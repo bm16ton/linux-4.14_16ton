@@ -71,13 +71,16 @@ int ieee80211_channel_to_frequency(int chan, enum nl80211_band band)
 {
 	/* see 802.11 17.3.8.3.2 and Annex J
 	 * there are overlapping channel numbers in 5GHz and 2GHz bands */
-	if (chan <= 0)
-		return 0; /* not supported */
+	/* if (chan <= 0) */
+		/* return 0; */ /* not supported */
 	switch (band) {
 	case NL80211_BAND_2GHZ:
+		chan = (int)(char)chan;
 		if (chan == 14)
 			return 2484;
 		else if (chan < 14)
+			return 2407 + chan * 5;
+		else if (chan > 14 && chan <= 65)
 			return 2407 + chan * 5;
 		break;
 	case NL80211_BAND_5GHZ:
@@ -103,6 +106,8 @@ int ieee80211_frequency_to_channel(int freq)
 	if (freq == 2484)
 		return 14;
 	else if (freq < 2484)
+		return (freq - 2407) / 5;
+	else if (freq > 2484 && freq <= 2732)
 		return (freq - 2407) / 5;
 	else if (freq >= 4910 && freq <= 4980)
 		return (freq - 4000) / 5;

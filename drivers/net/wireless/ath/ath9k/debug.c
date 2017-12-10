@@ -128,6 +128,36 @@ static const struct file_operations fops_debug = {
 
 #define DMA_BUF_LEN 1024
 
+static ssize_t read_file_dump_eep_power(struct file *file,
+					char __user *user_buf,
+					size_t count, loff_t *ppos)
+{
+	struct ath_softc *sc = file->private_data;
+	struct ath_hw *ah = sc->sc_ah;
+	u32 len = 0, size = 6000;
+	ssize_t retval = 0;
+	char *buf;
+
+	buf = kzalloc(size, GFP_KERNEL);
+	if (!buf)
+		return -ENOMEM;
+
+	ath9k_ps_wakeup(sc);
+	len = ah->eep_ops->dump_eep_power(ah, buf, len, size);
+	ath9k_ps_restore(sc);
+
+	retval = simple_read_from_buffer(user_buf, count, ppos, buf, len);
+	kfree(buf);
+
+	return retval;
+}
+
+static const struct file_operations fops_dump_eep_power = {
+	.read = read_file_dump_eep_power,
+	.open = simple_open,
+	.owner = THIS_MODULE,
+	.llseek = default_llseek,
+};
 
 static ssize_t read_file_ani(struct file *file, char __user *user_buf,
 			     size_t count, loff_t *ppos)
@@ -1432,7 +1462,8 @@ int ath9k_init_debug(struct ath_hw *ah)
 
 	ath9k_cmn_debug_base_eeprom(sc->debug.debugfs_phy, sc->sc_ah);
 	ath9k_cmn_debug_modal_eeprom(sc->debug.debugfs_phy, sc->sc_ah);
-
+	debugfs_create_file("dump_eep_power", S_IRUSR | S_IRGRP | S_IROTH,
+			    sc->debug.debugfs_phy, sc, &fops_dump_eep_power);
 	debugfs_create_u32("gpio_mask", S_IRUSR | S_IWUSR,
 			   sc->debug.debugfs_phy, &sc->sc_ah->gpio_mask);
 	debugfs_create_u32("gpio_val", S_IRUSR | S_IWUSR,

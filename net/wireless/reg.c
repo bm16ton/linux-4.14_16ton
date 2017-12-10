@@ -2488,6 +2488,8 @@ void regulatory_hint_country_ie(struct wiphy *wiphy, enum nl80211_band band,
 
 	return;
 
+	return;
+
 	/* IE len must be evenly divisible by 2 */
 	if (country_ie_len & 0x01)
 		return;
@@ -3185,7 +3187,7 @@ void wiphy_regulatory_deregister(struct wiphy *wiphy)
 int cfg80211_get_unii(int freq)
 {
 	/* UNII-1 */
-	if (freq >= 5150 && freq <= 5250)
+	if (freq >= 4920 && freq <= 5250)
 		return 0;
 
 	/* UNII-2A */
@@ -3201,7 +3203,7 @@ int cfg80211_get_unii(int freq)
 		return 3;
 
 	/* UNII-3 */
-	if (freq > 5725 && freq <= 5825)
+	if (freq > 5725 && freq <= 6100)
 		return 4;
 
 	return -EINVAL;
