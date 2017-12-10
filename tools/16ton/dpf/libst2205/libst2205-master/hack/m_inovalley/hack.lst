@@ -1,0 +1,258 @@
+Crasm LYB 1.3:                                                   page  1
+
+                         1  ;    Routines to allow direct USB-to-LCD-transfe
+rs in an ST220x-device
+                         2  ;    Copyright (C) 2008 Jeroen Domburg <jeroen@s
+pritesmods.com>
+                         3  ;
+                         4  ;    This program is free software: you can redi
+stribute it and/or modify
+                         5  ;    it under the terms of the GNU General Publi
+c License as published by
+                         6  ;    the Free Software Foundation, either versio
+n 3 of the License, or
+                         7  ;    (at your option) any later version.
+                         8  ;
+                         9  ;    This program is distributed in the hope tha
+t it will be useful,
+                        10  ;    but WITHOUT ANY WARRANTY; without even the 
+implied warranty of
+                        11  ;    MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the
+                        12  ;    GNU General Public License for more details
+.
+                        13  ;
+                        14  ;    You should have received a copy of the GNU 
+General Public License
+                        15  ;    along with this program.  If not, see <http
+://www.gnu.org/licenses/>.
+                        16  
+                        17  
+                        18      CPU 65c02
+                        19      OUTPUT HEX
+                        20      INCLUDE spec
+  7EE4                  21      * = EMPTY_AT+$4000
+                        22  
+                        23  ;The routine in the existing firmware is patched
+to jump here if the
+                        24  ;routine that discerns the address that's writte
+n to fails.
+                        25  ;This way, we can splice our own check inthere t
+oo.
+                        26  
+                        27  ;Watch out & be carefull with bloating this: one
+of the devices (the Coby)
+                        28  ;only has 230 bytes free to cram this in!
+                        29  
+                        30  ;check magic write to address 4400
+7EE4 ADFC03             31  start   lda CMP_VAR1
+7EE7 C922               32          cmp #$22
+7EE9 D009               33          bne nomagic
+7EEB ADFD03             34          lda CMP_VAR2
+7EEE C900               35          cmp #$00
+7EF0 D002               36          bne nomagic
+7EF2 8007               37          bra gotcha
+                        38  ;Nope? Do what the original routine did & bail o
+ut.
+7EF4 A9FF               39  nomagic lda #$ff
+7EF6 A2FF               40          ldx #$ff
+>>>> 41 ERROR: Undefined label
+                        41          jmp PATCH_AT+$4004
+                        42  
+                        43  ;ack usb wossname
+7EF8 A904               44  gotcha  lda #$04
+7EFA 8573               45          sta $73
+
+
+Crasm LYB 1.3:                                                   page  2
+
+                        46  
+                        47  ;Push registers 
+7EFC A535               48          lda $35
+7EFE 48                 49          pha
+                        50  
+                        51  ;select lcd
+7EFF A903               52          lda #$3
+7F01 8535               53          sta $35
+                        54  
+7F03 9CEE03             55          stz LEN0
+                        56  ;wait for usb packet
+7F06 A573               57  waitpacket lda $73
+7F08 2904               58          and #$4
+7F0A F0FA               59          beq waitpacket
+                        60  
+                        61  ;fetch command
+7F0C AD0002             62          lda $200
+7F0F C900               63          cmp #$0
+7F11 F04A               64          beq copy2fb
+7F13 C901               65          cmp #$1
+7F15 F01D               66          beq setaddr
+7F17 C902               67          cmp #$2
+7F19 F009               68          beq blon
+7F1B C903               69          cmp #$3
+7F1D F00D               70          beq bloff
+7F1F 8052               71          bra packetend
+                        72  
+                        73  ;Command 2: turn backlight on
+7F21 A503               74  blon    lda $03
+>>>> 75 WARNING: External parenthesis ignored
+7F23 29FB               75          and #($ff-$04)
+7F25 8503               76          sta $03
+7F27 804A               77          bra packetend
+                        78  
+                        79  ;Command 3: turn backlight off
+7F29 A503               80  bloff   lda $03
+7F2B 0904               81          ora #$04
+7F2D 8503               82          sta $03
+7F2F 8042               83          bra packetend
+                        84  
+                        85  
+                        86  ;Command 1: set window to write data to
+                        87  IF CTRTYPE=1 ;UC1697V
+                         C  ;set visible window
+                         C  ;Non-working as of yet :/
+                         C  setaddr lda #$F6 ;endx
+                         C          sta $8000
+                         C          lda $202
+                         C          sta $8000
+                         C  
+                         C          lda #$F7 ;endy
+                         C          sta $8000
+                         C          lda $204
+                         C          sta $8000
+                         C  
+                         C          lda #$F4 ;startx
+                         C          sta $8000
+                         C          lda $201
+                         C          sta $8000
+                         C  
+                         C          lda #$F5 ;starty
+                         C          sta $8000
+
+
+Crasm LYB 1.3:                                                   page  3
+
+                         C          lda $203
+                         C          sta $8000
+                         C  
+                         C  ;reset addr to (0,0)
+                         C  ;       lda #$00
+                         C  ;       sta $8000
+                         C  ;       lda #$10
+                         C  ;       sta $8000
+                         C  ;       lda #$60
+                         C  ;       sta $8000
+                         C  ;       lda #$70
+                         C  ;       sta $8000
+                         C  
+                         C          bra packetend
+                       121  ENDC
+                       122  IF CTRTYPE==0 ;PCF8833
+                       123  ;set addr
+7F31 A92A              124  setaddr lda #$2A
+7F33 8D0080            125          sta $8000
+7F36 AD0102            126          lda $201
+7F39 8D00C0            127          sta $c000
+7F3C AD0202            128          lda $202
+7F3F 8D00C0            129          sta $c000
+                       130  
+7F42 A92B              131          lda #$2B
+7F44 8D0080            132          sta $8000
+7F47 AD0302            133          lda $203
+7F4A 8D00C0            134          sta $c000
+7F4D AD0402            135          lda $204
+7F50 8D00C0            136          sta $c000
+                       137  
+7F53 A92C              138          lda #$2c
+7F55 8D0080            139          sta $8000
+                       140  
+7F58 8019              141          bra packetend
+                       142  ENDC
+                       143  
+                       144  
+                       145  ;Command 0: dma data to lcd.
+                       146          ;set dma regs
+                       147          ;copy from ($202)
+7F5A A902              148  copy2fb lda #$2
+7F5C 8558              149          sta $58
+7F5E 8559              150          sta $59
+                       151          ;from bank (=0)
+7F60 645E              152          stz $5e
+7F62 645F              153          stz $5f
+                       154          ;to (0xc0xx)
+7F64 A9C0              155          lda #$C0
+7F66 855B              156          sta $5b
+                       157  ;       stz $5a ;unnecessary
+                       158          ;count
+7F68 645D              159          stz $5D
+7F6A AD0102            160          lda $201
+                       161  ;       dea ;dma sends this +1 over; compensate
+                       162          ;^^ stupid crasm doesn't recognize this 
+:X
+7F6D 3A                163          db $3a ;=hardcoded 'dea'
+7F6E 855C              164          sta $5C
+                       165  
+                       166  
+                       167  ;subtract 0x40 from 37A:37D.
+
+
+Crasm LYB 1.3:                                                   page  4
+
+                       168  ;Damn, this is way easier on an ARM :P
+7F70 38                169  packetend sec
+7F71 ADEE03            170          lda LEN0
+7F74 E940              171          sbc #$40
+7F76 8DEE03            172          sta LEN0
+7F79 ADEF03            173          lda LEN1
+7F7C E900              174          sbc #$0
+7F7E 8DEF03            175          sta LEN1
+7F81 ADF003            176          lda LEN2
+7F84 E900              177          sbc #$0
+7F86 8DF003            178          sta LEN2
+                       179  ;never gonna do such large xfers anyway
+                       180  ;       lda LEN3
+                       181  ;       sbc #$0
+                       182  ;       sta LEN3
+                       183  
+                       184  ;ack
+7F89 A904              185          lda #$04
+7F8B 8573              186          sta $73
+                       187  
+                       188  ;check for done-ness
+                       189  ;       lda LEN3
+7F8D ADF003            190          lda LEN2
+7F90 0DEF03            191          ora LEN1
+7F93 0DEE03            192          ora LEN0
+7F96 F006              193          beq nowaitpacket
+7F98 4C067F            194          jmp waitpacket
+                       195  
+                       196  ;restore registers
+7F9B 68                197  nowaitpacket    pla
+7F9C 8535              198          sta $35
+                       199  
+                       200  
+                       201  ;send ack
+7F9E A900              202          lda #$00
+7FA0 205A4D            203          jsr SEND_CSW+0x4000
+                       204  
+                       205  ;and return as a winner :)
+7FA3 A9FF              206          lda #$ff
+7FA5 A2FF              207          ldx #$ff
+>>> 208 ERROR: Undefined label
+                       208          jmp PATCH_AT+$4004
+                       209  
+                       210  
+7FA7 4834434B          211          db "H","4","C","K"
+7FAB 01                212          db 1 ;version of info block
+7FAC 80                213          db CONF_XRES
+7FAD 80                214          db CONF_YRES
+7FAE 18                215          db CONF_BPP
+7FAF 00                216          db CONF_PROTO
+7FB0 00                217          db OFFX
+7FB1 04                218          db OFFY
+                       219  
+
+ERRORS:       2
+WARNINGS:     0
+
+No code generated...

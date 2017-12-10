@@ -1,0 +1,23 @@
+; By Joel Goldwein
+; Innovage Digital Photo Keychain on sale at Rite Aid for $2.99
+; Box says suggested retail $59.99
+; Device has three buttons on right side (up, down. menu),
+; led on top, usb on bottom and 1.4"x1.4" lcd
+
+CMP_VAR1=$0388
+CMP_VAR2=$0389
+PATCH_AT=$301C
+EMPTY_AT=$3C2C
+SEND_CSW=$2EE4
+LEN0=$037A
+LEN1=$037B
+LEN2=$037C
+LEN3=$037D
+CTRTYPE=0
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+OFFX=4
+OFFY=4
+

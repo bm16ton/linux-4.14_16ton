@@ -1,0 +1,23 @@
+;Spec-file for nextar n1-506 .
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+CMP_VAR1=$037A
+CMP_VAR2=$037B
+PATCH_AT=$2bb5
+EMPTY_AT=$2d5a
+SEND_CSW=$2a7d
+LEN0=$36c
+LEN1=$36d
+LEN2=$36e
+LEN3=$36f
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=24
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=4
+OFFY=4

@@ -1,0 +1,24 @@
+diff -Naur linux-sunxi-4.14-footrail/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c linux-gpd-4.14/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+--- linux-sunxi-4.14-footrail/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c	2017-11-20 03:23:35.000000000 -0500
++++ linux-gpd-4.14/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c	2017-12-09 17:18:23.298144579 -0500
+@@ -193,16 +193,16 @@
+ 	.alpha2 =  "99",
+ 	.reg_rules = {
+ 		/* IEEE 802.11b/g, channels 1..11 */
+-		REG_RULE(2412-10, 2472+10, 40, 6, 20, 0),
++		REG_RULE(2312-10, 2472+10, 40, 6, 30, 0),
+ 		/* If any */
+ 		/* IEEE 802.11 channel 14 - Only JP enables
+ 		 * this and for 802.11b only
+ 		 */
+-		REG_RULE(2484-10, 2484+10, 20, 6, 20, 0),
++		REG_RULE(2484-10, 2484+10, 40, 6, 30, 0),
+ 		/* IEEE 802.11a, channel 36..64 */
+-		REG_RULE(5150-10, 5350+10, 80, 6, 20, 0),
++		REG_RULE(4900-10, 5470+10, 80, 6, 30, 0),
+ 		/* IEEE 802.11a, channel 100..165 */
+-		REG_RULE(5470-10, 5850+10, 80, 6, 20, 0), }
++		REG_RULE(4900-10, 6000+10, 80, 6, 30, 0), }
+ };
+ 
+ /* Note: brcmf_cipher_suites is an array of int defining which cipher suites

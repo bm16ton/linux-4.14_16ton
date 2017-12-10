@@ -1,0 +1,23 @@
+;Spec-file for Tom-tec unit as sold by Bart Smit.
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+EMPTY_AT=$3A00 
+CMP_VAR1=$0388
+CMP_VAR2=$0389
+PATCH_AT=$2ddd
+SEND_CSW=$2ca5
+LEN0=$37A
+LEN1=$37B
+LEN2=$37C
+LEN3=$37D
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=4
+OFFY=4

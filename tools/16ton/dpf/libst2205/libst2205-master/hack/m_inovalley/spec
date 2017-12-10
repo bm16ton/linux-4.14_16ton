@@ -1,0 +1,23 @@
+;Spec-file for Inovalley.
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+CMP_VAR1=$03FC
+CMP_VAR2=$03FD
+EMPTY_AT=$3ee4
+SEND_CSW=$32a6
+SEND_CSW=$0D5a
+LEN0=$3ee
+LEN1=$3ef
+LEN2=$3f0
+LEN3=$3f1
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=24
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=0
+OFFY=4

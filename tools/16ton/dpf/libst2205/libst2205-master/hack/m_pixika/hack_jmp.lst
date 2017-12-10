@@ -1,0 +1,132 @@
+Crasm LYB 1.3:                                                   page  1
+
+                         1      CPU 65c02
+                         2      OUTPUT HEX
+                         3      INCLUDE spec
+  6EAC                   4      * = PATCH_AT+$4000
+                         5  
+                         6  ;This gets patched into the existing usb routine
+s.
+6EAC 4CB079              7      jmp EMPTY_AT+$4000
+6EAF EA                  8      nop
+                         9  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     6eaf (28335)
+ Code length         8 (8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm LYB 1.3:                                                   page  2
+
+?03B3   Abs CMP_VAR1                                         
+?03B4   Abs CMP_VAR2                                         
+?0010   Abs CONF_BPP                                         
+?0000   Abs CONF_PROTO                                       
+?0080   Abs CONF_XRES                                        
+?0080   Abs CONF_YRES                                        
+?0000   Abs CTRTYPE                                          
+ 39B0   Abs EMPTY_AT                                         
+?03A5   Abs LEN0                                             
+?03A6   Abs LEN1                                             
+?03A7   Abs LEN2                                             
+?03A8   Abs LEN3                                             
+?0004   Abs OFFX                                             
+?0004   Abs OFFY                                             
+ 2EAC   Abs PATCH_AT                                         
+?2D74   Abs SEND_CSW                                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

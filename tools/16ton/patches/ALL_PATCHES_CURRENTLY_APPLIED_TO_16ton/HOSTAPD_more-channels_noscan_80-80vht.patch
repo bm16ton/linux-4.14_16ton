@@ -1,0 +1,76 @@
+diff -Naur stock-hostapdsvn/src/ap/hw_features.c hostapdsvn/src/ap/hw_features.c
+--- stock-hostapdsvn/src/ap/hw_features.c	2017-10-10 13:14:11.901378041 -0400
++++ hostapdsvn/src/ap/hw_features.c	2017-10-07 11:36:02.988008755 -0400
+@@ -539,7 +539,7 @@
+ 			   iface->conf->channel,
+ 			   iface->conf->channel +
+ 			   iface->conf->secondary_channel * 4);
+-		iface->conf->secondary_channel = 0;
++               /* iface->conf->secondary_channel = 0; */
+ 		if (iface->drv_flags & WPA_DRIVER_FLAGS_HT_2040_COEX) {
+ 			/*
+ 			 * TODO: Could consider scheduling another scan to check
+diff -Naur stock-hostapdsvn/src/ap/ieee802_11_ht.c hostapdsvn/src/ap/ieee802_11_ht.c
+--- stock-hostapdsvn/src/ap/ieee802_11_ht.c	2017-10-10 13:14:11.894378082 -0400
++++ hostapdsvn/src/ap/ieee802_11_ht.c	2017-10-07 11:48:35.989826761 -0400
+@@ -261,6 +261,7 @@
+ 		}
+ 	}
+ 
++/* 
+ 	if (!is_ht_allowed &&
+ 	    (iface->drv_flags & WPA_DRIVER_FLAGS_HT_2040_COEX)) {
+ 		if (iface->conf->secondary_channel) {
+@@ -280,7 +281,9 @@
+ 			eloop_register_timeout(delay_time, 0, ap_ht2040_timeout,
+ 					       hapd->iface, NULL);
+ 		}
++
+ 	}
++*/
+ }
+ 
+ 
+diff -Naur stock-hostapdsvn/src/ap/ieee802_11_vht.c hostapdsvn/src/ap/ieee802_11_vht.c
+--- stock-hostapdsvn/src/ap/ieee802_11_vht.c	2017-10-10 13:14:11.905378017 -0400
++++ hostapdsvn/src/ap/ieee802_11_vht.c	2017-10-07 11:31:13.850644014 -0400
+@@ -72,6 +72,27 @@
+ 
+ 	oper->vht_op_info_chwidth = hapd->iconf->vht_oper_chwidth;
+ 
++	if (hapd->iconf->vht_oper_chwidth == 2) {
++		/*
++		 * Convert 160 MHz channel width to new style as interop
++		 * workaround.
++		 */
++		oper->vht_op_info_chwidth = 1;
++		oper->vht_op_info_chan_center_freq_seg1_idx =
++			oper->vht_op_info_chan_center_freq_seg0_idx;
++		if (hapd->iconf->channel <
++		    hapd->iconf->vht_oper_centr_freq_seg0_idx)
++				oper->vht_op_info_chan_center_freq_seg0_idx -= 8;
++			else
++				oper->vht_op_info_chan_center_freq_seg0_idx += 8;
++	} else if (hapd->iconf->vht_oper_chwidth == 3) {
++		/*
++		 * Convert 80+80 MHz channel width to new style as interop
++		 * workaround.
++		 */
++		oper->vht_op_info_chwidth = 1;
++	}
++
+ 	/* VHT Basic MCS set comes from hw */
+ 	/* Hard code 1 stream, MCS0-7 is a min Basic VHT MCS rates */
+ 	oper->vht_basic_mcs_set = host_to_le16(0xfffc);
+diff -Naur stock-hostapdsvn/src/common/ieee802_11_common.c hostapdsvn/src/common/ieee802_11_common.c
+--- stock-hostapdsvn/src/common/ieee802_11_common.c	2017-10-10 13:14:11.345381345 -0400
++++ hostapdsvn/src/common/ieee802_11_common.c	2017-10-07 10:10:29.278527182 -0400
+@@ -494,7 +494,7 @@
+ {
+ 	enum hostapd_hw_mode mode = NUM_HOSTAPD_MODES;
+ 
+-	if (freq >= 2412 && freq <= 2472) {
++	if (freq >= 2312 && freq <= 2732) {
+ 		mode = HOSTAPD_MODE_IEEE80211G;
+ 		*channel = (freq - 2407) / 5;
+ 	} else if (freq == 2484) {

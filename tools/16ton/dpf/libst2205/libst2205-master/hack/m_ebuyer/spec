@@ -1,0 +1,25 @@
+;Spec-file for a DPF-001 ? Made from a firmware image ripped by Bifferos
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+CMP_VAR1=$037a
+CMP_VAR2=$037b
+PATCH_AT=$2bb0
+EMPTY_AT=$2d70
+SEND_CSW=$2a78
+
+LEN0=$36c
+LEN1=$36d
+LEN2=$36e
+LEN3=$36f
+
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+
+CTRTYPE=1 ;UC1697V
+OFFX=0
+OFFY=0

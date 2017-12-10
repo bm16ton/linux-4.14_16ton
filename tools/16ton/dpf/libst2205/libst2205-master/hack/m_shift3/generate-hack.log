@@ -1,0 +1,269 @@
+using DA65=/home/rat/lcd/cc65/src/da65/da65
+using PHACK=/home/rat/lcd/st2205tool/phack
+Dumping firmware: /home/rat/lcd/st2205tool/phack -df fwimage.bin /dev/sdb
+Splitting firmware into 16k segments...
+Locating CMP_VAR1 & CMP_VAR2...
+038D->038E
+L6AC7:  lda     $038D
+        cmp     #$31
+        bne     L6AD7
+        lda     $038E
+        cmp     #$00
+        bne     L6AD7
+
+Locating PATCH_AT...
+L6B05:  lda     #$FF
+        ldx     #$FF
+L6B09:  sta     $038D
+        stx     $038E
+        rts
+
+Creating lookforme.bin...
+
+Locating free space ..
+Empty space: found 2245 0xff bytes starting at 0x3715
+FYI - you can verify with: hexdump -s 0x3715 -n 2245 -v fwimage-seg0.bin | less
+
+Locating SEND_CSW...
+L69CD:  pha
+        lda     #$55
+        sta     $0240
+        lda     #$53
+        sta     $0241
+        lda     #$42
+        sta     $0242
+        lda     #$53
+
+Locating LEN0 LEN1 LEN2 LEN3...
+        stz     $0381
+        stz     $0382
+        lda     $0216
+        stz     $0381
+        lda     $0217
+        sta     $0380
+        asl     $0380
+        rol     $0381
+        rol     $0382
+
+        stz     $0385
+        stz     $0386
+        lda     $0216
+        stz     $0385
+        lda     $0217
+        sta     $0384
+        asl     $0384
+        rol     $0385
+        rol     $0386
+
+Warning! multiple matches (2) - will use the first one after SEND_CSW location
+
+Guessing CTRTYPE...
+----
+        lda     #$2A
+        sta     $8000
+        lda     #$02
+        sta     $C000
+        lda     #$81
+        sta     $C000
+        lda     #$2B
+        sta     $8000
+        lda     #$00
+        sta     $C000
+        lda     #$7F
+        sta     $C000
+
+CTRTYPE is probably 0 (PCF8833)
+
+Writing spec file...
+Compiling hacks...Assembling m_coby_dp151...
+Assembling  hack.asm into m_coby_dp151/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_coby_dp151/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_coby_dp151/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_coby_dp151 assembled.
+Assembling m_coby_dp151_v8...
+Assembling  hack.asm into m_coby_dp151_v8/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_coby_dp151_v8/hack_jmp.bin...
+Pass #1
+1    1    9    17    25    33    9    Pass #2
+Assembling  lookforme.asm into m_coby_dp151_v8/lookforme.bin...
+Pass #1
+1    1    9    17    25    33    9    Pass #2
+m_coby_dp151_v8 assembled.
+Assembling m_dealextreme_sku5218...
+Assembling  hack.asm into m_dealextreme_sku5218/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_dealextreme_sku5218/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_dealextreme_sku5218/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_dealextreme_sku5218 assembled.
+Assembling m_dealextreme_sku5218_new...
+Assembling  hack.asm into m_dealextreme_sku5218_new/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_dealextreme_sku5218_new/hack_jmp.bin...
+Pass #1
+1    1    9    17    25    9    Pass #2
+Assembling  lookforme.asm into m_dealextreme_sku5218_new/lookforme.bin...
+Pass #1
+1    1    9    17    25    9    Pass #2
+m_dealextreme_sku5218_new assembled.
+Assembling m_dig-291...
+Assembling  hack.asm into m_dig-291/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_dig-291/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_dig-291/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_dig-291 assembled.
+Assembling m_ebuyer...
+Assembling  hack.asm into m_ebuyer/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_ebuyer/hack_jmp.bin...
+Pass #1
+1    1    9    17    25    9    Pass #2
+Assembling  lookforme.asm into m_ebuyer/lookforme.bin...
+Pass #1
+1    1    9    17    25    9    Pass #2
+m_ebuyer assembled.
+Assembling m_hknameless...
+Assembling  hack.asm into m_hknameless/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_hknameless/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_hknameless/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_hknameless assembled.
+Assembling m_innovage...
+Assembling  hack.asm into m_innovage/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_innovage/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_innovage/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_innovage assembled.
+Assembling m_innovage2...
+Assembling  hack.asm into m_innovage2/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_innovage2/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_innovage2/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_innovage2 assembled.
+Assembling m_keypix...
+Assembling  hack.asm into m_keypix/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_keypix/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_keypix/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_keypix assembled.
+Assembling m_khnameless_new...
+Assembling  hack.asm into m_khnameless_new/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_khnameless_new/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_khnameless_new/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_khnameless_new assembled.
+Assembling m_n1_506...
+Assembling  hack.asm into m_n1_506/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_n1_506/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_n1_506/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_n1_506 assembled.
+Assembling m_nextg...
+Assembling  hack.asm into m_nextg/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_nextg/hack_jmp.bin...
+Pass #1
+1    1    9    17    25    9    Pass #2
+Assembling  lookforme.asm into m_nextg/lookforme.bin...
+Pass #1
+1    1    9    17    25    9    Pass #2
+m_nextg assembled.
+Assembling m_pixika...
+Assembling  hack.asm into m_pixika/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_pixika/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_pixika/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_pixika assembled.
+Assembling m_shift3...
+Assembling  hack.asm into m_shift3/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_shift3/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_shift3/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_shift3 assembled.
+Assembling m_tomtech...
+Assembling  hack.asm into m_tomtech/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_tomtech/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_tomtech/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_tomtech assembled.
+Assembling m_vr3_vkc140...
+Assembling  hack.asm into m_vr3_vkc140/hack.bin...
+Pass #1
+1    9    17    1    9    17    25    33    41    49    57    65    73    81    89    97    105    113    121    129    137    145    153    161    169    177    185    193    201    209    217    Pass #2
+Assembling  hack_jmp.asm into m_vr3_vkc140/hack_jmp.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+Assembling  lookforme.asm into m_vr3_vkc140/lookforme.bin...
+Pass #1
+1    1    9    17    9    Pass #2
+m_vr3_vkc140 assembled.
+All done.
+
+Done.
+
+If you are brave you can now attempt to flash using: hackfw.sh /dev/sdb

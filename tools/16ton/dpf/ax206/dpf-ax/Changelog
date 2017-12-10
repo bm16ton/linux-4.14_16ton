@@ -1,0 +1,372 @@
+dpf-ax changelog
+
+	by <hackfin@section5.ch>
+	Find details in the git or svn logs.
+
+Thu, 17 Nov 2015
+v0.43 by superelchi
+       * README cleanup
+       * Support for alt up / down buttons
+       * New config param LCD_LR_ALT_BUTTONS
+       * New model:
+         - acme_8 (thx victorclaessen).
+         - acme_9 (thx pkrich).
+         - august_sp150l (thx leonjoeann).
+         - fanray (thx maxipes).
+	 - sweex_mm004v5_2 (thx free8bee).
+	 - sweex_mv004v4 (thx jon2099).
+	 - vivitar (thx metallurge and parkerlreed for his help to get the buttons working).
+	 - wh_smith (thx free8bee).
+       * Removed Link for winplus - the dpf on this page is no longer compatible.
+
+Fr, 26 Sep 2014
+       by superelchi
+       * New model:
+	 - acme_7 (thx gioagril).
+	 - acme_8 (thx kurczaczek).
+	 - bresser (thx gothbert).
+	 - coby_db_151_3 (thx maria).
+	 - keenox (thx nexus).
+	 - keenox_1026 (thx BmD_Online).
+	 - kgmedia_m16 (thx Szymon).
+	 - kodak_g240 (thx Michael).
+	 - leehoff (thx gothbert).
+	 - ramka_m16 (thx firefox).
+	 - swwex_mm004v5 (thx Magnetohh).
+	 - weltild (thx leonjoeann).
+	 - winplus (thx spooky2012).
+	 - yallstock_black_portrait_2 (thx oberseeler).
+	 - xp1000 (thx nonzhe).
+	 - xp1000_2 (thx dsqa).
+	 - zipp_dp506_2 (thx ajd4096).
+	
+Mon, 28 Okt 2013
+       by superelchi
+       * Fixed bug in identify.py:
+         custom_tables sometimes not written to lcdinit.s.
+       * Added missing "executable" property for identify.py
+       * New models:
+	 - acme_3 (thx johni85).
+	 - acme_4 (thx nexus).
+	 - acme_5 (thx binary).
+	 - acme_6 (thx Pepe).
+	 - clas_ohlson_2 (thx josef).
+	 - coby_dp151_bw_2 (thx Deamon666).
+	 - dhgate (thx Rollkopf).
+	 - kaiser_baas_n1879 (thx John).
+         - neckermann (thx Anaeijon).
+	 - newfrog (thx LUISE).
+	 - tao_80013 (thx richard).
+	 - taobao_2 (thx elickson).
+
+Fre, 21 Jun 2013
+       by superelchi
+       * Changed model:
+         - abeyerr_black_3: added param to swap left/right button.
+       * New models:
+	 - delightdigi_3 (thx fling).
+         - dinodirect (thx kodi).
+	 - estation100 (thx galvan).
+
+Thu, 23 May 2013
+v0.42 by superelchi
+       * Removed lcd4linux patch. Current lcd4linux svn revision has this patch already applied.
+       * tools/detect.py: added flash manufacturer Nantronics (thx Stanislav Brabec).
+
+Mon, 20 May 2013
+v0.41 by superelchi
+      * New folder src/dpfcore4driver with linux driver support files.
+      * New lcd4linux patch that works with current svn.
+	Features:
+	 - Driver is self-contained, no external dpf-ax libs/headers needed.
+	   Uses code from the new dpfcore4driver files.
+         - Includes scaletext patch (variable font size).
+         - Support for Property 'Backlight': Values: 0-7 (0 = off, 7 = max).
+         - Support for  Property 'Orientation':
+             Values: 0 = landscape, 1 = portrait, 2 = reverse landscape, 3 = reverse portrait.
+       * New lcd4linux sample configs for 128x128, 240x320 and 320x240.
+
+Thu, 16 May 2013
+       by superelchi
+       * Small src/Makefile fix.
+
+Mon, 13 May 2013
+       by superelchi
+       * Makefile fixes:
+         - Changed grep expressions in src/Makefile fpr better compatibility.
+       * Changed model:
+         - linkdelight: removed incorrect signature (thx mihre).
+       * New models:
+	 - focal_custom, focal_custom_2 (thx mihre).
+
+Fri, 10 May 2013
+v0.40 by superelchi
+       * General cleanup:
+         - Removed unnecessary files.
+	 - Makefile cleanup.
+	 - README cleanup.
+	 - Renamed display firmware files from fw_disp_* to fw_*.
+	 - Readded missing "reverse" folder.
+	 - Renamed folder "fw" to "tools".
+       * Compatibility fixes:
+         - Added check for correct sdcc version in src/Makefile.
+         - Added headerfile <stdint.h> to dpf.h.
+         - Compatibility fix in python/Makefile for non-debian linux.
+         - All python skripts now syntax compatible with python 3. But still need python 2.7 to run. :-(
+       * Partial windows support:
+         - identify.py and fulldump.py now work on windows (see tools/README.windows).
+       * identify.py changes:
+         - Flashdump now saved to folder tools instead of tools/identify.out.
+         - Flashdump filenames now include a date/time stamp.
+	 - Renamed temp folder from identify.out to lcd.tmp.
+	 - Dropped support for generic models.
+	 - Better firmware detection.
+	 - Signature expanded to include backlight and contrast type.
+	 - "-d" switch will build skeleton lcd files (dpfmodel.h/lcdblit.s/lcdinit.s/lcdsetor.s) in identify.out.
+       * Firmware:
+         - Dropped support for generic models.
+         - New resolution: 160x128.
+	 - NO_BATTERY_CHECK in src/Make.config is now uncommented by default.
+         - Menu-Setup-Backlight: value wraps around instead of stopping at lowest/highest value.
+         - Menu-Setup-Contrast: value wraps around instead of stopping at lowest/highest value.
+	 - Better Backlight & contrast handling.
+	 - Fixed error in init.c: some types did not wake up on Keypress after Poweroff (by "Menu"|"Off").
+       * Deleted all "generic" models:
+         - blue.
+	 - focal, focal_portrait.
+	 - pearl, pearl_portrait.
+	 - pink.
+	 - white.
+       * New models:
+	 - abeyerr_black_3 (thx joelbl).
+	 - august_dp150a.
+	 - coby_dp180 (thx johni).
+	 - dx104838_2 (thx j3r, mihre).
+	 - dx104838_3 (thx ralf001).
+	 - linkdelight_black_portrait_2 (thx Mr. P)
+	 - linkdelight_black_portrait_3 (thx prezes551)
+	 - veovision (thx ternyk).
+	 - xg4241 (thx marcusbrutus).
+	 - zipp_dp605 (thx CaptainCheeks).
+       * Changed models:
+	 - dx104838 brightness control fixed (only on/off supported by this modle).
+         - linkdelight_black portrait now supported.
+         - yallstock_black_portrait now supported.
+
+
+Mon, 28 Jan 2013
+       by superelchi
+       * New model:
+	 - sunluxy (thx glb).
+
+Sun, 20 Jan 2013
+       by superelchi
+       * New model:
+	 - abeyerr_black_2 (thx koonen).
+       * New Work-In-Progress model:
+         - linkdelight_black_portrait (thx Papa Oscar).	
+
+Sat, 05 Jan 2013
+       by superelchi
+       * New model:
+	 - taobao (thx cuckoohello).
+
+Thu, 03 Jan 2013
+       by superelchi
+       * New model:
+	 - linkdelight_5 (thx LUISE).
+
+Fri, 07 Dec 2012
+       by superelchi
+       * New model:
+	 - clas_ohlson (thx BufferFramed).
+
+Sat, 01 Dec 2012
+       by superelchi
+       * New models:
+	 - linkdelight_4 (thx Solo0815)
+         - pt824 (thx olderzeus).
+
+Sun, 04 Nov 2012
+       by superelchi
+       * New model:
+         - eachdesk_tumbler (thx c.dent).
+
+Sat, 03 Nov 2012
+       by superelchi
+       * New model:
+         - carrefour_bfv151 (thx assas1).
+
+Thu, 23 Oct 2012
+       by superelchi
+       * New model:
+         - intertronic (thx grouproot).
+
+Wed, 17 Oct 2012
+       by superelchi
+       * New model:
+         - sevendayshop_pebble (thx daveg).
+
+Wed, 17 Oct 2012
+       by superelchi
+       * Added contrast support info to knowntypes.html.
+
+Thu, 16 Oct 2012
+v0.320 by superelchi
+	* Support for model specific contrast init.
+	* Dpf type definition moved from config.h to ./lcd/TYPE/dpfmodel.h.
+	* New: knowntypes_builder.py builds type info from definitions in lcd/$(TYPE)/dpfmodel.h:
+	  - fw/knowntypes.py - for use by identify.py
+	  - fw/knowntypes.html - simple html page listing all supported dpfs.
+	* Identify.py rewrite:
+	  - Commandline options (-v = verbose, -d = developer support) replace manual dev_mode editing.
+	  - Extended developer support by putting dump-snipppets and disassembler-scripts in folder fw/identify.out.
+	  - Detection of default brightness / contrast value.
+	  - Better identification of models mit non-standard init ("fake" CRC generation).
+	  - Replaced knowdpfs.py with autogenerated knowntypes.py (see knowtypes_builder.py).
+	* Shebang added to all python scripts in folder fw.
+	* Hint to use hiddetach if dpf is claimed by hid added to rawusb.c
+	* Modelname change:
+	  - pearl -> pearl_portrait
+	  - pearl_landscape -> pearl
+	  - focal -> focal_portrait
+	  - focal_landscape -> focal
+	* New model:
+	  - acme_2
+	  - delightdigi_black_portrait
+	  - jovisa
+	  - linkdelight_2
+	  - linkdelight_3
+	  - pearl_custom
+
+Fri, 27 Jul 2012
+       by superelchi
+	* Added contrast init for model delightdigi_black
+
+Tue, 24 Jul 2012
+       by superelchi
+        * New models
+          - acme_1 (thx RedoX)
+          - copy_dp151_bw (by mrlinux)
+          - dx27893_2 (by RedoX)
+
+Wed, 11 Jul 2012
+v0.314 by superelchi
+	* New menuentry 'Setup - Screen Testpattern'
+	  for judging lcd alignment/brightness/contrast. 
+	* Changed inital backlight value back to maximum.
+	* New models:
+	  - dx104500 (not finished, may crash on USB connect/disconnect)
+	  - abeyerr_black.
+
+Mon, 25 Jun 2012
+       by superelchi
+        * New model
+          - avlabs_avl969s (by ax206geek)
+
+Tue, 19 Jun 2012
+       by superelchi
+        * Fixed compiler warning in xmenustring.c
+
+Sat, 16 Jun 2012
+v0.313 by superelchi
+	* Changed startup timing for backlight (keep off until display initialized).
+	* Option in Make.config to disable battery checks.
+	* Wrong value for dx21334a in config.h fixed.
+	* Added debug support (for development only).
+
+Sat, 09 Jun 2012
+v0.312 by superelchi
+	* Menu colors configurable in Make.config
+
+Mon, 04 Jun 2012
+v0.311 by superelchi
+	* Backlight control changes.
+	* New model:
+	  - dx104838
+
+Sat, 02 Jun 2012
+v0.310 by superelchi
+        * Support for frequency controlled backlight.
+	* New models:
+	  - dx21334a
+	  - dx21334b
+
+Wed, 23 May 2012
+v0.301 by superelchi
+        * USB serial number adjustable in dpfs menu.
+	* New model:
+	  - dx27893
+	  
+Fr, 18 May 2012
+v0.300 by superelchi
+	* New alternative "disp" firmware for use as status display:
+	  - New, bigger font
+	  - New menus
+	  - User selectabel & dowloadable splashscreen
+	  - User config saved to flash.
+
+Mon, 14 May 2012
+        by superelchi
+        * Modified identify.py for detection of coby firmware.
+	* New model:
+	  - coby_dp51_white
+
+Mon, 23 Apr 2012
+v0.205devel by superelchi
+	* Fixed fw compatibility issue with 0.1alpha dpflib (segfault)
+
+Sat, 21 Apr 2012
+v0.204devel by superelchi
+	* Integration of new models rewritten
+	* New models:
+	  - agk_violet
+	  - focalprice144
+	  
+Tue, 17 Apr 2012
+v0.203devel by superelchi
+	* Added hiddetach (crude replacement for libhid-detach-device).
+	* Added identify.py (new kind of dpf detection).
+	* Added a more pragmatic approach for integrating new LCD models.
+	* New supported model:
+	  - linkdelight
+	  
+Sun, 01 Apr 2012 14:51:00 +0200
+v0.202devel by superelchi
+	* Added support for ProgSPI flashing
+
+Tue, 13 Mar 2012 17:53:53 +0100
+v0.2develop
+	Standalone firmware that requires no hack. Added:
+	* Added bootloader mode downloading and flashing options to dpflib
+	* Bootstrapping code
+	* Bootblock and jump table generation to compile.py
+
+Mon, 11 Apr 2011 11:55:52 +0200
+v0.11alpha
+	* Actually starting a changelog
+	* This is a full firmware replacement, but we still talk about a
+	  "hack". 
+	LCD4linux (dpflib):
+	* Changed resolution query
+	* Support for orientation and backlight control
+	* Allow addressing of several frames ("Port" statement)
+	Firmware:
+	* Support for USB communication with restricted command set
+	  (kinda compatible to 0.1alpha)
+	* Support for various LCD controllers/screens (Sitronix, Orisetech,
+	  Ilitek, etc.)
+	* Locked flash access ('no-brick' mode for future upgrades)
+	* Power down mode: Full "deep sleep" with only RTC running
+	* Auto power down on low power
+	* Optional/experimental:
+		- Log ADC values to log sector on flash
+		- ADC voltage drawing over time (Menu: "Mon")
+		- Better Load/Exec support to download applets into the DPF via USB
+	* Frame specific issues:
+	    - The default orientation of the Pearl 320x240 frame was changed such
+	      that the USB connector is pointing down on normal display (i.e. we
+	      show "Portrait"). Use the pearl_landscape TYPE option for
+		  the original landscape mode.
+	    - The display rotation on the 128x128 DPFs is freely configureable
+	      using the Orientation option in the lcd4linux config file

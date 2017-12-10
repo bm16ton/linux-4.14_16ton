@@ -1,0 +1,23 @@
+;Spec-file for pixika
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+CMP_VAR1=$03B3
+CMP_VAR2=$03B4
+PATCH_AT=$2eac
+EMPTY_AT=$39b0
+SEND_CSW=$2d74
+LEN0=$3a5
+LEN1=$3a6
+LEN2=$3a7
+LEN3=$3a8
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=4
+OFFY=4

@@ -1,0 +1,222 @@
+diff -BNburp MPlayer-1.0rc2-org/configure MPlayer-1.0rc2/configure
+--- MPlayer-1.0rc2-org/configure	2007-10-07 21:49:33.000000000 +0200
++++ MPlayer-1.0rc2/configure	2008-01-20 15:18:25.000000000 +0100
+@@ -679,6 +679,7 @@ _color_console=no
+ _stream_cache=yes
+ _def_stream_cache="#define USE_STREAM_CACHE 1"
+ _need_shmem=yes
++_st2205u=auto
+ for ac_option do
+   case "$ac_option" in
+   --help|-help|-h)
+@@ -3971,6 +3972,29 @@ else
+ fi
+ echores "$_xv"
+ 
++echocheck "st2205u"
++if test "$_st2205u" = auto ; then
++  cat > $TMPC <<EOF
++#include <st2205.h>
++int main(void) {
++  (void) st2205_open("");
++  return 0; }
++EOF
++  _st2205u=no
++  cc_check -lst2205 && _st2205u=yes
++fi
++
++if test "$_st2205u" = yes ; then
++  _def_xv='#define HAVE_ST2205U 1'
++  _libs_mplayer="$_libs_mplayer -lst2205"
++  _vosrc="$_vosrc vo_st2205u.c"
++  _vomodules="st2205u $_vomodules"
++else
++  _def_xv='#undef HAVE_ST2205U'
++  _novomodules="st2205u $_novomodules"
++fi
++echores "$_st2205u"
++
+ 
+ echocheck "XvMC"
+ if test "$_xv" = yes && test "$_xvmc" != no ; then
+diff -BNburp MPlayer-1.0rc2-org/libvo/video_out.c MPlayer-1.0rc2/libvo/video_out.c
+--- MPlayer-1.0rc2-org/libvo/video_out.c	2007-10-07 21:49:28.000000000 +0200
++++ MPlayer-1.0rc2/libvo/video_out.c	2008-01-14 02:06:11.000000000 +0100
+@@ -92,6 +92,7 @@ extern vo_functions_t video_out_aa;
+ extern vo_functions_t video_out_caca;
+ extern vo_functions_t video_out_mpegpes;
+ extern vo_functions_t video_out_yuv4mpeg;
++extern vo_functions_t video_out_st2205u;
+ #ifdef HAVE_DIRECTX
+ extern vo_functions_t video_out_directx;
+ #endif
+@@ -149,6 +150,7 @@ extern vo_functions_t video_out_md5sum;
+ 
+ vo_functions_t* video_out_drivers[] =
+ {
++	&video_out_st2205u,
+ #ifdef HAVE_XVR100
+         &video_out_xvr100,
+ #endif
+diff -BNburp MPlayer-1.0rc2-org/libvo/vo_st2205u.c MPlayer-1.0rc2/libvo/vo_st2205u.c
+--- MPlayer-1.0rc2-org/libvo/vo_st2205u.c	1970-01-01 01:00:00.000000000 +0100
++++ MPlayer-1.0rc2/libvo/vo_st2205u.c	2008-01-24 21:38:25.000000000 +0100
+@@ -0,0 +1,158 @@
++/*
++ * Video driver for ST2205U
++ * Copyright 2008 Sprite_tm <picframe@spritesmods.com>
++ * For more info, please visit http://spritesmods.com/?art=picframe
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <errno.h>
++
++#include <sys/mman.h>
++#include <sys/ioctl.h>
++#include <linux/fb.h>
++
++#include "config.h"
++#include "video_out.h"
++#include "video_out_internal.h"
++#include "fastmemcpy.h"
++#include "sub.h"
++#include "mp_msg.h"
++
++#include <st2205.h>
++
++
++static vo_info_t info = {
++	"st2205u device",
++	"st2205u",
++	"Jeroen Domburg <picframe@spritesmods.com>",
++	""
++};
++
++LIBVO_EXTERN(st2205u)
++
++static char *st_dev_name = NULL; // such as /dev/sda
++static st2205_handle *st_h; // handle for st_dev_name
++static char *st_imagebuff;
++
++static int st_preinit(int reset)
++{
++	static int st_preinit_done = 0;
++	static int st_err = -1;
++
++	if (reset) {
++		st_preinit_done = 0;
++		return 0;
++	}
++	
++	if (st_preinit_done)
++		return st_err;
++		
++	st_preinit_done = 1;
++	printf("st2205: preinit\n");
++	if (!st_dev_name)
++		st_dev_name = strdup("/dev/sda");
++
++	mp_msg(MSGT_VO, MSGL_V, "[st2205u] Using device %s\n", st_dev_name);
++
++	st_h=st2205_open(st_dev_name);
++	if (st_h==NULL) {
++		mp_msg(MSGT_VO, MSGL_ERR, "[st2205u] Can't open %s: %s\n", st_dev_name, strerror(errno));
++		goto err_out;
++	}
++	st_imagebuff=malloc(st_h->height*st_h->width*3);
++	st_err = 0;
++	printf("[st2205u] %s opened successfully.\n", st_dev_name);
++	return 0;
++err_out:
++	st_err = -1;
++	return -1;
++}
++
++static int preinit(const char *subdevice)
++{
++	if (subdevice)
++	{
++	    if (st_dev_name) free(st_dev_name);
++	    st_dev_name = strdup(subdevice);
++	}
++	return st_preinit(0);
++}
++
++static void draw_osd(void) {
++    return;    
++}
++
++static int config(uint32_t width, uint32_t height, uint32_t d_width,
++		uint32_t d_height, uint32_t flags, char *title,
++		uint32_t format)
++{
++	return 0;
++}
++
++static int query_format(uint32_t format)
++{
++	if (st_preinit(0)) return 0;
++	if ((format & IMGFMT_RGB_MASK) == IMGFMT_RGB) {
++		if ((format & 0xff)==24) return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE;
++	}
++	return 0;
++}
++
++
++// all csp support stride
++static int draw_frame(uint8_t *src[]) { return 1; }
++
++static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
++{
++	char *imagebuff;
++	uint8_t *in = src[0];
++	uint8_t *dest = st_imagebuff + (st_h->width * y + x) * 3;
++	int next = st_h->width * 3;
++	int i,j;
++
++	//make sure we won't cross the boundaries of dest
++	if (x>127) return 0;
++	if (y>127) return 0;
++	if (w+x>st_h->width) w=st_h->width-x;
++	if (h+x>st_h->height) h=st_h->height-x;
++
++	for (i = 0; i < h; i++) {
++		//manually do a memcpy because the bytes
++		//should be flipped first :X
++		for (j=0; j<w; j++) {
++		    dest[j*3]=in[j*3];
++		    dest[j*3+1]=in[j*3+1];
++		    dest[j*3+2]=in[j*3+2];
++		}
++		dest += next;
++		in += stride[0];
++	}
++	return 0;
++}
++
++static void check_events(void)
++{
++}
++
++static void flip_page(void)
++{
++    //write dest to device
++    st2205_send_data(st_h,st_imagebuff);
++}
++
++static void uninit(void)
++{
++	st_preinit(1); // so that later calls to preinit don't fail
++}
++
++static int control(uint32_t request, void *data, ...)
++{
++  switch (request) {
++  case VOCTRL_QUERY_FORMAT:
++    return query_format(*((uint32_t*)data));
++  }
++  return VO_NOTIMPL;
++}

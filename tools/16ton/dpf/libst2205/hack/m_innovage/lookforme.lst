@@ -1,0 +1,132 @@
+Crasm LYB 1.3:                                                   page  1
+
+                         1      CPU 65c02
+                         2      OUTPUT HEX
+                         3      INCLUDE spec
+  708B                   4      * = PATCH_AT+$4000
+                         5  
+                         6  ;Look for this bit to patch.
+708B A9FF                7      LDA #$FF
+708D A2FF                8      LDX #$FF
+708F 8D8803              9      STA CMP_VAR1
+7092 8E8903             10      STX CMP_VAR2
+7095 60                 11      RTS
+                        12  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     7095 (28821)
+ Code length        16 (22)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm LYB 1.3:                                                   page  2
+
+ 0388   Abs CMP_VAR1                                         
+ 0389   Abs CMP_VAR2                                         
+?0010   Abs CONF_BPP                                         
+?0000   Abs CONF_PROTO                                       
+?0080   Abs CONF_XRES                                        
+?0080   Abs CONF_YRES                                        
+?0000   Abs CTRTYPE                                          
+?3C9B   Abs EMPTY_AT                                         
+?037A   Abs LEN0                                             
+?037B   Abs LEN1                                             
+?037C   Abs LEN2                                             
+?037D   Abs LEN3                                             
+?0004   Abs OFFX                                             
+?0004   Abs OFFY                                             
+ 308B   Abs PATCH_AT                                         
+?2F53   Abs SEND_CSW                                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

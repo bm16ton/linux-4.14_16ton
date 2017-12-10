@@ -1,0 +1,2 @@
+#!/bin/bash
+cat newhack.sh | sed -ne "s/^#<<//p" > newhack.txt

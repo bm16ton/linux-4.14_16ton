@@ -1,0 +1,132 @@
+Crasm LYB 1.3:                                                   page  1
+
+                         1      CPU 65c02
+                         2      OUTPUT HEX
+                         3      INCLUDE spec
+  6B05                   4      * = PATCH_AT+$4000
+                         5  
+                         6  ;This gets patched into the existing usb routine
+s.
+6B05 4C1577              7      jmp EMPTY_AT+$4000
+6B08 EA                  8      nop
+                         9  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     6b08 (27400)
+ Code length         8 (8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm LYB 1.3:                                                   page  2
+
+?038D   Abs CMP_VAR1                                         
+?038E   Abs CMP_VAR2                                         
+?0010   Abs CONF_BPP                                         
+?0000   Abs CONF_PROTO                                       
+?0080   Abs CONF_XRES                                        
+?0080   Abs CONF_YRES                                        
+?0000   Abs CTRTYPE                                          
+ 3715   Abs EMPTY_AT                                         
+?037F   Abs LEN0                                             
+?0380   Abs LEN1                                             
+?0381   Abs LEN2                                             
+?0382   Abs LEN3                                             
+?0004   Abs OFFX                                             
+?0004   Abs OFFY                                             
+ 2B05   Abs PATCH_AT                                         
+?29CD   Abs SEND_CSW                                         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

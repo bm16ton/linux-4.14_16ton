@@ -1,0 +1,32 @@
+;Spec-file for Coby DP151 (VERSION 8 PCB)
+;
+;PCB says: COBY VER:08 2008-5-29
+;Bought on amazon 2009-01.
+;
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+; 
+
+CMP_VAR1=$0389
+CMP_VAR2=$038a
+PATCH_AT=$2ef2
+EMPTY_AT=$3b10
+SEND_CSW=$2dba
+LEN0=$37b
+LEN1=$37c
+LEN2=$37d
+LEN3=$37e
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=0
+OFFY=2
+
+; another Coby DP 151 V8 needs those arguments: (thanks Sean Burford)
+; OFFX=4
+; OFFY=0

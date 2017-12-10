@@ -1,0 +1,23 @@
+;Spec-file for Coby DP151.
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+CMP_VAR1=$0388
+CMP_VAR2=$0389
+PATCH_AT=$308B
+EMPTY_AT=$3C9B
+SEND_CSW=$2F53
+LEN0=$37a
+LEN1=$37b
+LEN2=$37c
+LEN3=$37d
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=4
+OFFY=4

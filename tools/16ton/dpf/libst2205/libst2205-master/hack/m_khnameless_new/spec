@@ -1,0 +1,23 @@
+;Spec-file for A Generic "Digital Photo Frame".
+;Please keep the way the adresses are entered ($ to indicate a hex number,
+;adresses in 4 digits) intact or the hackfw.sh script won't work anymore.
+;Adresses here refer to file-adresses; in runtime these are loaded $4000
+;bytes higher but that's accounted for in the hack-code itself.
+
+CMP_VAR1=$038A
+CMP_VAR2=$038B
+PATCH_AT=$2E7B
+EMPTY_AT=$3A90
+SEND_CSW=$2D43
+LEN0=$37C
+LEN1=$37D
+LEN2=$37E
+LEN3=$37F
+CONF_XRES=128
+CONF_YRES=128
+CONF_BPP=16
+CONF_PROTO=0
+
+CTRTYPE=0 ;PCF8833
+OFFX=0
+OFFY=4
