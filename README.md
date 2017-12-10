@@ -27,3 +27,10 @@ tools/16ton/iw-3.17-16ton
 
 tools/16ton/hostapd-2.9
 	patched hostapd needed for my kernel patches
+
+tools/16ton/dpf/st2205term*
+	terminal emulator for hacked st2205 based tiny digital photo frames
+
+tools/16ton/dpf/FRAMEBUFFER/*
+	The userland application required for the tiny usb digital photo frame
+	based off the ax206 chipsets. and the stand alone kernel module source (maybe older then in tree)
