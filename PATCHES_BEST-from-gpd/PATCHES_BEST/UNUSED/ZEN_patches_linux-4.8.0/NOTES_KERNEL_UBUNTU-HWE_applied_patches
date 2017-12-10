@@ -1,0 +1,27 @@
+WHEN PATCHING THE ZEN/Liqourix PATCHES BEFORE UBUNTU's IGNORE THESE ERRORS
+
+patching file drivers/acpi/sleep.c
+Reversed (or previously applied) patch detected!  Assume -R? [n] 
+Apply anyway? [n] y
+Hunk #1 FAILED at 47.
+Hunk #2 FAILED at 916.
+2 out of 2 hunks FAILED -- saving rejects to file drivers/acpi/sleep.c.rej
+
+
+patching file drivers/input/mouse/synaptics.h
+Reversed (or previously applied) patch detected!  Assume -R? [n]     
+Apply anyway? [n] y
+Hunk #1 FAILED at 85.
+1 out of 1 hunk FAILED -- saving rejects to file drivers/input/mouse/synaptics.h.rej
+
+
+patching file fs/open.c
+Reversed (or previously applied) patch detected!  Assume -R? [n]     
+Apply anyway? [n] y
+Hunk #1 succeeded at 37 with fuzz 2 (offset 3 lines).
+Hunk #2 succeeded at 70 (offset 3 lines).
+Hunk #3 succeeded at 685 (offset 3 lines).
+Hunk #4 FAILED at 1045.
+1 out of 4 hunks FAILED -- saving rejects to file fs/open.c.rej
+patching file fs/orangefs/acl.c
+

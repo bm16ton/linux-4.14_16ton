@@ -1,0 +1,4 @@
+hostapd_2.9-16_amd64.deb net optional
+wpagui_2.9-16_amd64.deb net optional
+wpasupplicant-udeb_2.9-16_amd64.udeb debian-installer standard
+wpasupplicant_2.9-16_amd64.deb net optional

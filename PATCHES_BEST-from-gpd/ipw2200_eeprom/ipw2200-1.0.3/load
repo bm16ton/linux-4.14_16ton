@@ -1,0 +1,84 @@
+#!/bin/sh
+# Copyright (C) 2004-2005 Intel Corporation
+MODULE=ipw2200
+
+if [ `whoami` != "root" ]; then
+	echo "You must be root to run this script."
+	return
+fi
+
+. unload
+unset LOADED
+
+function load_pre
+{
+     for i in firmware_class; do
+	if ! (lsmod | grep -q $i) && \
+	   ! (modprobe $i > /dev/null 2>&1 && LOADED="${LOADED}${i} ") && \
+	   ! (grep -q request_firmware /proc/kallsyms); then
+		if [ ! -e /proc/kallsyms ]; then
+			echo "Could not be determine if firmware_class is already loaded."
+			echo "Attempting to load driver anyway..."
+		else
+			echo "Firmware capabilities not found.  See INSTALL."
+			return 0
+		fi
+	fi
+     done
+     return 1
+}
+
+
+function load_modules
+{
+	if grep -q "^[ \t]*CONFIG_IPW_DEBUG=y" Makefile; then
+		if [ -z $1 ]; then
+			IPW_DEBUG="debug=0x3bff"
+		else
+			IPW_DEBUG="debug=${1}"
+		fi
+	else
+		IPW_DEBUG=""
+	fi
+
+	if grep -q "^[ \t]*CONFIG_IEEE80211_DEBUG=y" Makefile; then
+		if [ -z ${IEEE80211_DEBUG} ]; then
+			I_DEBUG="debug=0"
+		else
+			I_DEBUG="debug=${IEEE80211_DEBUG}"
+		fi
+	else
+		I_DEBUG=""
+	fi
+
+     for i in ieee80211_crypt ieee80211_crypt_{wep,tkip,ccmp}; do
+	if [ -e ./$i.ko ]; then
+		insmod ./$i.ko && LOADED="${LOADED}${i} "
+	fi
+     done
+
+     for i in ieee80211; do
+	if [ -e ./$i.ko ]; then
+		insmod ./$i.ko ${I_DEBUG} && LOADED="${LOADED}${i} "
+	fi
+     done
+
+	if [ -z $1 ]; then
+		insmod ./${MODULE}.ko ${IPW_DEBUG} && LOADED="${LOADED}${MODULE} "
+	else
+		insmod ./${MODULE}.ko $@ && LOADED="${LOADED}${MODULE} "
+	fi
+
+     return 1
+}
+
+if ! load_pre && ! load_modules $@; then 
+	if [ -z "${LOADED}" ]; then
+		echo "No modules loaded."
+	else
+		echo "Loaded: ${LOADED}"
+	fi
+else
+	echo "Load failed."
+fi
+

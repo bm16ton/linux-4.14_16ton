@@ -1,0 +1,29 @@
+Source: iw
+Section: net
+Priority: optional
+Maintainer: Debian wpasupplicant Maintainers <pkg-wpa-devel@lists.alioth.debian.org>
+Uploaders: Kel Modderman <kel@otaku42.de>,
+ Stefan Lippers-Hollmann <s.l-h@gmx.de>
+Build-Depends: debhelper (>= 9.20120115),
+ libnl-3-dev (>= 3.2.3-2~),
+ libnl-genl-3-dev (>= 3.2.3-2~),
+ pkg-config
+Standards-Version: 3.9.6
+Vcs-Svn: svn://anonscm.debian.org/pkg-wpa/iw/trunk/
+Vcs-Browser: http://anonscm.debian.org/viewvc/pkg-wpa/iw/trunk/
+Homepage: http://wireless.kernel.org/en/users/Documentation/iw
+
+Package: iw
+Architecture: linux-any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: crda
+Breaks: aircrack-ng (<< 1:1.0~rc2-1)
+Replaces: aircrack-ng (<< 1:1.0~rc2-1)
+Description: tool for configuring Linux wireless devices
+ This package contains the `iw' tool which allows you to configure and show
+ information about wireless networking.
+ .
+ In the future iw will become the canonical command line tool for wireless
+ configuration and iwconfig/wireless-tools will no longer be required. See
+ /usr/share/doc/iw/README.Debian for a more detailed overview of iw.

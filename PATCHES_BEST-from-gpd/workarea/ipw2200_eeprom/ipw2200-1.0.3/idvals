@@ -1,0 +1,53 @@
+#!/bin/sh
+MODULE="ieee80211"
+FILE="ieee80211.h"
+DEBUG_PATH="/proc/net/${MODULE}/debug_level"
+LEVEL=""
+PREFIX=""
+
+function get_level()
+{
+	if [ ! -e ${DEBUG_PATH} ]; then
+		LEVEL=""
+	else
+		LEVEL=`cat ${DEBUG_PATH}`
+	fi
+}
+
+function bit()
+{
+	VAL=1
+	for ((i = 0; i < $2; i++)); do
+		VAL=$((VAL*2))
+	done
+	SET="$((VAL & $3))"
+	if [ "${SET}" = "0" ]; then
+		SET=" "
+	else
+		SET="*"
+	fi
+	printf "%-20s\t\t0x%08X [%s] %d\n" $1 $VAL "$SET" $VAL
+}
+
+IFS="
+"
+LEVELS=`sed -ne "s#.*_DL_\(.*\) *(1<<\(.*\))#${PREFIX}\1 \2#p" ${FILE}`
+get_level
+
+if [ ! -z ${LEVEL} ]; then
+	LEV=$((LEVEL))
+else
+	LEV=0
+fi
+printf "%-20s\t\t%-10s Set Decimal\n" "Description" "Hex"
+for i in $LEVELS; do
+	IFS=" 
+"
+	bit $i ${LEV}
+done
+
+if [ ! -z ${LEVEL} ]; then
+	printf "debug_level = ${LEVEL} (* = enabled)\n"
+else
+	printf "${MODULE} not currently loaded.  debug_level not set.\n"
+fi

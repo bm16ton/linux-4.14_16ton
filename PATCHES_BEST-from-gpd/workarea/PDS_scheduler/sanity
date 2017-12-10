@@ -1,0 +1,27 @@
+#!/bin/bash
+compileTest() {
+for i in {1..3}; do
+	make clean > /dev/null;
+	echo ">>>>>round $i"
+	~/bin/compile_throughput ${1} 2>&1 | tail -n3;
+done
+}
+#spin up
+cd /usr/src/linux-4.1-gc
+if [ "$1" != "nospin" ]; then
+echo ">>>>>spining up"
+make clean > /dev/null 2>&1
+make -j4 > /dev/null 2>&1
+fi
+echo ">>>>>50% workload"
+compileTest 2 $1
+echo ">>>>>100% workload"
+compileTest 4 $1
+echo ">>>>>150% workload"
+compileTest 6 $1
+echo ">>>>>200% workload"
+compileTest 8 $1
+echo ">>>>>250% workload"
+compileTest 10 $1
+echo ">>>>>300% workload"
+compileTest 12 $1

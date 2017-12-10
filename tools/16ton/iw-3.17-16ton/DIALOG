@@ -1,0 +1,70 @@
+<window title="16ton Network app" width-request="503" height-request="231"> <vbox>
+<hbox height-request="115">		
+	<vbox>
+	<hbox>		
+		<button>
+			<label>wifi link info (highlight card)</label>
+			<action>xterm -e /opt/hardware-apps/bin/stats-net-tools.sh &xterm -e /opt/hardware-apps/bin/stats2-net-tools.sh &</action>
+		</button>
+			<text>
+				<label>on dev </label>
+			</text>
+	</hbox>
+	<hbox>
+		<button>
+			<label>set txpower dbi to </label>
+			<action>pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY xterm +hold -e iwconfig $LIST txpower $COMBOBOX</action>
+		</button>
+			<combobox width-request="60">
+				<variable>COMBOBOX</variable>
+				<item>8</item>
+				<item>12</item>
+				<item>20</item>
+			</combobox>
+					<text>
+				<label>on dev </label>
+			</text>
+	</hbox>
+	<hbox>
+		<button>
+			<label>wireless signal (w/ wavemon)</label>
+			<action>xterm -e wavemon -i $LIST &</action>
+		</button>
+					<text>
+				<label>on dev </label>
+			</text>
+	</hbox>
+	</vbox>
+	<list> <width>30</width> <variable>LIST</variable>
+<item>wlp3s0</item>
+
+</list>
+</hbox>
+	<vbox>
+	<hbox homogeneous="true" space-expand="false" space-fill="false">
+		<button>
+			<label>Show info for wifi device PHY</label>
+			<action>xterm -hold -e iw phy$ENTRY info &</action>
+		</button>
+			<combobox width-request="60">
+				<variable>ENTRY</variable>
+				<item>0</item>
+			</combobox>
+	</hbox>
+	</vbox>
+<hseparator width-request="503"></hseparator>
+<hbox homogeneous="true" space-expand="false" space-fill="false">
+		<button>
+			<label>arp list without search  (no root)</label>
+			<action>xterm -hold -e arp -a &</action>
+		</button>
+		<button>
+			<label>"arp search  (requires root)"</label>
+			<action>pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY xterm -hold -e arp-scan --localnet</action>
+		</button>
+</hbox>
+		<button>
+			<label>Exit</label>
+		</button>
+
+</vbox> </window>

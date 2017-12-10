@@ -11,3 +11,16 @@ ADDITIONS:
 	added Marvell Avastar 88W8897 BACK into the kernel
 
 Im sures there more, and more is on the way
+
+in tools/16ton
+
+tools/16ton/iwleeprom 
+	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writting to certain intel and
+	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and 
+	22 on 5ghz. 
+
+tools/16ton/iw-3.17-16ton
+	patched iw tools needed for my kernel patches
+
+tools/16ton/hostapd-2.9
+	patched hostapd needed for my kernel patches

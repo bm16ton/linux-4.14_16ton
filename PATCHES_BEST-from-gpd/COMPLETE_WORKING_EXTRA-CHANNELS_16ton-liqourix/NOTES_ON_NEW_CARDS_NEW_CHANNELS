@@ -1,0 +1,18 @@
+	rtl8192cu;
+seems to work throws strange errors but i belive its because theres no max power settings for the new channels but works with negative channels with hostapd
+all channels above 12 are currently "NO IR" must fix
+
+	mwifiex 8897 chipset;
+seems to work first try with hostaps and negative channles dmesg threw 
+CMD_RESP: cmd 0x112 error, result=0x1
+CMD_RESP: cmd 0xb0 error, result=0x1
+Failed to set AP configuration
+Failed to start AP
+Card is removed: -71
+"					" X5 times
+unplugged card replugged and hostapd on negative channels worked great!
+
+	zd1211-rw;
+1st attempt;immediatly rebooted machine on insertion
+2nd update; worked and with hostapd with negative channels tho threw sum errors
+

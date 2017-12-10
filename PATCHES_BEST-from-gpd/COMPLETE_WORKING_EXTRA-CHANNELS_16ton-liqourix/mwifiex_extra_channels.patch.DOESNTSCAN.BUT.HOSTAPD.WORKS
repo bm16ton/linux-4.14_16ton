@@ -1,0 +1,65 @@
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/cfg80211.c linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/cfg80211.c
+--- linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/cfg80211.c	2017-10-10 11:01:30.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/cfg80211.c	2017-10-12 18:23:18.482428433 -0400
+@@ -1492,6 +1492,26 @@
+ 
+ /* Channel definitions to be advertised to cfg80211 */
+ static struct ieee80211_channel mwifiex_channels_2ghz[] = {
++	{.center_freq = 2312, .hw_value = -19, },
++	{.center_freq = 2317, .hw_value = -18, },
++	{.center_freq = 2322, .hw_value = -17, },
++	{.center_freq = 2327, .hw_value = -16, },
++	{.center_freq = 2332, .hw_value = -15, },
++	{.center_freq = 2337, .hw_value = -14, },
++	{.center_freq = 2342, .hw_value = -13, },
++	{.center_freq = 2347, .hw_value = -12, },
++	{.center_freq = 2352, .hw_value = -11, },
++	{.center_freq = 2357, .hw_value = -10, },
++	{.center_freq = 2362, .hw_value = -9, },
++	{.center_freq = 2367, .hw_value = -8, },
++	{.center_freq = 2372, .hw_value = -7, },
++	{.center_freq = 2377, .hw_value = -6, },
++	{.center_freq = 2382, .hw_value = -5, },
++	{.center_freq = 2387, .hw_value = -4, },
++	{.center_freq = 2392, .hw_value = -3, },
++	{.center_freq = 2397, .hw_value = -2, },
++	{.center_freq = 2402, .hw_value = -1, },
++	{.center_freq = 2407, .hw_value = 0, },
+ 	{.center_freq = 2412, .hw_value = 1, },
+ 	{.center_freq = 2417, .hw_value = 2, },
+ 	{.center_freq = 2422, .hw_value = 3, },
+@@ -1506,6 +1526,18 @@
+ 	{.center_freq = 2467, .hw_value = 12, },
+ 	{.center_freq = 2472, .hw_value = 13, },
+ 	{.center_freq = 2484, .hw_value = 14, },
++	{.center_freq = 2487, .hw_value = 16, },
++	{.center_freq = 2502, .hw_value = 19, },
++	{.center_freq = 2512, .hw_value = 21, },
++	{.center_freq = 2572, .hw_value = 33, },
++	{.center_freq = 2592, .hw_value = 37, },
++	{.center_freq = 2612, .hw_value = 41, },
++	{.center_freq = 2632, .hw_value = 45, },
++	{.center_freq = 2652, .hw_value = 49, },
++	{.center_freq = 2672, .hw_value = 53, },
++	{.center_freq = 2692, .hw_value = 57, },
++	{.center_freq = 2712, .hw_value = 61, },
++	{.center_freq = 2732, .hw_value = 65, },
+ };
+ 
+ static struct ieee80211_supported_band mwifiex_band_2ghz = {
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/main.h linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/main.h
+--- linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/main.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/main.h	2017-10-12 23:03:35.066805626 -0400
+@@ -141,10 +141,10 @@
+ 
+ #define MAX_BITMAP_RATES_SIZE			18
+ 
+-#define MAX_CHANNEL_BAND_BG     14
++#define MAX_CHANNEL_BAND_BG     46
+ #define MAX_CHANNEL_BAND_A      165
+ 
+-#define MAX_FREQUENCY_BAND_BG   2484
++#define MAX_FREQUENCY_BAND_BG   2732
+ 
+ #define MWIFIEX_EVENT_HEADER_LEN           4
+ #define MWIFIEX_UAP_EVENT_EXTRA_HEADER	   2

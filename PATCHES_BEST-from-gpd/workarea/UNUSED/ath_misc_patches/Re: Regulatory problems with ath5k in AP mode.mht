@@ -1,0 +1,770 @@
+From: <Saved by UnMHT Ver.8.3.2>
+Subject: Re: Regulatory problems with ath5k in AP mode
+Date: Fri, 25 Aug 2017 10:36:05 -0400
+MIME-Version: 1.0
+X-UnMHT-Save-State: Current-State
+Content-Type: multipart/related;
+	boundary="----=_Part_DED53AB4_50CC1DD2.15E19D248DE";
+	type="text/html"
+
+------=_Part_DED53AB4_50CC1DD2.15E19D248DE
+Content-Location: http://article.gmane.org/gmane.linux.kernel.wireless.general/38410
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset="UTF-8"
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; charset=
+=3DUTF-8">
+	<title>Re: Regulatory problems with ath5k in AP mode</title>
+	<link href=3D"http://assets.gmane.org/css/gmane.css" rel=3D"stylesheet" ty=
+pe=3D"text/css">
+	<link href=3D"http://assets.gmane.org/images/favicon.ico" rel=3D"SHORTCUT =
+ICON">
+<base href=3D"http://article.gmane.org/gmane.linux.kernel.wireless.general/=
+"></head>
+<body bgcolor=3D"white" class=3D"main" text=3D"black">
+<table cellpadding=3D"5" cellspacing=3D"10" class=3D"main">
+	<tbody>
+		<tr valign=3D"top">
+			<td class=3D"maintd">
+				<div class=3D"tdiv">
+					<div>
+												<a href=3D"http://gmane.org/">Home</a><br>
+						<a href=3D"http://dir.gmane.org/">Reading</a><br>
+						<!-- a href=3D"http://search.gmane.org/" -->Searching<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/subscribe.php" -->Subscribe<!-- /a --=
+><br>
+						<!-- a href=3D"http://gmane.org/sponsors.php" -->Sponsors<!-- /a --><=
+br>
+						<!-- a href=3D"http://gmane.org/stats.php" -->Statistics<!-- /a --><b=
+r>
+						<!-- a href=3D"http://gmane.org/post.php" -->Posting<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/contact.php" -->Contact<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/spam-control.php" -->Spam<!-- /a --><=
+br>
+						<!-- a href=3D"http://gmane.org/find.php" -->Lists<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/links.php" -->Links<!-- /a --><br>
+						<a href=3D"http://gmane.org/about/">About</a><br>
+						<!-- a href=3D"http://gmane.org/host.php" -->Hosting<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/filter.php" -->Filtering<!-- /a --><b=
+r>
+						<!-- a href=3D"http://gmane.org/features.php" -->Features<!-- /a -->
+						<!-- a href=3D"http://gmane.org/dist.php" -->Download<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/logo.php" -->Marketing<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/import.php" -->Archives<!-- /a --><br>
+						<!-- a href=3D"http://gmane.org/faq.php" -->FAQ<!-- /a --><br>
+						<a href=3D"http://home.gmane.org/">Blog</a><br>
+						&#xa0;<br>
+					</div>
+					<div class=3D"ltd">
+						<!-- <img src=3D"http://assets.gmane.org/img/gmane-25.png" width=3D25=
+ height=3D25 alt=3D"Gmane"> -->
+					</div>
+				</div>
+			</td>
+			<td align=3D"center" class=3D"maintd">
+				<a href=3D"http://gmane.org/"><img alt=3D"Gmane" border=3D"0" src=3D"ht=
+tp://assets.gmane.org/images/gmane-rot.png"></a>
+			</td>
+			<td class=3D"bodytd">
+
+				<div class=3D"headers">
+					<div class=3D"face">
+					</div>
+					From: Luis R. Rodriguez &lt;lrodriguez-DlyHzToyqoxBDgjK7y7TUQ &lt;at&g=
+t; public.gmane.org&gt;<br>
+					Subject: <a href=3D"http://thread.gmane.org/gmane.linux.kernel.wireles=
+s.general/38410">Re: Regulatory problems with ath5k in AP mode</a><br>
+					Newsgroups: <a href=3D"http://dir.gmane.org/gmane.linux.kernel.wireles=
+s.general" target=3D"_top">gmane.linux.kernel.wireless.general</a><br>
+					Date: Thursday 20th August 2009 16:20:00 UTC (over 8 years ago)<br>
+				</div>
+				<pre>Note: this e-mail is on a public mailing list. I&#x27;m adding Dav=
+id and
+Michael.
+
+On Thu, Aug 20, 2009 at 09:23:39AM +0100, Simon Farnsworth wrote:
+&gt; On Thursday 20 August 2009 01:20:58 Luis R. Rodriguez wrote:
+&gt; &gt; On Mon, Aug 17, 2009 at 1:27 PM, Simon
+Farnsworth<simon-aldjpej37erpigct6eibzw@public.gmane.org> wrote:
+&gt; &gt; &gt; As I&#x27;m trying to use the cards for AP mode, I cannot re=
+ly on beacons
+with
+&gt; &gt; &gt; regulatory data being present;
+&gt; &gt;
+&gt; &gt; Regulatory questions are often and I try really hard to answer th=
+em
+&gt; &gt; first through documentation so it seems we need to improve
+&gt; &gt; documentation further. To be thorough though I&#x27;d first like =
+to ask if
+&gt; &gt; you have read all this:
+&gt; &gt;
+&gt; &gt; Linux regulatory docs:
+&gt; &gt;
+&gt; &gt; <a href=3D"http://wireless.kernel.org/en/developers/Regulatory" r=
+el=3D"nofollow" target=3D"_top">http://wireless.kernel.org/en/developers/Re=
+gulatory</a>
+&gt; &gt;
+&gt; &gt; Atheros shared module documentation (ath.ko):
+&gt; &gt;
+&gt; &gt; <a href=3D"http://wireless.kernel.org/en/users/Drivers/ath" rel=
+=3D"nofollow" target=3D"_top">http://wireless.kernel.org/en/users/Drivers/a=
+th</a>
+&gt; &gt;
+&gt; I&#x27;ve read both of those - they&#x27;re why I&#x27;m not simply ov=
+erriding the
+EEPROM
+&gt; by hacking ath5k.ko around.
+
+Great to hear.
+
+&gt; &gt; &gt; instead, I have modprobe configured to run
+&gt; &gt; &gt; &quot;iw reg set GB&quot; after cfg80211 is loaded,
+&gt; &gt;
+&gt; &gt; How do you have modprove configured to do that? Are you using
+&gt; &gt; ieee80211_regdom module parameter? If so please consider just usi=
+ng
+&gt; &gt; &#x27;iw&#x27; or hostapd configured as you have below.
+&gt; &gt;
+&gt;
+&gt; In /etc/modprobe.d/regulatory, I have a line:
+&gt; install cfg80211 /sbin/modprobe --ignore-install cfg80211 ;
+/usr/local/sbin/iw reg set GB
+
+Heh, interesting, yeah I guess I have to test such a concoction and I guess
+using the
+ieee80211_regdom parameter will do the same. Anyway, this is will only help
+compliance,
+and since you are already setting this on hostapd setting it twice will
+yield an -EALREADY,
+so I recommend to just do it once and if you do want to set it, set it on
+hostapd.
+
+&gt; &gt; &gt; My cards both have a regdomain in the EEPROM of 0x0,
+&gt; &gt;
+&gt; &gt; This is something that the manufacturer would have decided on.
+&gt; &gt;
+&gt; &gt; &gt; which my vendor assures
+&gt; &gt; &gt; me is the correct regdomain for cards which don&#x27;t claim=
+ any
+particular
+&gt; &gt; &gt; regulatory compliance,
+&gt; &gt;
+&gt; &gt; Who exactly did you speak to?
+&gt; &gt;
+&gt; &gt; Atheros uses 0x0 for a default mapping to the US.
+&gt; &gt;
+&gt;
+&gt; I spoke to Mikrotik, who manufactured the R52 card I&#x27;m using. They
+assured
+&gt; me that EEPROM regdomain 0x0 was correct for a card with no knowledge =
+of
+&gt; what regulatory domain it would be sold in, and in any case, told me t=
+hat
+&gt; it works fine with the driver they have from Atheros, so it must be an
+&gt; upstream kernel bug.
+
+Please kindly inform them that this information is incorrect. 0x0 is to be
+used
+by Atheros devices to map to the &quot;US&quot;, always. Mikrotek just so h=
+appens to
+be
+a manufacturer who sells cards for AP purposes. Ubiquity is another example
+but
+I am aware Ubiquity sells Atheros *modified* hardware to operate either
+with
+higher EIRP or on different frequency ranges. Anyway, manufactuers in
+general
+who sell hardware with intentions of supporting AP mode have to test their
+cards for proper operation and calibration and for regulatory purposes.
+This
+is why you see these cards come with their own FCC ID attached.
+
+So be aware, 0x0 will always map to the US. If the manufacturer did not
+intend to
+do that they can provide their own regulatory.bin to customers where they
+can map
+&quot;US&quot; to their own defined regulatory domain. For you to use their
+regulatory.bin
+they can make public their RSA public key generated by building a modified
+wireless-regdb so users can compile crda to trust it. The pubkey from the
+manfuacturer can be put into the crda/pubkeys/ before compilation. If the
+manufacturer uses another value to put into the EEPROM they should use
+whatever
+country that value maps to to build their own regulatory.bin. If the
+manufacturer
+intended for the card they sell to be used in different countries *and*
+they
+support letting users change the country they can add those countries they
+have tested for regulatory support and have regulatory certification onto
+their
+regulatory.bin, in this case the default EEPROM mapping should yield a
+large
+regulatory domain which allows the full capability they want to allow for
+on their
+cards. That is if their cards are programmed with 0x0 then since ath.ko
+will ask
+for regulatory_hint(&quot;US&quot;) for Atheros devices they must map &quot=
+;US&quot; to a big
+regulatory domain, and next their customers can use &#x27;iw reg set&#x27; =
+or embed
+the country code as you have in hostapd.conf so that it then restricts the
+regulatory settings further to fit the country you are in, that is the
+intersection between the big regulatory domain and the one intended.
+Granted
+this means if they used &quot;0x0&quot; &quot;US&quot; is already taken, so=
+ they could either
+provide patches for ath.ko for their customers so that &quot;0x0&quot; does=
+ not match
+to &quot;US&quot; all the time but to something else like a debug mode like=
+ &quot;ZZ&quot;, or
+maybe numbers &quot;50&quot; maybe, although I forget if this will fail rig=
+ht now
+on cfg80211, or simply use another alpah2 for &quot;US&quot; for their cust=
+omers.
+
+Keep in mind though that the functionality to support country selection for
+AP operation is something that I understand as not welcomed by the FCC so
+I would be careful in considertion supporting this as a manufacturer for
+users
+in the US.
+
+Anyway the advantage of all this is all this can be supported now through
+userspace.
+It used to be some manufacturers had to provide patches on top of the
+supported
+Atheros driver to support custom regulatory domains. Provided the
+manfucturer has
+tested a regulatory domain this is no longer required and these changes can
+now
+be done completey in userspace.
+
+Feel free to refer Mikrotek, Ubiquity, or any manufacturer selling Atheros
+cards
+to support AP mode to the above. They should first test their stuff though
+:)
+
+&gt; &gt; &gt; thus preventing legal
+&gt; &gt; &gt; use of the WiFi bands, but allowing me illegal use.
+&gt; &gt;
+&gt; &gt; This is no different than considering the case of when you ship an
+&gt; &gt; access point from JP to the US and you start beaconing on channel=
+ 13.
+&gt; &gt; You are violating local US regulatory laws if your configuration =
+was
+&gt; &gt; to beacon on channel 13. If you take a US AP to the JP you then a=
+re
+&gt; &gt; prevented from usage of the allowed channel 13.
+&gt; &gt;
+&gt; &gt; I realize it may seem silly, and in fact I agree, but that is the=
+ law.
+&gt; &gt; If you were to bring an AP from JP to the US *with* a regulatory
+&gt; &gt; domain which matches the JP SKUs and therefore are allowed to bea=
+con
+&gt; &gt; on channel 13 we give you the flexibility in Linux to enhance
+&gt; &gt; compliance and indicate you are on in the US and disable channel =
+13.
+&gt; &gt; Now, as much as I would love for it to be the case that the other=
+ way
+&gt; &gt; around should be enabled it is not, and although technically it is
+&gt; &gt; feasible, it is just not something agreeable to current regulatory
+&gt; &gt; agencies. Maybe one day it will be for 802.11, who knows.
+&gt; &gt;
+&gt; &gt; Anyway in your case since the device sends a regulatory hint for =
+&quot;US&quot;
+&gt; &gt; first, and then you say &quot;GB&quot; the card will *always* res=
+pect first
+&gt; &gt; &quot;US&quot;, and &quot;GB&quot; is just used to further help c=
+ompliance.
+&gt; &gt;
+&gt;
+&gt; So, if I understand correctly, this is not considered a bug by you or =
+the
+&gt; card manufacturer, both of whom insist that the other one is wrong. Am=
+ I
+&gt; right in thinking that the easiest way to resolve this is to stick with
+an
+&gt; unmodified kernel, but to use my own regulatory database that treats US
+as
+&gt; GB?
+
+Your manufacturer has their information incorrect in thinking 0x0 maps to
+some debug mode to allow all channels. 0x0 maps to &quot;US&quot; by defaul=
+t on
+Atheros drivers. See the above explanation for what your manufacturer
+*can* do.
+
+&gt; &gt; &gt; Secondly, I&#x27;m seeing different regulatory settings on e=
+ach card. &quot;iw
+&gt; &gt; &gt; list&quot; shows me that in the 2GHz band, phy1 is being all=
+owed to use
+27.0
+&gt; &gt; &gt; dBm on channels 1-11, whereas I&#x27;m only allowed to use 2=
+0.0 dBm, but
+I&#x27;m
+&gt; &gt; &gt; allowed channels 1-13.
+&gt; &gt;
+&gt; &gt; I did not understand the last part, can you rephrase this again?
+&gt; &gt;
+&gt;
+&gt; Easiest to look at the full iw list output below, and remember that my
+&gt; local regulatory domain is GB, which is also the domain the cards were
+sold
+&gt; as having.
+
+OK I&#x27;ll try to do that, but again, I think we already spotted the main
+issue here:
+your manufacturer should be notified 0x0 is intended by Atheros drivers to
+map to
+the &quot;US&quot;. For support for new upstream Atheros Linux drivers (in =
+the Linux
+kernel)
+they should revisit how they should support customers for regulatory
+purposes
+in light of the new regulatory infrastructure which does allow them to
+modify
+the regulatory database in userspace and sign off on it.
+
+I&#x27;ll look into the other logs through another thread. Feel free to ref=
+er
+manufacturers to this e-mail for documentation purposes.
+
+  Luis
+--
+To unsubscribe from this list: send the line &quot;unsubscribe linux-wirele=
+ss&quot;
+in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  <a href=3D"http://vger.kernel.org/majordomo-info.ht=
+ml" rel=3D"nofollow" target=3D"_top">http://vger.kernel.org/majordomo-info.=
+html</a></simon-aldjpej37erpigct6eibzw@public.gmane.org></pre>
+				<script>!function(e,t,r,a,n,c,l,o){function h(e,t,r,a){for(r=3D'',a=3D'=
+0x'+e.substr(t,2)|0,t+=3D2;t<e.length;t+=3D2)r+=3DString.fromCharCode('0x'+=
+e.substr(t,2)^a); return r}try{for(n=3De.getElementsByTagName('a'),l=3D'/cd=
+n-cgi/l/email-protection#',o=3Dl.length,a=3D0;a<n.length;a++)try{c=3Dn[a],t=
+=3Dc.href.indexOf(l),t>-1&&(c.href=3D'mailto:'+h(c.href,t+o))}catch(f){}for=
+(n=3DArray.prototype.slice.apply(e.getElementsByClassName('__cf_email__')),=
+a=3D0;a<n.length;a++)try{c=3Dn[a],c.parentNode.replaceChild(e.createTextNod=
+e(h(c.getAttribute('data-cfemail'),0)),c)}catch(f){}}catch(f){}}(document)<=
+/script><script type=3D"text/javascript">
+					document.domain =3D 'gmane.org';
+					document.title =3D 'Re: Regulatory problems with ath5k in AP mode';
+				</script>
+			</td>
+			<td class=3D"listid" rowspan=3D"2">
+				<a href=3D"http://dir.gmane.org/gmane.linux.kernel.wireless.general">
+					<!-- img src=3D"http://gmane.org/paint-list-id.php?group=3Dgmane.linux=
+.kernel.wireless.general" border=3D"0"-->
+				</a>
+							</td>=20
+		</tr>
+		<tr>
+			<td class=3D"bads" colspan=3D"2">
+				&#xa0;
+				<!--
+				Get rid of ads<br><a href=3D"http://gmane.org/donate.php">Donate to Gma=
+ne</a>
+				-->
+			</td>
+			<td align=3D"left" class=3D"maintd" colspan=3D"1">
+			</td>
+
+		=09
+		</tr>
+	</tbody>
+</table>
+<font size=3D"1">CD: 3ms</font>
+<!-- Piwik -->
+<!-- script type=3D"text/javascript">
+  var _paq =3D _paq || [];
+  _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
+  _paq.push(["setCookieDomain", "*.gmane.org"]);
+  _paq.push(["setDomains", ["*.gmane.org"]]);
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=3D"//stats.gmane.org/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', '3']);
+    var d=3Ddocument, g=3Dd.createElement('script'), s=3Dd.getElementsByTag=
+Name('script')[0];
+    g.type=3D'text/javascript'; g.async=3Dtrue; g.defer=3Dtrue; g.src=3Du+'=
+piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src=3D"//stats.gmane.org/piwik.php?idsite=3D3" style=3D"b=
+order:0;" alt=3D"" /></p></noscript -->
+<!-- End Piwik Code -->
+
+</body></html>
+------=_Part_DED53AB4_50CC1DD2.15E19D248DE
+Content-Location: http://assets.gmane.org/css/gmane.css
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/css
+
+
+body {
+  font-family: arial, sans-serif;
+  color: black;
+  background: white;
+  margin: 0cm;
+}
+body.main {
+  font-family: arial, sans-serif;
+  color: black;
+  background: white;
+  margin: 0cm;
+  max-width: 800pt;
+
+}
+table.main {
+  border: 0 solid;
+  color: black;
+}
+td.maintd {
+  color: black;
+  background-color: white;
+  border: 1px solid #444444;
+}
+td.listid {
+  color: black;
+  background-color: white;
+  border: 0px solid #444444;
+  padding: 0pt;
+}
+td.bads {
+  color: black;
+  background-color: white;
+  border: 1px solid #444444;
+  text-align: center;
+}
+div.blank {
+  background-color: white;
+  border: 1px solid black;
+  height: 88px;
+  width: 726px;
+  padding: 0pt;
+}
+td.google {
+  color: black;
+  background-color: white;
+  border: 0px solid black;
+  padding: 0;
+}
+div.google {
+  color: black;
+  background-color: white;
+  padding: 0;
+  text-decoration: none;
+}
+div.googlefloat {
+  color: black;
+  background-color: white;
+  border: 0px solid #444444;
+  padding-left: 10px;
+  padding-top: 3px;
+  float: right;
+  margin-right: 2px;
+}
+div.google html body a {
+  color: #002390;
+  font-weight: bold;
+  text-decoration: none;
+}
+td.bodytd {
+  color: black;
+  background-color: white;
+  width: 100%;
+  border: 1px solid #444444;
+}
+table.otable {
+  color: black;
+  background-color: white;
+}
+table.grouptable {
+ vertical-align: top;
+}
+h1 {
+  font-weight: bold;
+  font-size: 12pt;
+}
+h2 {
+  font-weight: bold;
+  font-size: 12pt;
+}
+a {
+  color: #002390;
+  font-weight: bold;
+  text-decoration: none;
+}
+td.wetd {
+  color: white;
+  background-color: #009900;
+}
+td.webtd {
+  color: white;
+  background-color: #009900;
+  border: 1px solid black;
+}
+tt {
+}
+td.new {
+  font-size: small;
+  color: black;
+  text-align: right;
+}
+td.old {
+  font-size: small;
+  color: blue;
+  text-align: right;
+}
+table.threads {
+  border-spacing: 0px;
+  border-collapse: collapse;
+  border: 0px solid black; =20
+}
+table.threads table {
+  border-spacing: 0px;
+  border-collapse: collapse;
+  margin: 0px;
+  padding: 0px;
+  border: 0px solid black; =20
+}
+table.threads tr {
+}
+table.threads tr.read {
+  background: #e0e0e0;
+}
+table.threads tr.focused {
+  background: #ffd0d0;
+}
+table.threads td {
+  padding: 0pt 2pt;
+  margin: 0pt 0pt 0pt 0pt;
+  font-size: small;
+  white-space: nowrap;
+  border: 0px solid black;
+}
+table.threads th {
+  padding: 0pt 6pt;
+  margin: 0pt 0pt 0pt 0pt;
+  font-size: small;
+  white-space: nowrap;
+  border: 0px solid black;
+  text-align: right;
+  font-weight: normal;
+}
+table.threads td.s {
+  width: 100%;
+}
+table.threads div {
+  display: inline;
+}
+table.threads img {
+  border: 0px solid black;
+}
+body.loombody {
+  margin-top: 1pt;
+  margin-bottom: 1pt;
+  margin-left: 1pt;
+  margin-right: 1pt;
+}
+div.articletop {
+  background-color: black;
+  width: 100%;
+  height: 1px;
+  position: fixed;
+  left: 0px;
+  top: 0px;
+}
+body.article {
+  margin-top: 2px;
+  margin-bottom: 1pt;
+  margin-left: 3pt;
+  margin-right: 1pt;
+}
+div.fixed {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  height: 100%;
+  font-size: small;
+}
+div.ltd {
+  position: absolute;
+  border: 0px solid black;
+  bottom: 10px;
+  left: 25px;
+}
+div.tdiv {
+  height: 100%;
+  position: relative;
+  display: block;
+}
+table.ltd {
+  border: 1px solid black;
+  padding: 0px;
+  margin: 0px;
+}
+div.ttd {
+  height: 100%;
+}
+table.groups {
+  border-spacing: 0px;
+  border-collapse: collapse;
+  border: 0; =20
+}
+table.groups tr {
+}
+table.groups td {
+}
+div.face {
+   float: right;
+   margin-right: 2px;
+   margin-top: 2px;
+}
+div.face img {
+  border: 0px solid black;
+   vertical-align: top;
+}
+div.attachment {
+  font-size: small;
+  background-color: #e0e0e0;
+  border: 1px solid black;
+  padding: 1px;
+  margin: 1px;
+}
+div.imgattachment {
+  margin: 0px 0px 8px 0px;
+}
+div.imgattachment img {
+  border: 1px solid black;
+}
+div.headers {
+  margin-top: 2pt;
+}
+tr.subject {
+  background: #d0efff;
+}
+tr.subject td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-top: 1px solid black;
+}
+hr.rfc {
+  color: black;
+  background-color: black;
+  height: 1px;
+  border: 0;
+}
+div.donate {
+  float: right;
+  text-align: center;
+}
+table.donate {
+  background-color: #e0e0e0;
+  border: 1px solid black;
+  margin: 4px;
+}
+div.donate th {
+  text-align: left;
+  font-weight: normal;
+}
+div.donate td {
+  text-align: right;
+  font-weight: bold;
+}
+table.donate td.mcenter {
+  text-align: center;
+  font-weight: normal;
+}
+table.donate td.bcenter {
+  text-align: center;
+  font-weight: normal;
+  background-color: #d0d0d0;
+}
+div.rid {
+ text-align: center;
+ background-color: #e0e0e0;
+ width: 120px;
+}
+div.support {
+ text-align: center;
+ background-color: white;
+ border: 0px solid black;
+}
+table.frontad {
+  background-color: black;
+  color: white;
+}
+table.frontad a {
+  color: #8080ff;
+  font-weight: bold;
+  text-decoration: none;
+}
+form input.spam {
+  color:#003366;
+  font-family: arial, sans-serif;
+  white-space: normal;
+  font-weight: bold;
+ =20
+  background-color: transparent;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  cursor: hand;
+  margin: 0pt;
+  padding: 0pt;
+}
+
+table.popular {
+  border: 1px solid black;
+}
+
+div.navbar {
+  position: fixed;
+  height: 50px;
+  width: 100%;
+  border: 1px solid black;
+  bottom: 0px;
+  right: -2px;
+}
+
+------=_Part_DED53AB4_50CC1DD2.15E19D248DE
+Content-Location: http://assets.gmane.org/images/gmane-rot.png
+Content-Transfer-Encoding: base64
+Content-Type: image/png
+
+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
+B6fStnWbFMGAAAAAAElFTkSuQmCC
+
+------=_Part_DED53AB4_50CC1DD2.15E19D248DE--
