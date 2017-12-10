@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# compile ax206term
+
+sudo apt-get install libtool automake autoconf zlib1g-dev libssl-dev python-dev libc6 libusb-dev libgd2-noxpm-dev libgd2-noxpm
+
+# compile ax206term
+echo "Compiling ax206term..."
+gcc -Wall -g -O2 -DHAVE_DPF -o ax206term st2205term.c dpfcore4driver.c -lrote -lusb

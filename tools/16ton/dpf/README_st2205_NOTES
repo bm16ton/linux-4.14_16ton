@@ -1,0 +1,91 @@
+Prerequisities:
+You need libst2205 (part of st2205tool) and librote installed before you can compile:
+
+Debian Squeeze instructions (run as root):
+
+# curses (needed by librote)
+apt-get install libncurses5-dev
+# st2205tool (optional - you can leave it out if you use libdlo instead)
+wget -nd http://www.neophob.com/files/st2205tool-1.4.3.tar.gz
+tar xvfz st2205tool-1.4.3.tar.gz
+apt-get install libgd2-xpm-dev
+cd st2205tool && make && make install
+cd ..
+# librote
+wget -nd http://downloads.sourceforge.net/project/rote/rote/rote-0.2.8/rote-0.2.8.tar.gz
+tar xvfz rote-0.2.8.tar.gz
+cd rote-0.2.8/
+./configure && make && make install
+cd ..
+# libdlo (optional - only if you want Displaylink support)
+wget -nd http://people.freedesktop.org/~berniet/libdlo-0.1.2.tar.gz
+tar xvfz libdlo-0.1.2.tar.gz
+cd libdlo-0.1.2/
+./configure && make && make install
+cd ..
+
+How to compile st2205term:
+
+# run as root
+wget -nd http://jeff.doozan.com/debian/lcd/st2205term-0.10.tgz
+tar xvfz st2205term-0.10.tgz
+cd st2205term-0.10/
+./mak # look at script if you want displaylink support
+
+How to compile ax206term:
+
+Note: ax206term source was contributed and my ax206 based picframe is currently not working so please consider this experimental for now.
+
+# run as root
+wget -nd http://jeff.doozan.com/debian/lcd/st2205term-0.11.tgz
+tar xvfz st2205term-0.11.tgz
+cd st2205term-0.11/
+./mak-dpf # look at script and modify if necessary - it downloads and installs things
+
+How to run - autodetect
+
+By default st2205term will try to autodetect your keyboard and display. st2205term will also look for keymapping data (us.kmap) and font data (fonts.txt) in the same directory as the st22095term binary resides if they are not explicitly set on the command line:
+
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH # to find librote
+./st2205term
+
+How to run if you have multiple keyboards/display devices
+
+Find your picfame device:
+
+# ls -al /dev/disk/by-id/ | grep SITRONIX
+# lrwxrwxrwx 1 root root   9 Nov 24 21:04 usb-SITRONIX_MULTIMEDIA-0:0 -> ../../sdb
+
+Plug in your USB keyboard and find the input device:
+
+# ls -al /dev/input/by-id/ | grep kbd
+# lrwxrwxrwx 1 root root   9 Nov 24 11:17 usb-060b_USB_Keyboard-event-kbd -> ../event0
+
+Start up st2205term (run as root):
+
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH # to find librote
+./st2205term --font=tiny --picframe=/dev/sdb --keyboard=/dev/input/event0 --keymap=./us.kmap --fontdata=./fonts.txt
+
+Command Line Options:
+
+--font=tiny | small | large | giant  - sets the font size - also determines the terminal dimensions - default is tiny
+--picframe=<device> or --dlo - sets the target ouput Picframe device, or use displaylink device instead if --dlo specified
+--keyboard=<device> - sets the input keyboard device - this can be plugged/unplugged while st2205term is running
+--keymap=<file> - sets the key mapping definitions used to map evdev keyboard events to Linux keys
+--command=<command> - run a shell command rather than 'bash --login' when terminal is connected
+--screensaver=<command> - run a shell command as a screensaver when keyboard is idle
+--fontdata=<file> - sets the font definition file that determines what the fonts look like
+--dlo-fast-scroll=yes | no - enables/disables enhanced scrolling on Displaylink devices
+--blink - makes the cursor blink
+--verbose or -v - turns on debug output
+
+Device Naming:
+Real device paths like /dev/sdb or /dev/input/event0 may change at boot time or depending on the order of detection or if devices are added/removed. To help with hot plugging st2205term can also use udev by-id symlinks to find the right device.
+
+For example, on my PC my picframe is accessible by either /dev/sdb or /dev/disk/by-id/usb-SITRONIX_MULTIMEDIA-0\:0
+(remember to escape \ the :)
+
+ls -al /dev/disk/by-id/* | grep sdb
+lrwxrwxrwx 1 root root  9 Nov 29 22:09 /dev/disk/by-id/usb-SITRONIX_MULTIMEDIA-0:0 -> ../../sdb
+
+Udev symlinks can be used to identify the keyboard as well ( ls -al /dev/input/by-id ).

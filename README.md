@@ -17,7 +17,10 @@ in tools/16ton
 tools/16ton/iwleeprom 
 	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writting to certain intel and
 	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and 
-	22 on 5ghz. 
+	22 on 5ghz on Intel cards and for Atheros cards it changes the eeprom reg domain to 0x6A tho ive seen multiple
+    sources say 65 unlocks 5ghz a quick look at linux driver makes me think 6A will be less restrictive, if im wrong
+	edit ath9kio.c search for 0x6A and replace it with 0x65, recompile. THO FOR ATHEROS CARDS THIS IS NOT REQUIRED AT
+	ALL WHEN USING MY KERNEL. This might open things for windows people, i dunno i hate microsoft products.
 
 tools/16ton/iw-3.17-16ton
 	patched iw tools needed for my kernel patches

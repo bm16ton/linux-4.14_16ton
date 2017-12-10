@@ -2224,6 +2224,21 @@ config FB_DA8XX
 	  found on DA8xx/OMAP-L1xx/AM335x SoCs.
 	  If unsure, say N.
 
+config FB_DPF
+	tristate "USB digital photo frames"
+	depends on FB
+	select FB_SYS_FILLRECT
+	select FB_SYS_COPYAREA
+	select FB_SYS_IMAGEBLIT
+	select FB_SYS_FOPS
+	---help---
+	  Currently only mini DPF's based on ax206 chipsets and the Samsung
+	  SPF-8(X) series are supported. the ax206 requires custom firmware
+	  https://github.com/dreamlayers/dpf-ax and both require userland
+	  apps to handle the jpeg stuff. Since it uses the virtual framebuffer
+	  the moduole param  video=vfb is REQUIRED! Please see kernel 
+	  Documentation for more info
+
 config FB_VIRTUAL
 	tristate "Virtual Frame Buffer support (ONLY FOR TESTING!)"
 	depends on FB

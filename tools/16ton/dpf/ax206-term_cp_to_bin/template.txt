@@ -1,0 +1,7 @@
+HST: $host<<<<<<<<<<<<<<<<<<
+ IP: $ip_eth0<<<<<<<<<<<<<<<
+TIM: $time<<<<<<<<<<
+MEM: $used>>/$cach<<
+NET: $recv>>/$send<<
+CPU: $usr>>>/$sys<<<
+PAG: $in>>>>/$out<<<<

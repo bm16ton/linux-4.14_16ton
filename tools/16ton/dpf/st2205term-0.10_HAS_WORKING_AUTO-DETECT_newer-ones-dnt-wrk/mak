@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# compile using libst2205
+gcc -Wall -g -O2 -DHAVE_ST2205 -o st2205term st2205term.c -lrote -lst2205
+
+# compile using libdlo
+# gcc -Wall -g -O2 -DHAVE_DLO -o st2205term st2205term.c -lrote -ldlo
+
+# compile using libst2205 and libdlo
+# gcc -Wall -g -O2 -DHAVE_ST2205 -DHAVE_DLO -o st2205term st2205term.c -lrote -lst2205 -ldlo
+
+# ---------------------- other apps ------------------
+
+# compile curses bases statistic display (reformats dstat output)
+gcc -Wall -g -O2 stats.c -o stats -lcurses
+
+# compile makefonts binary (generates fonts.txt)
+# gcc makefonts.c -o makefonts -lgd
+

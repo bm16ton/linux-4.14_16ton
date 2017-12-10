@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo mplayer -nolirc -vo fbdev:/dev/fb1 -vf scale=128:128  $1

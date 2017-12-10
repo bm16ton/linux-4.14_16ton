@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# compile ax206term
+
+sudo apt-get install libtool automake autoconf zlib1g-dev libssl-dev python-dev libc6 libusb-dev libibus-dev subversion libgd2-noxpm-dev libgd2-noxpm
+
+# compile python intelhex module required to build libdpf.a if user runs as: mak-dpf intelhex
+if [ "x$1" = 'intelhex' ]; then
+    if [ ! -e intelhex-1.4.zip ]; then
+        echo "Downloading python intelhex module"
+        wget http://www.bialix.com/intelhex/intelhex-1.4.zip
+    fi
+
+    echo "Installing python intelhex module"
+    unzip -x intelhex-1.4.zip 
+    cd intelhex-1.4 
+    python setup.py build
+    sudo python setup.py install
+fi
+
+# install sdcc if its not already there
+HAVE_SDCC=$(dpkg --get-selections | grep sdcc | wc -l)
+if [ $HAVE_SDCC -eq 0 ]; then
+    echo "Downloading sdcc from ftp.debian.org and installing..."
+    rm -f sdcc-libraries_2.9.0-5_all.deb sdcc_2.9.0-5_armel.deb
+    wget ftp://ftp.debian.org/debian/pool/main/s/sdcc/sdcc-libraries_2.9.0-5_all.deb
+    wget ftp://ftp.debian.org/debian/pool/main/s/sdcc/sdcc_2.9.0-5_armel.deb
+    sudo dpkg -i sdcc-libraries_2.9.0-5_all.deb
+    sudo dpkg -i sdcc_2.9.0-5_armel.deb
+fi
+
+# download source for libdpf if its not already there
+if [ ! -d dpf-ax ]; then
+    echo "Downloading source for dpf library"
+    svn co https://dpf-ax.svn.sourceforge.net/svnroot/dpf-ax/trunk dpf-ax
+fi
+
+# compile libdpf
+echo "Compiling libdpf..."
+(cd dpf-ax && make clean && make)
+
+# compile ax206term
+echo "Compiling ax206term..."
+gcc -Wall -g -O2 -DHAVE_DPF -o ax206term st2205term.c -lrote dpf-ax/libdpf.a -lusb
+
+# Notes:
+# old deprecated way to hack display - (this may have been superceeded by dpf-ax)
+# 
+# #wget http://tech.section5.ch/files/dpfhack-0.1alpha.tgz
+# #tar xvfz dpfhack-0.1alpha.tgz
+# wget http://tech.section5.ch/files/dpfhack-0.12devel.tgz
+# tar xvfz dpfhack-0.12devel.tgz
+# cd dpf/src
+# make
+# sudo python hackit.py /dev/sg1
+# # generate command to hack frame (once its plugged in)
+# dmesg | perl -ne 'print "sudo python hackit.py /dev/$1\n" if /Attached scsi generic (\S+) type 5/'
+
+
+
