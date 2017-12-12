@@ -1,37 +1,13 @@
 /*
- *  ax206fb.c
+ *  linux/drivers/video/ax206fb.c -- Virtual frame buffer device
  *
- *  Samsung Picture Frame Buffer
+ *      Copyright (C) 2002 James Simmons
  *
- *      This file is subject to the terms and conditions of the GNU General
- *      Public License.  See the file COPYING in the main directory of this
- *      archive for more details.
+ *	Copyright (C) 1997 Geert Uytterhoeven
  *
- *		This is an virtal frame buffer driver based on
- *      linux/drivers/video/vfb.c.
- *
- *  README:
- *
- *  This is a virtual framebuffer driver written for Samsung Picture Frames (like
- *  the Samsung SPF-85H). These frames can be used as a litte USB monitor. So one
- *  can send JPEG encoded pictures to them.
- *
- *  However, as it is not a good idea to have a JPEG encoder running in kernelspace
- *  we need an additional userspace application which does the JPEG frame encoding.
- *  Furthermore this app also sends the encoded image via libusb to the frame.
- *
- *  The cool thing about this driver is the efficiant implementation of the
- *  reader/writer paradigm in order to circumvent periodic, CPU intensive FB refreshs.
- *
- *  The userland deamon performs a blocking read on /sys/kernel/debug/ax206fb. When ever
- *  an application writes something to the framebuffer (via the character dev),
- *  the read call returns and the FB can be refreshed.
- *
- *  This works perfect if for instance the application mmap's the framebuffer and
- *  performs a single write on the character device.
- *  However it can cause problems when an application just uses the character device
- *  and does many write calls at once as each of them causes on refresh.
- *
+ *  This file is subject to the terms and conditions of the GNU General Public
+ *  License. See the file COPYING in the main directory of this archive for
+ *  more details.
  */
 
 #include <linux/module.h>
@@ -63,77 +39,31 @@
 static void *videomemory;
 static u_long videomemorysize = VIDEOMEMSIZE;
 module_param(videomemorysize, ulong, 0);
+MODULE_PARM_DESC(videomemorysize, "RAM available to frame buffer (in bytes)");
 
-/**********************************************************************
- *
- * Memory management
- *
- **********************************************************************/
-static void *rvmalloc(unsigned long size)
-{
-	void *mem;
-	unsigned long adr;
+static char *mode_option = NULL;
+module_param(mode_option, charp, 0);
+MODULE_PARM_DESC(mode_option, "Preferred video mode (e.g. 640x480-8@60)");
 
-	size = PAGE_ALIGN(size);
-	mem = vmalloc_32(size);
-	if (!mem)
-		return NULL;
-
-	memset(mem, 0, size); /* Clear the ram out, no junk to the user */
-	adr = (unsigned long) mem;
-	while (size > 0) {
-		SetPageReserved(vmalloc_to_page((void *)adr));
-		adr += PAGE_SIZE;
-		size -= PAGE_SIZE;
-	}
-
-	return mem;
-}
-
-static void rvfree(void *mem, unsigned long size)
-{
-	unsigned long adr;
-
-	if (!mem)
-		return;
-
-	adr = (unsigned long) mem;
-	while ((long) size > 0) {
-		ClearPageReserved(vmalloc_to_page((void *)adr));
-		adr += PAGE_SIZE;
-		size -= PAGE_SIZE;
-	}
-	vfree(mem);
-}
-
-
-static struct fb_var_screeninfo ax206fb_default __initdata = {
+static const struct fb_videomode ax206fb_default = {
 	.xres =		128,
 	.yres =		128,
-	.xres_virtual =	128,
-	.yres_virtual =	128,
-	.bits_per_pixel = 16,
-	.red =		{ 0, 8, 0 },
-	.green =	{ 0, 8, 0 },
-	.blue =		{ 0, 8, 0 },
-	.activate =	FB_ACTIVATE_NOW, //FB_ACTIVATE_TEST,
-	.height =	-1,
-	.width =	-1,
 	.vmode =	FB_VMODE_NONINTERLACED,
 };
 
-static struct fb_fix_screeninfo ax206fb_fix __initdata = {
+static struct fb_fix_screeninfo ax206fb_fix = {
 	.id =			"AX206 DPF Frame Buffer",
 	.type =			FB_TYPE_PACKED_PIXELS,
-	.visual =		FB_VISUAL_PSEUDOCOLOR,
-	.xpanstep =		1,
-	.ypanstep =		1,
+	.visual =	FB_VISUAL_PSEUDOCOLOR,
+	.xpanstep =	1,
+	.ypanstep =	1,
 	.ywrapstep =	1,
-	.accel =		FB_ACCEL_NONE,
+	.accel =	FB_ACCEL_NONE,
 };
 
-
-/* function prototypes */
+static bool ax206fb_enable __initdata = 1;	/* disabled by default */
+module_param(ax206fb_enable, bool, 0);
+MODULE_PARM_DESC(ax206fb_enable, "Enable Virtual FB driver");
 static ssize_t ax206fb_read_sysfs(struct file *file, char __user *user, size_t count, loff_t *ppos);
 
 static int ax206fb_check_var(struct fb_var_screeninfo *var,
@@ -223,12 +153,13 @@ static struct fb_ops ax206fb_ops = {
 	.fb_fillrect	= sys_fillrect,
 	.fb_copyarea	= sys_copyarea,
 	.fb_imageblit	= sys_imageblit,
-	.fb_mmap		= ax206fb_mmap,
+	.fb_mmap	= ax206fb_mmap,
 };
 
-/*
- *  Internal routines
- */
+    /*
+     *  Internal routines
+     */
+
 static u_long get_line_length(int xres_virtual, int bpp)
 {
 	u_long length;
@@ -301,13 +232,12 @@ static int ax206fb_check_var(struct fb_var_screeninfo *var,
 
 	/*
 	 * Now that we checked it we alter var. The reason being is that the video
-	 * mode passed in might not work but slight changes to it might make it
+	 * mode passed in might not work but slight changes to it might make it 
 	 * work. This way we let the user know what is acceptable.
 	 */
 	switch (var->bits_per_pixel) {
 	case 1:
 	case 8:
-	/* try the settings for RGB 888  here */
 		var->red.offset = 0;
 		var->red.length = 8;
 		var->green.offset = 0;
@@ -368,8 +298,8 @@ static int ax206fb_check_var(struct fb_var_screeninfo *var,
 }
 
 /* This routine actually sets the video mode. It's in here where we
- * the hardware state info->par and fix which can be affected by the
- * change in par. For this driver it doesn't do much.
+ * the hardware state info->par and fix which can be affected by the 
+ * change in par. For this driver it doesn't do much. 
  */
 static int ax206fb_set_par(struct fb_info *info)
 {
@@ -498,25 +428,30 @@ static int ax206fb_pan_display(struct fb_var_screeninfo *var,
 /*
  *  Most drivers don't need their own mmap function
  */
-static int ax206fb_mmap(struct fb_info *info,
-		    struct vm_area_struct *vma)
+static int ax206fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
 {
 	unsigned long start = vma->vm_start;
 	unsigned long size = vma->vm_end - vma->vm_start;
 	unsigned long offset = vma->vm_pgoff << PAGE_SHIFT;
 	unsigned long page, pos;
 
-	if (offset + size > info->fix.smem_len) {
+	if (vma->vm_pgoff > (~0UL >> PAGE_SHIFT))
 		return -EINVAL;
-	}
+	if (size > info->fix.smem_len)
+		return -EINVAL;
+	if (offset > info->fix.smem_len - size)
+		return -EINVAL;
 
 	pos = (unsigned long)info->fix.smem_start + offset;
 
+	pr_notice("mmap() framebuffer addr:%lu size:%lu\n",
+		  pos, size);
+
 	while (size > 0) {
 		page = vmalloc_to_pfn((void *)pos);
-		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED)) {
+		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED))
 			return -EAGAIN;
-		}
+
 		start += PAGE_SIZE;
 		pos += PAGE_SIZE;
 		if (size > PAGE_SIZE)
@@ -524,16 +459,14 @@ static int ax206fb_mmap(struct fb_info *info,
 		else
 			size = 0;
 	}
-/* #define  VM_RESERVED   (VM_DONTEXPAND | VM_DONTDUMP) */
-	vma->vm_flags |= VM_IO;	/* avoid to swap out this VMA */
-	return 0;
 
+	return 0;
 }
 
-// #ifndef MODULE
+#ifndef MODULE
 /*
  * The virtual framebuffer driver is only enabled if explicitly
- * requested by passing 'video=vfb:' (or any actual options).
+ * requested by passing 'video=ax206fb:' (or any actual options).
  */
 static int __init ax206fb_setup(char *options)
 {
@@ -542,6 +475,7 @@ static int __init ax206fb_setup(char *options)
 	if (!options)
 		return 1;
 
+	ax206fb_enable = 1;
 
 	if (!*options)
 		return 1;
@@ -549,10 +483,15 @@ static int __init ax206fb_setup(char *options)
 	while ((this_opt = strsep(&options, ",")) != NULL) {
 		if (!*this_opt)
 			continue;
+		/* Test disable for backwards compatibility */
+		if (!strcmp(this_opt, "disable"))
+			ax206fb_enable = 0;
+		else
+			mode_option = this_opt;
 	}
 	return 1;
 }
-// #endif  /*  MODULE  */
+#endif  /*  MODULE  */
 
 /*
  *  Initialisation
@@ -560,21 +499,14 @@ static int __init ax206fb_setup(char *options)
 static int __init ax206fb_probe(struct platform_device *dev)
 {
 	struct fb_info *info;
+	unsigned int size = PAGE_ALIGN(videomemorysize);
 	int retval = -ENOMEM;
 
 	/*
 	 * For real video cards we use ioremap.
 	 */
-	if (!(videomemory = rvmalloc(videomemorysize)))
+	if (!(videomemory = vmalloc_32_user(size)))
 		return retval;
-
-	/*
-	 * VFB must clear memory to prevent kernel info
-	 * leakage into userspace
-	 * VGA-based drivers MUST NOT clear memory if
-	 * they want to be able to take over vgacon
-	 */
-	memset(videomemory, 0, videomemorysize);
 
 	info = framebuffer_alloc(sizeof(u32) * 256, &dev->dev);
 	if (!info)
@@ -583,13 +515,19 @@ static int __init ax206fb_probe(struct platform_device *dev)
 	info->screen_base = (char __iomem *)videomemory;
 	info->fbops = &ax206fb_ops;
 
-	info->var = ax206fb_default;
+	if (!fb_find_mode(&info->var, info, mode_option,
+			  NULL, 0, &ax206fb_default, 8)){
+		fb_err(info, "Unable to find usable video mode.\n");
+		retval = -EINVAL;
+		goto err1;
+	}
+
 	ax206fb_fix.smem_start = (unsigned long) videomemory;
 	ax206fb_fix.smem_len = videomemorysize;
 	info->fix = ax206fb_fix;
 	info->pseudo_palette = info->par;
 	info->par = NULL;
-	info->flags = FBINFO_FLAG_DEFAULT;
+	info->flags = FBINFO_DEFAULT | FBINFO_READS_FAST | FBINFO_VIRTFB | FBINFO_MISC_ALWAYS_SETPAR;
 
 	retval = fb_alloc_cmap(&info->cmap, 256, 0);
 	if (retval < 0)
@@ -600,16 +538,15 @@ static int __init ax206fb_probe(struct platform_device *dev)
 		goto err2;
 	platform_set_drvdata(dev, info);
 
-	printk(KERN_INFO
-	       "fb%d: AX206 Picture Frame frame buffer device created, using %ldK of video memory\n",
-	       info->node, videomemorysize >> 10);
+	fb_info(info, "ax206fb buffer device, using %ldK of video memory\n",
+		videomemorysize >> 10);
 	return 0;
 err2:
 	fb_dealloc_cmap(&info->cmap);
 err1:
 	framebuffer_release(info);
 err:
-	rvfree(videomemory, videomemorysize);
+	vfree(videomemory);
 	return retval;
 }
 
@@ -619,7 +556,7 @@ static int ax206fb_remove(struct platform_device *dev)
 
 	if (info) {
 		unregister_framebuffer(info);
-		rvfree(videomemory, videomemorysize);
+		vfree(videomemory);
 		fb_dealloc_cmap(&info->cmap);
 		framebuffer_release(info);
 	}
@@ -643,15 +580,19 @@ static int __init ax206fb_init(void)
 {
 	int ret = 0;
 
-// #ifndef MODULE
+#ifndef MODULE
 	char *option = NULL;
 
 	if (fb_get_options("ax206fb", &option))
 		return -ENODEV;
 	ax206fb_setup(option);
-// #endif
+#endif
+
+	if (!ax206fb_enable)
+		return -ENXIO;
 
 	ret = platform_driver_register(&ax206fb_driver);
+
 	if (!ret) {
 		ax206fb_device = platform_device_alloc("ax206fb", 0);
 
@@ -689,11 +630,4 @@ static void __exit ax206fb_exit(void)
 module_exit(ax206fb_exit);
 
 MODULE_LICENSE("GPL");
-#endif /* MODULE */
-
-
-
-
-
-
-
+#endif				/* MODULE */
