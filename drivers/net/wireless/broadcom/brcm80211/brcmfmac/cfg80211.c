@@ -151,6 +151,7 @@ static struct ieee80211_rate __wl_rates[] = {
 }
 
 static struct ieee80211_channel __wl_2ghz_channels[] = {
+	CHAN2G(-3, 2392), CHAN2G(-2, 2397), CHAN2G(-1, 2402), CHAN2G(0, 2407),
 	CHAN2G(1, 2412), CHAN2G(2, 2417), CHAN2G(3, 2422), CHAN2G(4, 2427),
 	CHAN2G(5, 2432), CHAN2G(6, 2437), CHAN2G(7, 2442), CHAN2G(8, 2447),
 	CHAN2G(9, 2452), CHAN2G(10, 2457), CHAN2G(11, 2462), CHAN2G(12, 2467),
@@ -193,7 +194,7 @@ static const struct ieee80211_regdomain brcmf_regdom = {
 	.alpha2 =  "99",
 	.reg_rules = {
 		/* IEEE 802.11b/g, channels 1..11 */
-		REG_RULE(2312-10, 2472+10, 40, 6, 30, 0),
+		REG_RULE(2312-10, 2484+10, 40, 6, 30, 0),
 		/* If any */
 		/* IEEE 802.11 channel 14 - Only JP enables
 		 * this and for 802.11b only
@@ -6110,15 +6111,7 @@ static int brcmf_construct_chaninfo(struct brcmf_cfg80211_info *cfg,
 			chaninfo = ch.chspec;
 			err = brcmf_fil_bsscfg_int_get(ifp, "per_chan_info",
 						       &chaninfo);
-			if (!err) {
-				if (chaninfo & WL_CHAN_RADAR)
-					channel->flags |=
-						(IEEE80211_CHAN_RADAR |
-						 IEEE80211_CHAN_NO_IR);
-				if (chaninfo & WL_CHAN_PASSIVE)
-					channel->flags |=
-						IEEE80211_CHAN_NO_IR;
-			}
+
 		}
 	}
 
