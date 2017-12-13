@@ -22,16 +22,6 @@
 *.lst
 *.symtypes
 *.order
-*.elf
-*.bin
-*.tar
-*.gz
-*.bz2
-*.lzma
-*.xz
-*.lz4
-*.lzo
-*.patch
 *.gcno
 *.ll
 modules.builtin
@@ -56,7 +46,7 @@ Module.symvers
 #
 # Debian directory (make deb-pkg)
 #
-/debian/
+# /debian/
 
 #
 # tar directory (make tar*-pkg)
@@ -111,7 +101,7 @@ signing_key.x509
 x509.genkey
 
 # Kconfig presets
-all.config
+
 
 # Kdevelop4
 *.kdev4

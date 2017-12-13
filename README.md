@@ -1,5 +1,10 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
+NEW:
+	Removed NO-IR from middle band
+	applied Krack patches to wpa/hostapd in tools/16ton
+    updated mini DPF framebuffer driver
+
 FIXES:
 	SDCARD adapter now patched works with bigger, newer and faster cards.
 	5ghz AP mode works now, edit brcmfmac4356-pcie.txt change ccode from X2 to 00
