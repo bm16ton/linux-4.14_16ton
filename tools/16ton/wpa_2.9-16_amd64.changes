@@ -1,0 +1,34 @@
+Format: 1.8
+Date: Mon, 02 Oct 2017 03:00:19 +0200
+Source: wpa
+Binary: hostapd wpagui wpasupplicant wpasupplicant-udeb
+Architecture: amd64
+Version: 2.9-16
+Distribution: UNRELEASED
+Urgency: medium
+Maintainer: Debian wpasupplicant Maintainers <pkg-wpa-devel@lists.alioth.debian.org>
+Changed-By: Benjamin Maddocks <bm16ton@gmail.com>
+Description:
+ hostapd    - IEEE 802.11 AP and IEEE 802.1X/WPA/WPA2/EAP Authenticator
+ wpagui     - graphical user interface for wpa_supplicant
+ wpasupplicant - client support for WPA and WPA2 (IEEE 802.11i)
+ wpasupplicant-udeb - Client support for WPA and WPA2 (IEEE 802.11i) (udeb)
+Changes:
+ wpa (2.9-16) UNRELEASED; urgency=medium
+ .
+   * no-scan patch
+Checksums-Sha1:
+ 501243a3aac5590da714e91e2524c8daff8db2df 539842 hostapd_2.9-16_amd64.deb
+ 8f8f3da3ab6630a85e467d8d9d086ba1cd5cd188 346296 wpagui_2.9-16_amd64.deb
+ bd5eb749c7811ee1be11087e2c5891be81d2b8ba 225086 wpasupplicant-udeb_2.9-16_amd64.udeb
+ cbe70f42382840e1052cee2cfcd0209a40f6bbc2 915472 wpasupplicant_2.9-16_amd64.deb
+Checksums-Sha256:
+ c6d2ec05a92e7604b478c2ab8a6257c05a1d652cb7d26223a7b8e553b805284f 539842 hostapd_2.9-16_amd64.deb
+ fc2aba4836242efb1b36264458839b6b3426670066998ea6287908d1397203ec 346296 wpagui_2.9-16_amd64.deb
+ d846d3b1479d09523e45455fc520a65ea783fb4abb4e7670d4651871ff81c294 225086 wpasupplicant-udeb_2.9-16_amd64.udeb
+ 0f4106a554be756900fdc13a825cf38167bcdcca298f06c65d7d2e618e13652c 915472 wpasupplicant_2.9-16_amd64.deb
+Files:
+ 14163b755c06ba70582fe24fcd64ca18 539842 net optional hostapd_2.9-16_amd64.deb
+ 38ac6c153aa3cf8936569b75409277e7 346296 net optional wpagui_2.9-16_amd64.deb
+ 30bcbeaf7b99704c86f7ffbfbe3a585b 225086 debian-installer standard wpasupplicant-udeb_2.9-16_amd64.udeb
+ d6890e13c71b8a1aae77ac7e881dc2fe 915472 net optional wpasupplicant_2.9-16_amd64.deb
