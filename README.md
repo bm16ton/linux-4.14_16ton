@@ -8,6 +8,13 @@ NEW:
 FIXES:
 	SDCARD adapter now patched works with bigger, newer and faster cards.
 	5ghz AP mode works now, edit brcmfmac4356-pcie.txt change ccode from X2 to 00
+	mwifiex on newer network-manager versions requires;
+
+[device]
+wifi.scan-rand-mac-address=no
+
+	at end of /etc/NetworkManager/NetworkManager.conf
+	
 
 ADDITIONS:
 	increased max txpower for the bradcom wifi to 30db MUCH HIGHER THEN THE CARD CAN HANDLE MOST LIKELY SET MAX AT BOOT!
