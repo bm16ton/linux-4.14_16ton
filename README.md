@@ -1,5 +1,8 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
+ISSUES: Currently the Krack patches i applied to 2.3 keep the middle band from correctly working in AP mode and
+	all kinds on notworking in Managed mode. Currently working on applying my patches to 2.4
+
 NEW:
 	Removed NO-IR from middle band
 	applied Krack patches to wpa/hostapd in tools/16ton
@@ -15,7 +18,7 @@ wifi.scan-rand-mac-address=no
 
 	at end of /etc/NetworkManager/NetworkManager.conf
 	
-!!!!!!!!! my version of hostapd is based on 2.3 which apparently on the GPD with Ubuntu 17.04 doesnt work when this is ENABLED, i havent debuged but this is queer
+
 
 ADDITIONS:
 	increased max txpower for the bradcom wifi to 30db MUCH HIGHER THEN THE CARD CAN HANDLE MOST LIKELY SET MAX AT BOOT!
