@@ -83,7 +83,7 @@ quiet_cmd_builddeb = BUILDDEB
 		$(srctree)/scripts/package/builddeb $@
 
 deb-pkg: FORCE
-	$(MAKE) clean
+#	$(MAKE) clean
 	$(call cmd,src_tar,$(KDEB_SOURCENAME))
 	$(MAKE) KBUILD_SRC=
 	+$(call cmd,builddeb)

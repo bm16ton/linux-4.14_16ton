@@ -15,6 +15,7 @@ wifi.scan-rand-mac-address=no
 
 	at end of /etc/NetworkManager/NetworkManager.conf
 	
+!!!!!!!!! my version of hostapd is based on 2.3 which apparently on the GPD with Ubuntu 17.04 doesnt work when this is ENABLED, i havent debuged but this is queer
 
 ADDITIONS:
 	increased max txpower for the bradcom wifi to 30db MUCH HIGHER THEN THE CARD CAN HANDLE MOST LIKELY SET MAX AT BOOT!

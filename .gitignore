@@ -29,6 +29,10 @@ Module.symvers
 *.dwo
 *.su
 *.c.[012]*.*
+*~
+*.bin
+*.gz
+*.elf
 
 #
 # Top-level generic files
@@ -47,7 +51,7 @@ Module.symvers
 # Debian directory (make deb-pkg)
 #
 # /debian/
-
+debian/hdrtmp/
 #
 # tar directory (make tar*-pkg)
 #

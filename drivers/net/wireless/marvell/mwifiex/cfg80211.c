@@ -366,7 +366,7 @@ mwifiex_cfg80211_set_tx_power(struct wiphy *wiphy,
 		power_cfg.is_power_auto = 0;
 		power_cfg.power_level = dbm;
 	} else {
-		power_cfg.is_power_auto = 1;
+		power_cfg.is_power_auto = 0;
 	}
 
 	priv = mwifiex_get_priv(adapter, MWIFIEX_BSS_ROLE_ANY);
@@ -594,6 +594,7 @@ int mwifiex_send_domain_info_cmd_fw(struct wiphy *wiphy)
 
 static void mwifiex_reg_apply_radar_flags(struct wiphy *wiphy)
 {
+
 	struct ieee80211_supported_band *sband;
 	struct ieee80211_channel *chan;
 	unsigned int i;
