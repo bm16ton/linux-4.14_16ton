@@ -1,7 +1,16 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
+ISSUES: At first non of the 5ghz band was available in Master (AP) mode on the brcmfmac (especially on GPD Win
+	the only brcmfmac device i own) When I first applied my patches and the restrictions where removed from the
+	channel list, I tried an AP on 36 and it worked. I foolishly assumed I was done. I now realized even tho
+	hostapd starts and runs without errors on channels above 36 a stupidly quick test today showed those channels
+	are not in fact working. I will investigate this further. I quickly tried channels above 140. Which should
+	be outside the fake X2 regulatory domains restricitons and it still didnt "seem" to work.
+
 ISSUES: Currently the Krack patches i applied to 2.3 keep the middle band from correctly working in AP mode and
 	all kinds on notworking in Managed mode. Currently working on applying my patches to 2.4
+UPDATE: Theres the 2.4 source and my patches in tools/16ton now. Only did a quick test channel 36 worked fine
+	on GPD Win ill test it against my atheros patches later.
 
 NEW:
 	Removed NO-IR from middle band

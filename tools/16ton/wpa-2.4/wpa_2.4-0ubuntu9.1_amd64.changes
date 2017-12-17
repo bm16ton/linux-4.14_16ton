@@ -1,0 +1,43 @@
+Format: 1.8
+Date: Mon, 16 Oct 2017 07:41:21 -0400
+Source: wpa
+Binary: hostapd wpagui wpasupplicant wpasupplicant-udeb
+Architecture: amd64
+Version: 2.4-0ubuntu9.1
+Distribution: zesty-security
+Urgency: medium
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Changed-By: Marc Deslauriers <marc.deslauriers@ubuntu.com>
+Description:
+ hostapd    - IEEE 802.11 AP and IEEE 802.1X/WPA/WPA2/EAP Authenticator
+ wpagui     - graphical user interface for wpa_supplicant
+ wpasupplicant - client support for WPA and WPA2 (IEEE 802.11i)
+ wpasupplicant-udeb - Client support for WPA and WPA2 (IEEE 802.11i) (udeb)
+Changes:
+ wpa (2.4-0ubuntu9.1) zesty-security; urgency=medium
+ .
+   * SECURITY UPDATE: Multiple issues in WPA protocol
+     - debian/patches/2017-1/*.patch: Add patches from Debian stretch
+     - CVE-2017-13077, CVE-2017-13078, CVE-2017-13079, CVE-2017-13080,
+       CVE-2017-13081, CVE-2017-13082, CVE-2017-13086, CVE-2017-13087,
+       CVE-2017-13088
+   * SECURITY UPDATE: Denial of service issues
+     - debian/patches/2016-1/*.patch: Add patches from Debian stretch
+     - CVE-2016-4476
+     - CVE-2016-4477
+Checksums-Sha1:
+ 21b652111688bdc716daf2e8f046affab42cd3e7 562012 hostapd_2.4-0ubuntu9.1_amd64.deb
+ cb6332fcfec12ebad8df597a2e5885082956a409 352268 wpagui_2.4-0ubuntu9.1_amd64.deb
+ d9c2986c8825cfdd7e9b74b29448771dacdba5df 247374 wpasupplicant-udeb_2.4-0ubuntu9.1_amd64.udeb
+ 5397d0829dfceb6dcbaf34a83dc74892b1ca83d6 973204 wpasupplicant_2.4-0ubuntu9.1_amd64.deb
+Checksums-Sha256:
+ 278a4c0785c5f9ef160e52c875f6c37dd44b8811fe26183a06f20593d53f1abc 562012 hostapd_2.4-0ubuntu9.1_amd64.deb
+ 515340c4b1a70bf6050bbe19a448749326a82f7df6c2043c32035975459e5a0e 352268 wpagui_2.4-0ubuntu9.1_amd64.deb
+ a2977c9e598a84732ad0e6f9636a1279965d7b3201465307f66d429e38b26e8a 247374 wpasupplicant-udeb_2.4-0ubuntu9.1_amd64.udeb
+ 24fb195810d61363b891edad90f3cc2a776b1ee549ce0215d29dded3bbd4e63d 973204 wpasupplicant_2.4-0ubuntu9.1_amd64.deb
+Files:
+ d286199c4cec8f2372ce1edf754f06bb 562012 net optional hostapd_2.4-0ubuntu9.1_amd64.deb
+ 893962f5a81c39d880612c184c8fc0da 352268 net optional wpagui_2.4-0ubuntu9.1_amd64.deb
+ 85f04a23e702164934018e26f2fa5e2e 247374 debian-installer standard wpasupplicant-udeb_2.4-0ubuntu9.1_amd64.udeb
+ 0aad6eae996f53509940207ec52ebb5a 973204 net optional wpasupplicant_2.4-0ubuntu9.1_amd64.deb
+Original-Maintainer: Debian wpasupplicant Maintainers <pkg-wpa-devel@lists.alioth.debian.org>
