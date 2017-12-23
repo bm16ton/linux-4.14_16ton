@@ -226,7 +226,7 @@ static const struct ieee80211_regdomain world_regdom = {
 		REG_RULE(2467-10, 2472+10, 20, 6, 30, 0),
 		/* IEEE 802.11 channel 14 - Only JP enables
 		 * this and for 802.11b only */
-		REG_RULE(2484-10, 2484+10, 20, 6, 30, 0),
+		REG_RULE(2484-20, 2484+20, 40, 6, 30, 0),
 		/* IEEE 802.11a, channel 36..48 */
 		REG_RULE(5180-10, 5240+10, 80, 6, 30, 0),
 
@@ -237,7 +237,7 @@ static const struct ieee80211_regdomain world_regdom = {
 		REG_RULE(5500-10, 5720+10, 160, 6, 30, 0),
 
 		/* IEEE 802.11a, channel 149..165 */
-		REG_RULE(5745-10, 5825+10, 80, 6, 30, 0),
+		REG_RULE(5745-10, 6000+10, 80, 6, 30, 0),
 
 		/* IEEE 802.11ad (60GHz), channels 1..3 */
 		REG_RULE(56160+2160*1-1080, 56160+2160*3+1080, 2160, 0, 0, 0),
@@ -2100,19 +2100,10 @@ bool reg_dfs_domain_same(struct wiphy *wiphy1, struct wiphy *wiphy2)
 static void reg_copy_dfs_chan_state(struct ieee80211_channel *dst_chan,
 				    struct ieee80211_channel *src_chan)
 {
-	if (!(dst_chan->flags & IEEE80211_CHAN_RADAR) ||
-	    !(src_chan->flags & IEEE80211_CHAN_RADAR))
-		return;
 
-	if (dst_chan->flags & IEEE80211_CHAN_DISABLED ||
-	    src_chan->flags & IEEE80211_CHAN_DISABLED)
-		return;
-
-	if (src_chan->center_freq == dst_chan->center_freq &&
-	    dst_chan->dfs_state == NL80211_DFS_USABLE) {
 		dst_chan->dfs_state = src_chan->dfs_state;
 		dst_chan->dfs_state_entered = src_chan->dfs_state_entered;
-	}
+
 }
 
 static void wiphy_share_dfs_chan_state(struct wiphy *dst_wiphy,

@@ -1,0 +1,34 @@
+/* boiler plate stuff */
+CHANGES
+FILES
+INSTALL
+ISSUES
+LICENSE
+
+/* makefile that ties into an existing kernel build tree */
+Makefile
+
+/* readme for the release */
+README.ipw2200
+
+/* All the following contain the 802.11 generic functionality */
+ieee80211.h
+ieee80211_crypt.c
+ieee80211_crypt.h
+ieee80211_crypt_ccmp.c
+ieee80211_crypt_tkip.c
+ieee80211_crypt_wep.c
+ieee80211_module.c
+ieee80211_rx.c
+ieee80211_tx.c
+ieee80211_wx.c
+
+/* ipw2200 implementation */
+ipw2200.h
+ipw2200.c
+
+/* helper scripts */
+load
+unload
+dvals
+idvals

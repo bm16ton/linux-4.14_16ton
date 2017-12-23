@@ -1,0 +1,23 @@
+--- ../linux-3.3.8.og/net/wireless/util.c	2017-11-30 14:14:59.500539304 -0500
++++ net/wireless/util.c	2017-11-30 14:56:58.487439346 -0500
+@@ -45,8 +45,9 @@
+ 			return 2484;
+ 		else if (chan < 14)
+ 			return 2407 + chan * 5;
+-		else
+-			return 0; /* not supported */
++		else if (chan > 14 && chan <= 65)
++			return 2407 + chan * 5;
++		break;
+ 	}
+ }
+ EXPORT_SYMBOL(ieee80211_channel_to_frequency);
+@@ -58,6 +59,8 @@
+ 		return 14;
+ 	else if (freq < 2484)
+ 		return (freq - 2407) / 5;
++	else if (freq > 2484 && freq <= 2732)
++		return (freq - 2407) / 5;
+ 	else if (freq >= 4910 && freq <= 4980)
+ 		return (freq - 4000) / 5;
+ 	else

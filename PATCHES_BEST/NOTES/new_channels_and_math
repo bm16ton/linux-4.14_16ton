@@ -1,0 +1,120 @@
+	if (freq >= 2312 && freq <= 2732) {
+ 		mode = HOSTAPD_MODE_IEEE80211G;
+
+
+ 		if (chan == 14)
+ 			return 2484;
+ 		else if (chan < 14)
+ 			return 2407 + chan * 5;
+		else if (chan > 14 && chan <= 65)
+			return 2407 + chan * 5;
+ 		break;
+ 	case NL80211_BAND_5GHZ:
+ 		if (chan >= 182 && chan <= 196)
+@@ -300,6 +302,8 @@
+ 		return 14;
+ 	else if (freq < 2484)
+ 		return (freq - 2407) / 5;
+	else if (freq > 2484 && freq <= 2732)
+		return (freq - 2407) / 5;
+ 	else if (freq >= 4910 && freq <= 4980)
+ 		return (freq - 4000) / 5;
+ 	else if (freq <= 45000) /* DMG band lower limit */
+
+
+ 2312, 2317, 2322, 2327, 2332, 2337, 2342, 2347, 2352, 2357, 2362, 2367, 2372, 2377, 2382, 2387, 2392, 2397, 2402, 2407, 2412, 2417, 2422, 2427, 2432,
+	2437, 2442, 2447, 2452, 2457, 2462, 2467, 2472, 2484, 2487, 2502, 2512, 2572, 2592, 2612, 2632, 2652, 2672, 2692, 2712, 2732
+
+static const struct ieee80211_channel ath9k_2ghz_chantable[] = {
+	CHAN2G(2312, 26), /* Channel XX */
+	CHAN2G(2317, 27), /* Channel XX */
+	CHAN2G(2322, 28), /* Channel XX */
+	CHAN2G(2327, 29), /* Channel XX */
+	CHAN2G(2332, 30), /* Channel XX */
+	CHAN2G(2337, 31), /* Channel XX */
+	CHAN2G(2342, 32), /* Channel XX */
+	CHAN2G(2347, 33), /* Channel XX */
+	CHAN2G(2352, 34), /* Channel XX */
+	CHAN2G(2357, 35), /* Channel XX */
+	CHAN2G(2362, 36), /* Channel XX */
+	CHAN2G(2367, 37), /* Channel XX */
+	CHAN2G(2372, 38), /* Channel XX */
+	CHAN2G(2377, 39), /* Channel XX */
+	CHAN2G(2382, 40), /* Channel XX */
+	CHAN2G(2387, 41), /* Channel XX */
+	CHAN2G(2392, 42), /* Channel XX */
+	CHAN2G(2397, 43), /* Channel XX */
+	CHAN2G(2402, 44), /* Channel XX */
+	CHAN2G(2407, 45), /* Channel XX */
+
+	CHAN2G(2412, 0), /* Channel 1 */
+	CHAN2G(2417, 1), /* Channel 2 */
+	CHAN2G(2422, 2), /* Channel 3 */
+	CHAN2G(2427, 3), /* Channel 4 */
+	CHAN2G(2432, 4), /* Channel 5 */
+	CHAN2G(2437, 5), /* Channel 6 */
+	CHAN2G(2442, 6), /* Channel 7 */
+	CHAN2G(2447, 7), /* Channel 8 */
+	CHAN2G(2452, 8), /* Channel 9 */
+	CHAN2G(2457, 9), /* Channel 10 */
+	CHAN2G(2462, 10), /* Channel 11 */
+	CHAN2G(2467, 11), /* Channel 12 */
+	CHAN2G(2472, 12), /* Channel 13 */
+
+
+	CHAN2G(2484, 13), /* Channel 14 */
+
+	CHAN2G(2487, 14), /* Channel XX */
+	CHAN2G(2502, 15), /* Channel XX */
+	CHAN2G(2512, 16), /* Channel XX */
+	CHAN2G(2572, 17), /* Channel XX */
+	CHAN2G(2592, 18), /* Channel XX */
+	CHAN2G(2612, 19), /* Channel XX */
+	CHAN2G(2632, 20), /* Channel XX */
+	CHAN2G(2652, 21), /* Channel XX */
+	CHAN2G(2672, 22), /* Channel XX */
+	CHAN2G(2692, 23), /* Channel XX */
+	CHAN2G(2712, 24), /* Channel XX */
+	CHAN2G(2732, 25), /* Channel XX */
+
+};
+
+/* Some 5 GHz radios are actually tunable on XXXX-YYYY
+ * on 5 MHz steps, we support the channels which we know
+ * we have calibration data for all cards though to make
+ * this static */
+static const struct ieee80211_channel ath9k_5ghz_chantable[] = {
+	CHAN5G(4920, 46), /* Channel XX */
+	CHAN5G(4940, 47), /* Channel XX */
+	CHAN5G(4960, 48), /* Channel XX */
+	CHAN5G(4980, 49), /* Channel XX */
+
+	/* _We_ call this UNII 1 */
+	CHAN5G(5180, 50), /* Channel 36 */
+	CHAN5G(5200, 51), /* Channel 40 */
+	CHAN5G(5220, 52), /* Channel 44 */
+	CHAN5G(5240, 53), /* Channel 48 */
+	/* _We_ call this UNII 2 */
+	CHAN5G(5260, 54), /* Channel 52 */
+	CHAN5G(5280, 55), /* Channel 56 */
+	CHAN5G(5300, 56), /* Channel 60 */
+	CHAN5G(5320, 57), /* Channel 64 */
+	/* _We_ call this "Middle band" */
+	CHAN5G(5500, 58), /* Channel 100 */
+	CHAN5G(5520, 59), /* Channel 104 */
+	CHAN5G(5540, 60), /* Channel 108 */
+	CHAN5G(5560, 61), /* Channel 112 */
+	CHAN5G(5580, 62), /* Channel 116 */
+	CHAN5G(5600, 63), /* Channel 120 */
+	CHAN5G(5620, 64), /* Channel 124 */
+	CHAN5G(5640, 65), /* Channel 128 */
+	CHAN5G(5660, 66), /* Channel 132 */
+	CHAN5G(5680, 67), /* Channel 136 */
+	CHAN5G(5700, 68), /* Channel 140 */
+	/* _We_ call this UNII 3 */
+	CHAN5G(5745, 69), /* Channel 149 */
+	CHAN5G(5765, 70), /* Channel 153 */
+	CHAN5G(5785, 71), /* Channel 157 */
+	CHAN5G(5805, 72), /* Channel 161 */
+	CHAN5G(5825, 73), /* Channel 165 */
+};

@@ -1,0 +1,27 @@
+Source: linux-4.14.8-16ton-gpd-win-gaming-conf
+Section: kernel
+Priority: optional
+Maintainer: Anonymous <root@maddocks-Q552UB>
+Build-Depends: bc, kmod, cpio 
+Homepage: http://www.kernel.org/
+
+Package: linux-image-4.14.8-16ton-gpd-win-gaming-conf
+Architecture: any
+Description: Linux kernel, version 4.14.8-16ton-gpd-win-gaming-conf
+ This package contains the Linux kernel, modules and corresponding other
+ files, version: 4.14.8-16ton-gpd-win-gaming-conf.
+
+Package: linux-headers-4.14.8-16ton-gpd-win-gaming-conf
+Architecture: any
+Description: Linux kernel headers for 4.14.8-16ton-gpd-win-gaming-conf on ${kernel:debarch}
+ This package provides kernel header files for 4.14.8-16ton-gpd-win-gaming-conf on ${kernel:debarch}
+ .
+ This is useful for people who need to build external modules
+
+Package: linux-libc-dev
+Section: devel
+Provides: linux-kernel-headers
+Architecture: any
+Description: Linux support headers for userspace development
+ This package provides userspaces headers from the Linux kernel.  These headers
+ are used by the installed headers for GNU glibc and other system libraries.

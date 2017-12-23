@@ -1456,11 +1456,10 @@ static int ec_install_handlers(struct acpi_ec *ec, bool handle_events)
 			if (test_bit(EC_FLAGS_STARTED, &ec->flags) &&
 			    ec->reference_count >= 1)
 				acpi_ec_enable_gpe(ec, true);
-
-			/* EC is fully operational, allow queries */
-			acpi_ec_enable_event(ec);
 		}
 	}
+	/* EC is fully operational, allow queries */
+	acpi_ec_enable_event(ec);
 
 	return 0;
 }
@@ -2035,6 +2034,12 @@ int __init acpi_ec_init(void)
 
 	/* Drivers must be started after acpi_ec_query_init() */
 	dsdt_fail = acpi_bus_register_driver(&acpi_ec_driver);
+	/*
+	 * Register ECDT to ACPI bus only when PNP0C09 probe fails. This is
+	 * useful for platforms (confirmed on ASUS X550ZE) with valid ECDT
+	 * settings but invalid DSDT settings.
+	 * https://bugzilla.kernel.org/show_bug.cgi?id=196847
+	 */
 	ecdt_fail = acpi_ec_ecdt_start();
 	return ecdt_fail && dsdt_fail ? -ENODEV : 0;
 }

@@ -1,0 +1,103 @@
+--- linux-2.6.16/drivers/net/wireless/ipw2200.c 2006-03-20 07:53:29.000000000 +0200
++++ linux-2.6.16.new/drivers/net/wireless/ipw2200.c 2006-03-24 22:07:12.000000000 +0200
+@@ -2345,6 +2345,8 @@
+* NOTE: To better understand how these functions work (i.e what is a chip
+* select and why do have to keep driving the eeprom clock?), read
+* just about any data sheet for a Microwire compatible EEPROM.
++ *
++ * The chip is 93C66 in 16x256 mode. */
+/* write a 32 bit value into the indirect accessor register */
+@@ -2425,6 +2427,37 @@
+return r; }
++/* write 16 bits to the eeprom */
++static void eeprom_write_u16(struct ipw_priv* priv, u8 addr, u16 data)
++{
++ int i;
++
++ printk(KERN_INFO DRV_NAME " eeprom_write_u16(%02x, %04x) ", addr, data);
++
++ /* write/erase enable */
++ eeprom_op(priv, EEPROM_CMD_EWEN, EEPROM_CMD_EWEN_ADDR);
++ eeprom_disable_cs(priv);
++
++ eeprom_op(priv, EEPROM_CMD_WRITE, addr);
++
++ /* now the data bits follow */
++ for ( i=15; i>=0; i-- ) {
++ eeprom_write_bit(priv, ( (data&(1<<i)) != 0 ) ? 1 : 0 );
++ }
++
++ /* CS needs to be taken low before next clock */
++ eeprom_write_reg(priv,0);
++ eeprom_write_reg(priv,EEPROM_BIT_SK);
++
++ msleep(10); /* wait for the write to complete */
++
++ eeprom_write_reg(priv,0);
++
++ /* write/erase disable */
++ eeprom_op(priv,EEPROM_CMD_EWDS,EEPROM_CMD_EWDS_ADDR);
++ eeprom_disable_cs(priv);
++}
++ /* helper function for pulling the mac address out of the private */
+/* data's copy of the eeprom data */
+static void eeprom_parse_mac(struct ipw_priv *priv, u8 * mac)
+@@ -9946,19 +9979,45 @@
+return 0; }
++#define IPW2200_EEPROM_MAGIC 0x2200
++#define CX2_CHECKSUM 0x0040
+static int ipw_ethtool_set_eeprom(struct net_device *dev,
+struct ethtool_eeprom *eeprom, u8 * bytes)
+{
+struct ipw_priv *p = ieee80211_priv(dev);
+- int i;
++ u8 wordoffset;
++ u16 w;
++ int i;
++
++ if(eeprom->magic != IPW2200_EEPROM_MAGIC)
++ return -EINVAL;
+if (eeprom->offset + eeprom->len > IPW_EEPROM_IMAGE_SIZE)
+return -EINVAL;
++
++ wordoffset = eeprom->offset / 2;
++
++ /* TODO ethtool currently supports writing only 1 byte,
++ * take eeprom->len into account */
++
++ if (eeprom->offset % 2 == 0) /* LSB */
++ w = (p->eeprom[(eeprom->offset)+1] << 8 ) | *bytes;
++ else /* MSB */
++ w = p->eeprom[(eeprom->offset)-1] | (*bytes << 8 ); down(&p->sem);
++ eeprom_write_u16(p, wordoffset, w); memcpy(&p->eeprom[eeprom->offset], bytes, eeprom->len);
+- for (i = IPW_EEPROM_DATA;
+- i < IPW_EEPROM_DATA + IPW_EEPROM_IMAGE_SIZE; i++)
+- ipw_write8(p, i, p->eeprom[i]);
++ if (wordoffset > CX2_CHECKSUM / 2) {
++ p->eeprom[CX2_CHECKSUM] = 0;
++ p->eeprom[CX2_CHECKSUM+1] = 0;
++ for (i = CX2_CHECKSUM+2; i < IPW_EEPROM_IMAGE_SIZE; i+=2) {
++ p->eeprom[CX2_CHECKSUM] ^= p->eeprom[i];
++ p->eeprom[CX2_CHECKSUM+1] ^= p->eeprom[i+1];
++ }
++ eeprom_write_u16(p, CX2_CHECKSUM/2, (p->eeprom[CX2_CHECKSUM+1] << 8 ) | p->eeprom[CX2_CHECKSUM]);
++ IPW_ERROR("New EEPROM Checksum %04x ", (p->eeprom[CX2_CHECKSUM+1] << 8 ) | p->eeprom[CX2_CHECKSUM]);
++ }
+up(&p->sem);
+return 0;
+}
+
+diff -u linux-2.6.16/drivers/net/wireless/ipw2200.h linux-2.6.16.new/drivers/net/wireless/ipw2200.h
+--- linux-2.6.16/drivers/net/wireless/ipw2200.h 2006-03-20 07:53:29.000000000 +0200
++++ linux-2.6.16.new/drivers/net/wireless/ipw2200.h 2006-03-24 21:15:47.000000000 +0200
+@@ -1583,6 +1583,13 @@
+#define EEPROM_BIT_DO (1<<4)
+#define EEPROM_CMD_READ 0x2
++#define EEPROM_CMD_WRITE 0x1
++#define EEPROM_CMD_EWEN 0x0 /* write/erase enable */
++#define EEPROM_CMD_EWDS 0x0 /* write/erase disable */
++
++/* these latter two are distinguished by two upper bits in address */
++#define EEPROM_CMD_EWEN_ADDR 0xC0
++#define EEPROM_CMD_EWDS_ADDR 0x00 /* Interrupts masks */
+#define IPW_INTA_NONE 0x00000000 

@@ -1,0 +1,303 @@
+From 981c6967feb113eecf6d7c2e2fae578cd35af6fc Mon Sep 17 00:00:00 2001
+From: Rajkumar Manoharan <rmanohar@qca.qualcomm.com>
+Date: Thu, 17 Nov 2011 16:07:25 +0530
+Subject: [PATCH] UPSTREAM: ath9k: Dump eeprom target power values
+
+This patch dumps all eeprom target power values and
+tx power for each values written in BB register.
+
+Debugfs file location:
+    <debugfs_mnt>/ieee80211/phy#/ath9k/dump_eep_power
+
+Signed-off-by: Rajkumar Manoharan <rmanohar@qca.qualcomm.com>
+
+BUG=chrome-os-partner:7103
+TEST=cat dump_eep_power
+
+Change-Id: I81fcff12370cb21cb2be6c67817cab130e0a81a1
+Reviewed-on: https://gerrit.chromium.org/gerrit/12563
+Commit-Ready: Sam Leffler <sleffler@chromium.org>
+Reviewed-by: Sam Leffler <sleffler@chromium.org>
+Tested-by: Sam Leffler <sleffler@chromium.org>
+(cherry picked from commit 050f445deb31e94b9663f76baa1ef87f66301608)
+---
+
+diff --git a/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c b/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c
+index 41abe5a..cc96cd8 100644
+--- a/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c
++++ b/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c
+@@ -4992,9 +4992,212 @@
+ 	}
+ }
+ 
++static u32 ath9k_hw_ar9003_dump_eep_power(struct ath_hw *ah, u8 *buf,
++					  u32 len, u32 size)
++{
++	struct ar9300_eeprom *eep = &ah->eeprom.ar9300_eep;
++	int i, j;
++#define PR_EEP(_s, _val)						\
++	do {								\
++		len += snprintf(buf + len, size - len, _s, (_val));	\
++	} while (0)
++
++	PR_EEP("macAddr : %pM\n", eep->macAddr);
++	len += snprintf(buf + len, size - len, "calPierData2G :\n");
++	len += snprintf(buf + len, size - len,
++			"Chain  refPower voltMeas tempMeas "
++			"rxNoisefloorCal rxNoisefloorPower rxTempMeas\n");
++	for (i = 0; i < AR9300_MAX_CHAINS; i++) {
++		if (!(ah->txchainmask & BIT(i)))
++			continue;
++
++		for (j = 0; j < AR9300_NUM_2G_CAL_PIERS; j++) {
++			len += snprintf(buf + len, size - len,
++				"%2d %8d %8d %10d %10d %20d %8d\n", i,
++				eep->calPierData2G[i][j].refPower,
++				eep->calPierData2G[i][j].voltMeas,
++				eep->calPierData2G[i][j].tempMeas,
++				eep->calPierData2G[i][j].rxNoisefloorCal,
++				eep->calPierData2G[i][j].rxNoisefloorPower,
++				eep->calPierData2G[i][j].rxTempMeas);
++		}
++	}
++	len += snprintf(buf + len, size - len, "\ncalTarget_freqbin_Cck :\n");
++	for (i = 0; i < AR9300_NUM_2G_CCK_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_Cck[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\ncalTarget_freqbin_2G :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_2G[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_2GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_2GHT20[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_2GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_2G_40_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_2GHT40[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPowerCck :\n");
++	for (i = 0; i < AR9300_NUM_2G_CCK_TARGET_POWERS; i++) {
++		for (j = 0; j < 4; j++)
++			PR_EEP("%u ", (eep->calTargetPowerCck[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower2G :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 4; j++)
++			PR_EEP("%u ", (eep->calTargetPower2G[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower2GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower2GHT20[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower2GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_2G_40_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower2GHT40[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\nctlIndex_2G :\n");
++	for (i = 0; i < AR9300_NUM_CTLS_2G; i++)
++		PR_EEP("0x%x ", eep->ctlIndex_2G[i]);
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\nctl_freqbin_2G:\n");
++	for (i = 0; i < AR9300_NUM_CTLS_2G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_2G; j++)
++			PR_EEP("%u ", FBIN2FREQ(eep->ctl_freqbin_2G[i][j], 1));
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len,
++			"\nctlPowerData_2G : { power, flag }\n");
++	for (i = 0; i < AR9300_NUM_CTLS_2G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_2G; j++) {
++			len += snprintf(buf + len, size - len, "{ %d, %u } ",
++			   CTL_EDGE_TPOWER(eep->ctlPowerData_2G[i].ctlEdges[j]),
++			   CTL_EDGE_FLAGS(eep->ctlPowerData_2G[i].ctlEdges[j]));
++		}
++		len += snprintf(buf + len, size - len, "\n");
++	}
++	len += snprintf(buf + len, size - len, "\ncalPierData5G :\n");
++	len += snprintf(buf + len, size - len,
++			"Chain  refPower voltMeas tempMeas "
++			"rxNoisefloorCal rxNoisefloorPower rxTempMeas\n");
++	for (i = 0; i < AR9300_MAX_CHAINS; i++) {
++		if (!(ah->txchainmask & BIT(i)))
++			continue;
++
++		for (j = 0; j < AR9300_NUM_5G_CAL_PIERS; j++) {
++			len += snprintf(buf + len, size - len,
++				"%2d %8d %8d %10d %10d %20d %8d\n", i,
++				eep->calPierData5G[i][j].refPower,
++				eep->calPierData5G[i][j].voltMeas,
++				eep->calPierData5G[i][j].tempMeas,
++				eep->calPierData5G[i][j].rxNoisefloorCal,
++				eep->calPierData5G[i][j].rxNoisefloorPower,
++				eep->calPierData5G[i][j].rxTempMeas);
++		}
++	}
++	len += snprintf(buf + len, size - len, "\ncalTarget_freqbin_5G :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_5G[i], 0));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_5GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_5GHT20[i], 0));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_5GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_5G_40_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_5GHT40[i], 0));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower5G :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 4; j++)
++			PR_EEP("%u ", (eep->calTargetPower5G[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower5GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower5GHT20[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower5GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_5G_40_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower5GHT40[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\nctlIndex_5G :\n");
++	for (i = 0; i < AR9300_NUM_CTLS_5G; i++)
++		PR_EEP("0x%x ", eep->ctlIndex_5G[i]);
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\nctl_freqbin_5G:\n");
++	for (i = 0; i < AR9300_NUM_CTLS_5G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_5G; j++)
++			PR_EEP("%u ", FBIN2FREQ(eep->ctl_freqbin_5G[i][j], 0));
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len,
++			"\nctlPowerData_5G : { power, flag }\n");
++	for (i = 0; i < AR9300_NUM_CTLS_5G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_5G; j++) {
++			len += snprintf(buf + len, size - len, "{ %d, %u } ",
++			   CTL_EDGE_TPOWER(eep->ctlPowerData_5G[i].ctlEdges[j]),
++			   CTL_EDGE_FLAGS(eep->ctlPowerData_5G[i].ctlEdges[j]));
++		}
++		len += snprintf(buf + len, size - len, "\n");
++	}
++	len += snprintf(buf + len, size - len, "\n");
++
++	if (ah->curchan)
++		PR_EEP("freq %d\n", ah->curchan->channel);
++
++	for (i = 0; i < 12; i++)
++		len += snprintf(buf + len, size - len,
++				"Tx Power Rate %2d : 0x%08x\n",
++				i, REG_READ(ah, AR_PHY_POWER_TX_RATE(i)));
++
++	if (len > size)
++		len = size;
++
++#undef PR_EEP
++	return len;
++}
++
+ const struct eeprom_ops eep_ar9300_ops = {
+ 	.check_eeprom = ath9k_hw_ar9300_check_eeprom,
+ 	.get_eeprom = ath9k_hw_ar9300_get_eeprom,
++	.dump_eep_power = ath9k_hw_ar9003_dump_eep_power,
+ 	.fill_eeprom = ath9k_hw_ar9300_fill_eeprom,
+ 	.get_eeprom_ver = ath9k_hw_ar9300_get_eeprom_ver,
+ 	.get_eeprom_rev = ath9k_hw_ar9300_get_eeprom_rev,
+diff --git a/drivers/net/wireless/ath/ath9k/debug.c b/drivers/net/wireless/ath/ath9k/debug.c
+index 85a6a1e..7198a11 100644
+--- a/drivers/net/wireless/ath/ath9k/debug.c
++++ b/drivers/net/wireless/ath/ath9k/debug.c
+@@ -1486,6 +1486,36 @@
+ 	.llseek = default_llseek,
+ };
+ 
++static ssize_t read_file_dump_eep_power(struct file *file,
++					char __user *user_buf,
++					size_t count, loff_t *ppos)
++{
++	struct ath_softc *sc = file->private_data;
++	struct ath_hw *ah = sc->sc_ah;
++	u32 len = 0, size = 6000;
++	ssize_t retval = 0;
++	char *buf;
++
++	buf = kzalloc(size, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	ath9k_ps_wakeup(sc);
++	len = ah->eep_ops->dump_eep_power(ah, buf, len, size);
++	ath9k_ps_restore(sc);
++
++	retval = simple_read_from_buffer(user_buf, count, ppos, buf, len);
++	kfree(buf);
++
++	return retval;
++}
++
++static const struct file_operations fops_dump_eep_power = {
++	.read = read_file_dump_eep_power,
++	.open = ath9k_debugfs_open,
++	.owner = THIS_MODULE,
++	.llseek = default_llseek,
++};
+ 
+ int ath9k_init_debug(struct ath_hw *ah)
+ {
+@@ -1532,6 +1562,8 @@
+ 			    sc->debug.debugfs_phy, sc, &fops_dump_nfcal);
+ 	debugfs_create_file("samples", S_IRUSR | S_IRGRP | S_IROTH,
+ 			    sc->debug.debugfs_phy, sc, &fops_samps);
++	debugfs_create_file("dump_eep_power", S_IRUSR | S_IRGRP | S_IROTH,
++			    sc->debug.debugfs_phy, sc, &fops_dump_eep_power);
+ 
+ 	debugfs_create_u32("gpio_mask", S_IRUSR | S_IWUSR,
+ 			   sc->debug.debugfs_phy, &sc->sc_ah->gpio_mask);
+diff --git a/drivers/net/wireless/ath/ath9k/eeprom.h b/drivers/net/wireless/ath/ath9k/eeprom.h
+index de99c0d..64d4217 100644
+--- a/drivers/net/wireless/ath/ath9k/eeprom.h
++++ b/drivers/net/wireless/ath/ath9k/eeprom.h
+@@ -648,6 +648,7 @@
+ struct eeprom_ops {
+ 	int (*check_eeprom)(struct ath_hw *hw);
+ 	u32 (*get_eeprom)(struct ath_hw *hw, enum eeprom_param param);
++	u32 (*dump_eep_power)(struct ath_hw *hw, u8 *buf, u32 len, u32 size);
+ 	bool (*fill_eeprom)(struct ath_hw *hw);
+ 	int (*get_eeprom_ver)(struct ath_hw *hw);
+ 	int (*get_eeprom_rev)(struct ath_hw *hw);

@@ -1,0 +1,48 @@
+--- linux-4.8.0-41.44/drivers/net/wireless/marvell/mwifiex/usb.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/usb.c	2017-09-03 09:56:35.299400980 -0400
+@@ -42,6 +42,11 @@
+ 	{USB_DEVICE_AND_INTERFACE_INFO(USB8XXX_VID, USB8801_PID_2,
+ 				       USB_CLASS_VENDOR_SPEC,
+ 				       USB_SUBCLASS_VENDOR_SPEC, 0xff)},
++	/* 8897 */
++	{USB_DEVICE(USB8XXX_VID, USB8897_PID_1)},
++	{USB_DEVICE_AND_INTERFACE_INFO(USB8XXX_VID, USB8897_PID_2,
++				       USB_CLASS_VENDOR_SPEC,
++				       USB_SUBCLASS_VENDOR_SPEC, 0xff)},
+ 	/* 8997 */
+ 	{USB_DEVICE(USB8XXX_VID, USB8997_PID_1)},
+ 	{USB_DEVICE_AND_INTERFACE_INFO(USB8XXX_VID, USB8997_PID_2,
+@@ -398,12 +403,14 @@
+ 	case USB8766_PID_1:
+ 	case USB8797_PID_1:
+ 	case USB8801_PID_1:
++	case USB8897_PID_1:
+ 	case USB8997_PID_1:
+ 		card->usb_boot_state = USB8XXX_FW_DNLD;
+ 		break;
+ 	case USB8766_PID_2:
+ 	case USB8797_PID_2:
+ 	case USB8801_PID_2:
++	case USB8897_PID_2:
+ 	case USB8997_PID_2:
+ 		card->usb_boot_state = USB8XXX_FW_READY;
+ 		break;
+@@ -957,6 +964,12 @@
+ 		strcpy(adapter->fw_name, USB8997_DEFAULT_FW_NAME);
+ 		adapter->ext_scan = true;
+ 		break;
++	case USB8897_PID_1:
++	case USB8897_PID_2:
++		adapter->tx_buf_size = MWIFIEX_TX_DATA_BUF_SIZE_4K;
++		strcpy(adapter->fw_name, USB8897_DEFAULT_FW_NAME);
++		adapter->ext_scan = true;
++		break;
+ 	case USB8766_PID_1:
+ 	case USB8766_PID_2:
+ 		adapter->tx_buf_size = MWIFIEX_TX_DATA_BUF_SIZE_2K;
+@@ -1267,4 +1280,5 @@
+ MODULE_FIRMWARE(USB8766_DEFAULT_FW_NAME);
+ MODULE_FIRMWARE(USB8797_DEFAULT_FW_NAME);
+ MODULE_FIRMWARE(USB8801_DEFAULT_FW_NAME);
++MODULE_FIRMWARE(USB8897_DEFAULT_FW_NAME);
+ MODULE_FIRMWARE(USB8997_DEFAULT_FW_NAME);

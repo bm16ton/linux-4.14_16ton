@@ -1,0 +1,49 @@
+#!/bin/sh
+MODULE="ipw2200"
+ENTRY="status"
+EREG="s#.define \(STATUS_.*\) *(1<<\([^)]*\)).*#\1 \2#p"
+
+unset FILE
+for i in /sys/bus/pci/drivers/${MODULE}/*; do
+	if [ -e "${i}/${ENTRY}" ]; then
+		FILE="${i}/${ENTRY}"
+	fi
+done
+
+function bit()
+{
+	VAL=1
+	for ((i = 0; i < $2; i++)); do
+		VAL=$((VAL*2))
+	done
+	SET="$((VAL & $3))"
+	if [ "${SET}" = "0" ]; then
+		SET=" "
+	else
+		SET="*"
+	fi
+	printf "%-20s\t\t0x%08X [%s] %d\n" $1 $VAL "$SET" $i
+}
+
+IFS="
+"
+LEVELS=`sed -ne "${EREG}" ipw2200.h`
+if [ -z "${FILE}" ] || [ ! -e "${FILE}" ]; then
+	VALUE=0
+else
+	VALUE=`cat ${FILE}`
+fi
+
+printf "%-20s\t\t%-10s Set Bit\n" "Description" "Hex"
+for i in $LEVELS; do
+	IFS=" 
+"
+	bit $i $((${VALUE}))
+done
+
+
+if [ -z "${FILE}" ] || [ ! -e "${FILE}" ]; then
+	echo "No '${ENTRY}' found in /sys/bus/pci/drivers/${MODULE}."
+else
+	printf "${ENTRY} = ${VALUE} (* = active)\n"
+fi

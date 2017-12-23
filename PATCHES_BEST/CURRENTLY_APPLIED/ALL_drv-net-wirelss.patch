@@ -1,0 +1,1411 @@
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	2017-10-07 00:42:46.073707432 -0400
+@@ -5495,9 +5495,212 @@
+ 	}
+ }
+ 
++static u32 ath9k_hw_ar9003_dump_eep_power(struct ath_hw *ah, u8 *buf,
++					  u32 len, u32 size)
++{
++	struct ar9300_eeprom *eep = &ah->eeprom.ar9300_eep;
++	int i, j;
++#define PR_EEP(_s, _val)						\
++	do {								\
++		len += snprintf(buf + len, size - len, _s, (_val));	\
++	} while (0)
++
++	PR_EEP("macAddr : %pM\n", eep->macAddr);
++	len += snprintf(buf + len, size - len, "calPierData2G :\n");
++	len += snprintf(buf + len, size - len,
++			"Chain  refPower voltMeas tempMeas "
++			"rxNoisefloorCal rxNoisefloorPower rxTempMeas\n");
++	for (i = 0; i < AR9300_MAX_CHAINS; i++) {
++		if (!(ah->txchainmask & BIT(i)))
++			continue;
++
++		for (j = 0; j < AR9300_NUM_2G_CAL_PIERS; j++) {
++			len += snprintf(buf + len, size - len,
++				"%2d %8d %8d %10d %10d %20d %8d\n", i,
++				eep->calPierData2G[i][j].refPower,
++				eep->calPierData2G[i][j].voltMeas,
++				eep->calPierData2G[i][j].tempMeas,
++				eep->calPierData2G[i][j].rxNoisefloorCal,
++				eep->calPierData2G[i][j].rxNoisefloorPower,
++				eep->calPierData2G[i][j].rxTempMeas);
++		}
++	}
++	len += snprintf(buf + len, size - len, "\ncalTarget_freqbin_Cck :\n");
++	for (i = 0; i < AR9300_NUM_2G_CCK_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_Cck[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\ncalTarget_freqbin_2G :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_2G[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_2GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_2GHT20[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_2GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_2G_40_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_2GHT40[i], 1));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPowerCck :\n");
++	for (i = 0; i < AR9300_NUM_2G_CCK_TARGET_POWERS; i++) {
++		for (j = 0; j < 4; j++)
++			PR_EEP("%u ", (eep->calTargetPowerCck[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower2G :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 4; j++)
++			PR_EEP("%u ", (eep->calTargetPower2G[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower2GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_2G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower2GHT20[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower2GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_2G_40_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower2GHT40[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\nctlIndex_2G :\n");
++	for (i = 0; i < AR9300_NUM_CTLS_2G; i++)
++		PR_EEP("0x%x ", eep->ctlIndex_2G[i]);
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\nctl_freqbin_2G:\n");
++	for (i = 0; i < AR9300_NUM_CTLS_2G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_2G; j++)
++			PR_EEP("%u ", FBIN2FREQ(eep->ctl_freqbin_2G[i][j], 1));
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len,
++			"\nctlPowerData_2G : { power, flag }\n");
++	for (i = 0; i < AR9300_NUM_CTLS_2G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_2G; j++) {
++			len += snprintf(buf + len, size - len, "{ %d, %u } ",
++			   CTL_EDGE_TPOWER(eep->ctlPowerData_2G[i].ctlEdges[j]),
++			   CTL_EDGE_FLAGS(eep->ctlPowerData_2G[i].ctlEdges[j]));
++		}
++		len += snprintf(buf + len, size - len, "\n");
++	}
++	len += snprintf(buf + len, size - len, "\ncalPierData5G :\n");
++	len += snprintf(buf + len, size - len,
++			"Chain  refPower voltMeas tempMeas "
++			"rxNoisefloorCal rxNoisefloorPower rxTempMeas\n");
++	for (i = 0; i < AR9300_MAX_CHAINS; i++) {
++		if (!(ah->txchainmask & BIT(i)))
++			continue;
++
++		for (j = 0; j < AR9300_NUM_5G_CAL_PIERS; j++) {
++			len += snprintf(buf + len, size - len,
++				"%2d %8d %8d %10d %10d %20d %8d\n", i,
++				eep->calPierData5G[i][j].refPower,
++				eep->calPierData5G[i][j].voltMeas,
++				eep->calPierData5G[i][j].tempMeas,
++				eep->calPierData5G[i][j].rxNoisefloorCal,
++				eep->calPierData5G[i][j].rxNoisefloorPower,
++				eep->calPierData5G[i][j].rxTempMeas);
++		}
++	}
++	len += snprintf(buf + len, size - len, "\ncalTarget_freqbin_5G :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_5G[i], 0));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_5GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_5GHT20[i], 0));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len,
++			"\ncalTarget_freqbin_5GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_5G_40_TARGET_POWERS; i++)
++		PR_EEP("%u ", FBIN2FREQ(eep->calTarget_freqbin_5GHT40[i], 0));
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower5G :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 4; j++)
++			PR_EEP("%u ", (eep->calTargetPower5G[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower5GHT20 :\n");
++	for (i = 0; i < AR9300_NUM_5G_20_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower5GHT20[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\ncalTargetPower5GHT40 :\n");
++	for (i = 0; i < AR9300_NUM_5G_40_TARGET_POWERS; i++) {
++		for (j = 0; j < 14; j++)
++			PR_EEP("%u ",
++			       (eep->calTargetPower5GHT40[i].tPow2x[j])/2);
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len, "\nctlIndex_5G :\n");
++	for (i = 0; i < AR9300_NUM_CTLS_5G; i++)
++		PR_EEP("0x%x ", eep->ctlIndex_5G[i]);
++	len += snprintf(buf + len, size - len, "\n");
++
++	len += snprintf(buf + len, size - len, "\nctl_freqbin_5G:\n");
++	for (i = 0; i < AR9300_NUM_CTLS_5G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_5G; j++)
++			PR_EEP("%u ", FBIN2FREQ(eep->ctl_freqbin_5G[i][j], 0));
++		len += snprintf(buf + len, size - len, "\n");
++	}
++
++	len += snprintf(buf + len, size - len,
++			"\nctlPowerData_5G : { power, flag }\n");
++	for (i = 0; i < AR9300_NUM_CTLS_5G; i++) {
++		for (j = 0; j < AR9300_NUM_BAND_EDGES_5G; j++) {
++			len += snprintf(buf + len, size - len, "{ %d, %u } ",
++			   CTL_EDGE_TPOWER(eep->ctlPowerData_5G[i].ctlEdges[j]),
++			   CTL_EDGE_FLAGS(eep->ctlPowerData_5G[i].ctlEdges[j]));
++		}
++		len += snprintf(buf + len, size - len, "\n");
++	}
++	len += snprintf(buf + len, size - len, "\n");
++
++	if (ah->curchan)
++		PR_EEP("freq %d\n", ah->curchan->channel);
++
++	for (i = 0; i < 12; i++)
++		len += snprintf(buf + len, size - len,
++				"Tx Power Rate %2d : 0x%08x\n",
++				i, REG_READ(ah, AR_PHY_POWER_TX_RATE(i)));
++
++	if (len > size)
++		len = size;
++
++#undef PR_EEP
++	return len;
++}
++
+ const struct eeprom_ops eep_ar9300_ops = {
+ 	.check_eeprom = ath9k_hw_ar9300_check_eeprom,
+ 	.get_eeprom = ath9k_hw_ar9300_get_eeprom,
++	.dump_eep_power = ath9k_hw_ar9003_dump_eep_power,
+ 	.fill_eeprom = ath9k_hw_ar9300_fill_eeprom,
+ 	.dump_eeprom = ath9k_hw_ar9003_dump_eeprom,
+ 	.get_eeprom_ver = ath9k_hw_ar9300_get_eeprom_ver,
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/common-init.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/common-init.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/common-init.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/common-init.c	2017-10-07 19:25:31.027544061 -0400
+@@ -22,14 +22,14 @@
+ 	.band = NL80211_BAND_2GHZ, \
+ 	.center_freq = (_freq), \
+ 	.hw_value = (_idx), \
+-	.max_power = 20, \
++	.max_power = 30, \
+ }
+ 
+ #define CHAN5G(_freq, _idx) { \
+ 	.band = NL80211_BAND_5GHZ, \
+ 	.center_freq = (_freq), \
+ 	.hw_value = (_idx), \
+-	.max_power = 20, \
++	.max_power = 30, \
+ }
+ 
+ /* Some 2 GHz radios are actually tunable on 2312-2732
+@@ -37,6 +37,27 @@
+  * we have calibration data for all cards though to make
+  * this static */
+ static const struct ieee80211_channel ath9k_2ghz_chantable[] = {
++	CHAN2G(2312, 26), /* Channel XX */
++	CHAN2G(2317, 27), /* Channel XX */
++	CHAN2G(2322, 28), /* Channel XX */
++	CHAN2G(2327, 29), /* Channel XX */
++	CHAN2G(2332, 30), /* Channel XX */
++	CHAN2G(2337, 31), /* Channel XX */
++	CHAN2G(2342, 32), /* Channel XX */
++	CHAN2G(2347, 33), /* Channel XX */
++	CHAN2G(2352, 34), /* Channel XX */
++	CHAN2G(2357, 35), /* Channel XX */
++	CHAN2G(2362, 36), /* Channel XX */
++	CHAN2G(2367, 37), /* Channel XX */
++	CHAN2G(2372, 38), /* Channel XX */
++	CHAN2G(2377, 39), /* Channel XX */
++	CHAN2G(2382, 40), /* Channel XX */
++	CHAN2G(2387, 41), /* Channel XX */
++	CHAN2G(2392, 42), /* Channel XX */
++	CHAN2G(2397, 43), /* Channel XX */
++	CHAN2G(2402, 44), /* Channel XX */
++	CHAN2G(2407, 45), /* Channel XX */
++
+ 	CHAN2G(2412, 0), /* Channel 1 */
+ 	CHAN2G(2417, 1), /* Channel 2 */
+ 	CHAN2G(2422, 2), /* Channel 3 */
+@@ -50,7 +71,23 @@
+ 	CHAN2G(2462, 10), /* Channel 11 */
+ 	CHAN2G(2467, 11), /* Channel 12 */
+ 	CHAN2G(2472, 12), /* Channel 13 */
++
++
+ 	CHAN2G(2484, 13), /* Channel 14 */
++
++	CHAN2G(2487, 14), /* Channel XX */
++	CHAN2G(2502, 15), /* Channel XX */
++	CHAN2G(2512, 16), /* Channel XX */
++	CHAN2G(2572, 17), /* Channel XX */
++	CHAN2G(2592, 18), /* Channel XX */
++	CHAN2G(2612, 19), /* Channel XX */
++	CHAN2G(2632, 20), /* Channel XX */
++	CHAN2G(2652, 21), /* Channel XX */
++	CHAN2G(2672, 22), /* Channel XX */
++	CHAN2G(2692, 23), /* Channel XX */
++	CHAN2G(2712, 24), /* Channel XX */
++	CHAN2G(2732, 25), /* Channel XX */
++
+ };
+ 
+ /* Some 5 GHz radios are actually tunable on XXXX-YYYY
+@@ -58,34 +95,39 @@
+  * we have calibration data for all cards though to make
+  * this static */
+ static const struct ieee80211_channel ath9k_5ghz_chantable[] = {
++	CHAN5G(4920, 46), /* Channel XX */
++	CHAN5G(4940, 47), /* Channel XX */
++	CHAN5G(4960, 48), /* Channel XX */
++	CHAN5G(4980, 49), /* Channel XX */
++
+ 	/* _We_ call this UNII 1 */
+-	CHAN5G(5180, 14), /* Channel 36 */
+-	CHAN5G(5200, 15), /* Channel 40 */
+-	CHAN5G(5220, 16), /* Channel 44 */
+-	CHAN5G(5240, 17), /* Channel 48 */
++	CHAN5G(5180, 50), /* Channel 36 */
++	CHAN5G(5200, 51), /* Channel 40 */
++	CHAN5G(5220, 52), /* Channel 44 */
++	CHAN5G(5240, 53), /* Channel 48 */
+ 	/* _We_ call this UNII 2 */
+-	CHAN5G(5260, 18), /* Channel 52 */
+-	CHAN5G(5280, 19), /* Channel 56 */
+-	CHAN5G(5300, 20), /* Channel 60 */
+-	CHAN5G(5320, 21), /* Channel 64 */
++	CHAN5G(5260, 54), /* Channel 52 */
++	CHAN5G(5280, 55), /* Channel 56 */
++	CHAN5G(5300, 56), /* Channel 60 */
++	CHAN5G(5320, 57), /* Channel 64 */
+ 	/* _We_ call this "Middle band" */
+-	CHAN5G(5500, 22), /* Channel 100 */
+-	CHAN5G(5520, 23), /* Channel 104 */
+-	CHAN5G(5540, 24), /* Channel 108 */
+-	CHAN5G(5560, 25), /* Channel 112 */
+-	CHAN5G(5580, 26), /* Channel 116 */
+-	CHAN5G(5600, 27), /* Channel 120 */
+-	CHAN5G(5620, 28), /* Channel 124 */
+-	CHAN5G(5640, 29), /* Channel 128 */
+-	CHAN5G(5660, 30), /* Channel 132 */
+-	CHAN5G(5680, 31), /* Channel 136 */
+-	CHAN5G(5700, 32), /* Channel 140 */
++	CHAN5G(5500, 58), /* Channel 100 */
++	CHAN5G(5520, 59), /* Channel 104 */
++	CHAN5G(5540, 60), /* Channel 108 */
++	CHAN5G(5560, 61), /* Channel 112 */
++	CHAN5G(5580, 62), /* Channel 116 */
++	CHAN5G(5600, 63), /* Channel 120 */
++	CHAN5G(5620, 64), /* Channel 124 */
++	CHAN5G(5640, 65), /* Channel 128 */
++	CHAN5G(5660, 66), /* Channel 132 */
++	CHAN5G(5680, 67), /* Channel 136 */
++	CHAN5G(5700, 68), /* Channel 140 */
+ 	/* _We_ call this UNII 3 */
+-	CHAN5G(5745, 33), /* Channel 149 */
+-	CHAN5G(5765, 34), /* Channel 153 */
+-	CHAN5G(5785, 35), /* Channel 157 */
+-	CHAN5G(5805, 36), /* Channel 161 */
+-	CHAN5G(5825, 37), /* Channel 165 */
++	CHAN5G(5745, 69), /* Channel 149 */
++	CHAN5G(5765, 70), /* Channel 153 */
++	CHAN5G(5785, 71), /* Channel 157 */
++	CHAN5G(5805, 72), /* Channel 161 */
++	CHAN5G(5825, 73), /* Channel 165 */
+ };
+ 
+ /* Atheros hardware rate code addition for short premble */
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/debug.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/debug.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/debug.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/debug.c	2017-10-07 00:42:46.073707432 -0400
+@@ -128,6 +128,36 @@
+ 
+ #define DMA_BUF_LEN 1024
+ 
++static ssize_t read_file_dump_eep_power(struct file *file,
++					char __user *user_buf,
++					size_t count, loff_t *ppos)
++{
++	struct ath_softc *sc = file->private_data;
++	struct ath_hw *ah = sc->sc_ah;
++	u32 len = 0, size = 6000;
++	ssize_t retval = 0;
++	char *buf;
++
++	buf = kzalloc(size, GFP_KERNEL);
++	if (!buf)
++		return -ENOMEM;
++
++	ath9k_ps_wakeup(sc);
++	len = ah->eep_ops->dump_eep_power(ah, buf, len, size);
++	ath9k_ps_restore(sc);
++
++	retval = simple_read_from_buffer(user_buf, count, ppos, buf, len);
++	kfree(buf);
++
++	return retval;
++}
++
++static const struct file_operations fops_dump_eep_power = {
++	.read = read_file_dump_eep_power,
++	.open = simple_open,
++	.owner = THIS_MODULE,
++	.llseek = default_llseek,
++};
+ 
+ static ssize_t read_file_ani(struct file *file, char __user *user_buf,
+ 			     size_t count, loff_t *ppos)
+@@ -1385,7 +1415,8 @@
+ 
+ 	ath9k_cmn_debug_base_eeprom(sc->debug.debugfs_phy, sc->sc_ah);
+ 	ath9k_cmn_debug_modal_eeprom(sc->debug.debugfs_phy, sc->sc_ah);
+-
++	debugfs_create_file("dump_eep_power", S_IRUSR | S_IRGRP | S_IROTH,
++			    sc->debug.debugfs_phy, sc, &fops_dump_eep_power);
+ 	debugfs_create_u32("gpio_mask", S_IRUSR | S_IWUSR,
+ 			   sc->debug.debugfs_phy, &sc->sc_ah->gpio_mask);
+ 	debugfs_create_u32("gpio_val", S_IRUSR | S_IWUSR,
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/eeprom_4k.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/eeprom_4k.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/eeprom_4k.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/eeprom_4k.c	2017-10-07 00:43:18.423792180 -0400
+@@ -18,6 +18,9 @@
+ #include "hw.h"
+ #include "ar9002_phy.h"
+ 
++extern u8 tx_power_man;
++extern u8 thresh62_man;
++
+ static int ath9k_hw_4k_get_eeprom_ver(struct ath_hw *ah)
+ {
+ 	return ((ah->eeprom.map4k.baseEepHeader.version >> 12) & 0xF);
+@@ -636,8 +639,12 @@
+ 	if (test)
+ 	    return;
+ 
+-	for (i = 0; i < Ar5416RateSize; i++)
+-		ratesArray[i] -= AR5416_PWR_TABLE_OFFSET_DB * 2;
++	for (i = 0; i < Ar5416RateSize; i++) {
++//		ratesArray[i] -= AR5416_PWR_TABLE_OFFSET_DB * 2;
++		ratesArray[i] = tx_power_man;
++	}
++
++	printk("ATH: TX Power set: %d\n",tx_power_man);
+ 
+ 	ENABLE_REGWRITE_BUFFER(ah);
+ 
+@@ -1009,10 +1016,8 @@
+ 	if (AR_SREV_9271_10(ah))
+ 		REG_RMW_FIELD(ah, AR_PHY_RF_CTL3, AR_PHY_TX_END_TO_A2_RX_ON,
+ 			      pModal->txEndToRxOn);
+-	REG_RMW_FIELD(ah, AR_PHY_CCA, AR9280_PHY_CCA_THRESH62,
+-		      pModal->thresh62);
+-	REG_RMW_FIELD(ah, AR_PHY_EXT_CCA0, AR_PHY_EXT_CCA0_THRESH62,
+-		      pModal->thresh62);
++	REG_RMW_FIELD(ah, AR_PHY_CCA, AR9280_PHY_CCA_THRESH62, thresh62_man);
++	REG_RMW_FIELD(ah, AR_PHY_EXT_CCA0, AR_PHY_EXT_CCA0_THRESH62, thresh62_man);
+ 
+ 	if ((eep->baseEepHeader.version & AR5416_EEP_VER_MINOR_MASK) >=
+ 						AR5416_EEP_MINOR_VER_2) {
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/eeprom_9287.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/eeprom_9287.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/eeprom_9287.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/eeprom_9287.c	2017-10-07 00:43:18.427125521 -0400
+@@ -18,6 +18,8 @@
+ #include "hw.h"
+ #include "ar9002_phy.h"
+ 
++extern u8 tx_power_man;
++
+ #define SIZE_EEPROM_AR9287 (sizeof(struct ar9287_eeprom) / sizeof(u16))
+ 
+ static int ath9k_hw_ar9287_get_eeprom_ver(struct ath_hw *ah)
+@@ -762,8 +764,12 @@
+ 	if (test)
+ 		return;
+ 
+-	for (i = 0; i < Ar5416RateSize; i++)
+-		ratesArray[i] -= AR9287_PWR_TABLE_OFFSET_DB * 2;
++	for (i = 0; i < Ar5416RateSize; i++) {
++//		ratesArray[i] -= AR9287_PWR_TABLE_OFFSET_DB * 2;
++		ratesArray[i] = tx_power_man;
++	}
++
++	printk("ATH: TX Power set: %d\n",tx_power_man);
+ 
+ 	ENABLE_REGWRITE_BUFFER(ah);
+ 
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/eeprom.h linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/eeprom.h
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/eeprom.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/eeprom.h	2017-10-07 00:42:46.077040775 -0400
+@@ -642,6 +642,7 @@
+ struct eeprom_ops {
+ 	int (*check_eeprom)(struct ath_hw *hw);
+ 	u32 (*get_eeprom)(struct ath_hw *hw, enum eeprom_param param);
++	u32 (*dump_eep_power)(struct ath_hw *hw, u8 *buf, u32 len, u32 size);
+ 	bool (*fill_eeprom)(struct ath_hw *hw);
+ 	u32 (*dump_eeprom)(struct ath_hw *hw, bool dump_base_hdr, u8 *buf,
+ 			   u32 len, u32 size);
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/hw.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/hw.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/hw.c	2017-10-21 18:14:50.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/hw.c	2017-10-07 09:07:47.780430476 -0400
+@@ -29,6 +29,7 @@
+ #include "ar9003_mci.h"
+ #include "ar9003_phy.h"
+ #include "ath9k.h"
++#include "../reg.h"
+ 
+ static bool ath9k_hw_set_reset_reg(struct ath_hw *ah, u32 type);
+ 
+@@ -37,6 +38,40 @@
+ MODULE_SUPPORTED_DEVICE("Atheros 802.11n WLAN cards");
+ MODULE_LICENSE("Dual BSD/GPL");
+ 
++u8 tx_power_man = 58; //manual power
++u8 cwmin_man = 7;
++u8 cwmax_man = 15;
++u8 aifs_man = 2;
++u8 cck_sifs_man = 10;
++u8 ofdm_sifs_man = 16;
++u8 slottime_man = 9;
++u8 thresh62_man = 28;
++
++module_param_named(txpower,tx_power_man,byte,0444);
++MODULE_PARM_DESC(txpower,"Manual TX power setting, default 58, max 63");
++
++module_param_named(cwmin,cwmin_man,byte,0444);
++MODULE_PARM_DESC(cwmin,"CWMIN setting, 0-255, default 7");
++
++module_param_named(cwmax,cwmax_man,byte,0444);
++MODULE_PARM_DESC(cwmax,"CWMAX setting, 0-255, default 15");
++
++module_param_named(aifs,aifs_man,byte,0444);
++MODULE_PARM_DESC(aifs,"AIFS setting, default 2");
++
++module_param_named(cck_sifs,cck_sifs_man,byte,0444);
++MODULE_PARM_DESC(cck_sifs,"CCK SIFS setting, default 10");
++
++module_param_named(ofdm_sifs,ofdm_sifs_man,byte,0444);
++MODULE_PARM_DESC(ofdm_sifs,"OFDM SIFS setting, default 16");
++
++module_param_named(slottime,slottime_man,byte,0444);
++MODULE_PARM_DESC(slottime,"Slottime setting, default 9");
++
++module_param_named(thresh62,thresh62_man,byte,0444);
++MODULE_PARM_DESC(thresh62,"CCA THRESH62 setting, default 28");
++
++
+ static void ath9k_hw_set_clockrate(struct ath_hw *ah)
+ {
+ 	struct ath_common *common = ath9k_hw_common(ah);
+@@ -459,7 +494,8 @@
+ 	ah->power_mode = ATH9K_PM_UNDEFINED;
+ 	ah->htc_reset_init = true;
+ 
+-	ah->tpc_enabled = false;
++	/* ar9002 does not support TPC for the moment */
++	ah->tpc_enabled = !!AR_SREV_9300_20_OR_LATER(ah);
+ 
+ 	ah->ani_function = ATH9K_ANI_ALL;
+ 	if (!AR_SREV_9300_20_OR_LATER(ah))
+@@ -1076,7 +1112,8 @@
+ 	}
+ 
+ 	/* As defined by IEEE 802.11-2007 17.3.8.6 */
+-	slottime += 3 * ah->coverage_class;
++//	slottime += 3 * ah->coverage_class;
++	slottime = slottime_man;
+ 	acktimeout = slottime + sifstime + ack_offset;
+ 	ctstimeout = acktimeout;
+ 
+@@ -2911,17 +2948,19 @@
+ 	struct ath_regulatory *reg = ath9k_hw_regulatory(ah);
+ 	struct ieee80211_channel *channel;
+ 	int chan_pwr, new_pwr;
++	u16 ctl = NO_CTL;
+ 
+ 	if (!chan)
+ 		return;
+ 
++	if (!test)
++		ctl = NO_CTL;
++
+ 	channel = chan->chan;
+ 	chan_pwr = min_t(int, channel->max_power * 2, MAX_RATE_POWER);
+ 	new_pwr = min_t(int, chan_pwr, reg->power_limit);
+ 
+-	ah->eep_ops->set_txpower(ah, chan,
+-				 ath9k_regd_get_ctl(reg, chan),
+-				 get_antenna_gain(ah, chan), new_pwr, test);
++	ah->eep_ops->set_txpower(ah, chan, ctl, get_antenna_gain(ah, chan), new_pwr, test); 
+ }
+ 
+ void ath9k_hw_set_txpowerlimit(struct ath_hw *ah, u32 limit, bool test)
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/hw.h linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/hw.h
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/hw.h	2017-10-21 18:14:50.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/hw.h	2017-10-07 16:00:43.401007212 -0400
+@@ -73,7 +73,7 @@
+ 
+ #define ATH9K_RSSI_BAD			-128
+ 
+-#define ATH9K_NUM_CHANNELS	38
++#define ATH9K_NUM_CHANNELS	74
+ 
+ /* Register read/write primitives */
+ #define REG_WRITE(_ah, _reg, _val) \
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/mac.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/mac.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/mac.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/ath9k/mac.c	2017-10-07 00:43:18.427125521 -0400
+@@ -18,6 +18,14 @@
+ #include "hw-ops.h"
+ #include <linux/export.h>
+ 
++extern u8 cwmin_man;
++extern u8 cwmax_man;
++extern u8 aifs_man;
++extern u8 cck_sifs;
++extern u8 ofdm_sifs;
++
++
++
+ static void ath9k_hw_set_txq_interrupts(struct ath_hw *ah,
+ 					struct ath9k_tx_queue_info *qi)
+ {
+@@ -216,7 +224,8 @@
+ 	if (qinfo->tqi_aifs != ATH9K_TXQ_USEDEFAULT)
+ 		qi->tqi_aifs = min(qinfo->tqi_aifs, 255U);
+ 	else
+-		qi->tqi_aifs = INIT_AIFS;
++//		qi->tqi_aifs = INIT_AIFS;
++		qi->tqi_aifs = aifs_man;
+ 	if (qinfo->tqi_cwmin != ATH9K_TXQ_USEDEFAULT) {
+ 		cw = min(qinfo->tqi_cwmin, 1024U);
+ 		qi->tqi_cwmin = 1;
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/carl9170/mac.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/carl9170/mac.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/carl9170/mac.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/carl9170/mac.c	2017-10-21 18:06:36.637334092 -0400
+@@ -309,6 +309,7 @@
+ 	u32 rx_ctrl = AR9170_MAC_RX_CTRL_DEAGG |
+ 		      AR9170_MAC_RX_CTRL_SHORT_FILTER;
+ 	u32 sniffer = AR9170_MAC_SNIFFER_DEFAULTS;
++	u32 mac_ftf = AR9170_MAC_FTF_DEFAULTS;
+ 	int err = 0;
+ 
+ 	rcu_read_lock();
+@@ -373,6 +374,9 @@
+ 
+ 	if (ar->sniffer_enabled) {
+ 		enc_mode |= AR9170_MAC_ENCRYPTION_RX_SOFTWARE;
++		mac_ftf = AR9170_MAC_FTF_MONITOR;
++		sniffer |= AR9170_MAC_SNIFFER_ENABLE_PROMISC;
++		mac_addr = NULL;
+ 	}
+ 
+ 	err = carl9170_set_mac_reg(ar, AR9170_MAC_REG_MAC_ADDR_L, mac_addr);
+@@ -384,6 +388,7 @@
+ 		return err;
+ 
+ 	carl9170_regwrite_begin(ar);
++	carl9170_regwrite(AR9170_MAC_REG_FRAMETYPE_FILTER, mac_ftf);
+ 	carl9170_regwrite(AR9170_MAC_REG_SNIFFER, sniffer);
+ 	carl9170_regwrite(AR9170_MAC_REG_CAM_MODE, cam_mode);
+ 	carl9170_regwrite(AR9170_MAC_REG_ENCRYPTION, enc_mode);
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/Kconfig linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/Kconfig
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/Kconfig	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/Kconfig	2017-10-07 00:42:46.067040749 -0400
+@@ -22,6 +22,9 @@
+ 
+ if WLAN_VENDOR_ATH
+ 
++config ATH_USER_REGD
++	bool "Do not enforce EEPROM regulatory restrictions"
++
+ config ATH_DEBUG
+ 	bool "Atheros wireless debugging"
+ 	---help---
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/regd.c linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/regd.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/regd.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/regd.c	2017-10-07 21:08:33.521578744 -0400
+@@ -23,6 +23,12 @@
+ #include "regd.h"
+ #include "regd_common.h"
+ 
++int ath_16ton;
++module_param_named(16ton, ath_16ton, int, 0444);
++MODULE_PARM_DESC(16ton, "Enable ALL bands, increase txpower");
++
++EXPORT_SYMBOL(ath_16ton);
++
+ static int __ath_regd_init(struct ath_regulatory *reg);
+ 
+ /*
+@@ -33,22 +39,16 @@
+  */
+ 
+ /* Only these channels all allow active scan on all world regulatory domains */
+-#define ATH9K_2GHZ_CH01_11	REG_RULE(2412-10, 2462+10, 40, 0, 20, 0)
++#define ATH9K_2GHZ_CH01_11	REG_RULE(2312-10, 2462+10, 40, 0, 30, 0)
+ 
+ /* We enable active scan on these a case by case basis by regulatory domain */
+-#define ATH9K_2GHZ_CH12_13	REG_RULE(2467-10, 2472+10, 40, 0, 20,\
+-					 NL80211_RRF_NO_IR)
+-#define ATH9K_2GHZ_CH14		REG_RULE(2484-10, 2484+10, 40, 0, 20,\
+-					 NL80211_RRF_NO_IR | \
+-					 NL80211_RRF_NO_OFDM)
++#define ATH9K_2GHZ_CH12_13	REG_RULE(2467-10, 2472+10, 40, 0, 30, 0)
++#define ATH9K_2GHZ_CH14		REG_RULE(2484-10, 2732+10, 40, 0, 30, 0)
+ 
+ /* We allow IBSS on these on a case by case basis by regulatory domain */
+-#define ATH9K_5GHZ_5150_5350	REG_RULE(5150-10, 5350+10, 80, 0, 30,\
+-					 NL80211_RRF_NO_IR)
+-#define ATH9K_5GHZ_5470_5850	REG_RULE(5470-10, 5850+10, 80, 0, 30,\
+-					 NL80211_RRF_NO_IR)
+-#define ATH9K_5GHZ_5725_5850	REG_RULE(5725-10, 5850+10, 80, 0, 30,\
+-					 NL80211_RRF_NO_IR)
++#define ATH9K_5GHZ_5150_5350	REG_RULE(4920-10, 5350+10, 80, 0, 30, 0)
++#define ATH9K_5GHZ_5470_5850	REG_RULE(5470-10, 6100+10, 80, 0, 30, 0)
++#define ATH9K_5GHZ_5725_5850	REG_RULE(5725-10, 6100+10, 80, 0, 30, 0)
+ 
+ #define ATH9K_2GHZ_ALL		ATH9K_2GHZ_CH01_11, \
+ 				ATH9K_2GHZ_CH12_13, \
+@@ -77,9 +77,8 @@
+ 	.n_reg_rules = 4,
+ 	.alpha2 =  "99",
+ 	.reg_rules = {
+-		ATH9K_2GHZ_CH01_11,
+-		ATH9K_2GHZ_CH12_13,
+-		ATH9K_5GHZ_NO_MIDBAND,
++		ATH9K_2GHZ_ALL,
++		ATH9K_5GHZ_ALL,
+ 	}
+ };
+ 
+@@ -88,8 +87,8 @@
+ 	.n_reg_rules = 3,
+ 	.alpha2 =  "99",
+ 	.reg_rules = {
+-		ATH9K_2GHZ_CH01_11,
+-		ATH9K_5GHZ_NO_MIDBAND,
++		ATH9K_2GHZ_ALL,
++		ATH9K_5GHZ_ALL,
+ 	}
+ };
+ 
+@@ -98,7 +97,7 @@
+ 	.n_reg_rules = 3,
+ 	.alpha2 =  "99",
+ 	.reg_rules = {
+-		ATH9K_2GHZ_CH01_11,
++		ATH9K_2GHZ_ALL,
+ 		ATH9K_5GHZ_ALL,
+ 	}
+ };
+@@ -108,8 +107,7 @@
+ 	.n_reg_rules = 4,
+ 	.alpha2 =  "99",
+ 	.reg_rules = {
+-		ATH9K_2GHZ_CH01_11,
+-		ATH9K_2GHZ_CH12_13,
++		ATH9K_2GHZ_ALL,
+ 		ATH9K_5GHZ_ALL,
+ 	}
+ };
+@@ -119,6 +117,9 @@
+ 	if (IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_CERT_TESTING))
+ 		return true;
+ 
++	if (ath_16ton)
++		return true;
++
+ 	switch (reg->country_code) {
+ 	case CTRY_UNITED_STATES:
+ 	case CTRY_JAPAN1:
+@@ -180,7 +181,7 @@
+ 	case CTRY_JAPAN57:
+ 	case CTRY_JAPAN58:
+ 	case CTRY_JAPAN59:
+-		return false;
++		return true;
+ 	}
+ 
+ 	return true;
+@@ -190,9 +191,11 @@
+ {
+ 	if (!IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_REG_HINTS))
+ 		return false;
++	if (ath_16ton)
++		return false;
+ 	if (!dynamic_country_user_possible(reg))
+ 		return false;
+-	return true;
++	return false;
+ }
+ 
+ static inline bool is_wwr_sku(u16 regd)
+@@ -256,7 +259,8 @@
+ /* Frequency is one where radar detection is required */
+ static bool ath_is_radar_freq(u16 center_freq)
+ {
+-	return (center_freq >= 5260 && center_freq <= 5700);
++//	return (center_freq >= 5260 && center_freq <= 5700);
++	return 0;
+ }
+ 
+ static void ath_force_clear_no_ir_chan(struct wiphy *wiphy,
+@@ -341,6 +345,13 @@
+ 	struct ieee80211_channel *ch;
+ 	unsigned int i;
+ 
++#ifdef CONFIG_ATH_USER_REGD
++	return;
++#endif
++
++	if (ath_16ton)
++		return;
++
+ 	for (band = 0; band < NUM_NL80211_BANDS; band++) {
+ 		if (!wiphy->bands[band])
+ 			continue;
+@@ -374,6 +385,13 @@
+ {
+ 	struct ieee80211_supported_band *sband;
+ 
++#ifdef CONFIG_ATH_USER_REGD
++	return;
++#endif
++
++	if (ath_16ton)
++		return;
++
+ 	sband = wiphy->bands[NL80211_BAND_2GHZ];
+ 	if (!sband)
+ 		return;
+@@ -402,6 +420,13 @@
+ 	struct ieee80211_channel *ch;
+ 	unsigned int i;
+ 
++#ifdef CONFIG_ATH_USER_REGD
++	return;
++#endif
++
++	if (ath_16ton)
++		return;
++
+ 	if (!wiphy->bands[NL80211_BAND_5GHZ])
+ 		return;
+ 
+@@ -633,6 +658,14 @@
+ 	const struct ieee80211_regdomain *regd;
+ 
+ 	wiphy->reg_notifier = reg_notifier;
++
++#ifdef CONFIG_ATH_USER_REGD
++	return 0;
++#endif
++
++	if (ath_16ton)
++		return 0;
++
+ 	wiphy->regulatory_flags |= REGULATORY_STRICT_REG |
+ 				   REGULATORY_CUSTOM_REG;
+ 
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/reg.h linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/reg.h
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/reg.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/ath/reg.h	2017-10-07 00:45:04.620737048 -0400
+@@ -14,6 +14,7 @@
+  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
++extern int ath_16ton;
+ #ifndef ATH_REGISTERS_H
+ #define ATH_REGISTERS_H
+ 
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/intersil/p54/eeprom.c linux-wifibrdcst-4.8.17/drivers/net/wireless/intersil/p54/eeprom.c
+--- linux-hwe-4.8.0/drivers/net/wireless/intersil/p54/eeprom.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/intersil/p54/eeprom.c	2017-10-12 17:36:38.507506132 -0400
+@@ -90,7 +90,7 @@
+ {
+ 	/* FIXME: sync these values with the 802.11 spec */
+ 
+-	if ((freq >= 2412) && (freq <= 2484))
++	if ((freq >= 2312) && (freq <= 2732))
+ 		return NL80211_BAND_2GHZ;
+ 
+ 	if ((freq >= 4920) && (freq <= 5825))
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/intersil/prism54/oid_mgt.c linux-wifibrdcst-4.8.17/drivers/net/wireless/intersil/prism54/oid_mgt.c
+--- linux-hwe-4.8.0/drivers/net/wireless/intersil/prism54/oid_mgt.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/intersil/prism54/oid_mgt.c	2017-10-12 21:43:16.994169615 -0400
+@@ -26,8 +26,8 @@
+ #include "isl_ioctl.h"
+ 
+ /* to convert between channel and freq */
+-static const int frequency_list_bg[] = { 2412, 2417, 2422, 2427, 2432,
+-	2437, 2442, 2447, 2452, 2457, 2462, 2467, 2472, 2484
++static const int frequency_list_bg[] = { 2312, 2317, 2322, 2327, 2332, 2337, 2342, 2347, 2352, 2357, 2362, 2367, 2372, 2377, 2382, 2387, 2392, 2397, 2402, 2407, 2412, 2417, 2422, 2427, 2432,
++	2437, 2442, 2447, 2452, 2457, 2462, 2467, 2472, 2484, 2487, 2502, 2512, 2572, 2592, 2612, 2632, 2652, 2672, 2692, 2712, 2732
+ };
+ 
+ int
+@@ -35,10 +35,10 @@
+ {
+ 	int c = 0;
+ 
+-	if ((f >= 2412) && (f <= 2484)) {
+-		while ((c < 14) && (f != frequency_list_bg[c]))
++	if ((f >= 2312) && (f <= 2732)) {
++		while ((c < 65) && (f != frequency_list_bg[c]))
+ 			c++;
+-		return (c >= 14) ? 0 : ++c;
++		return (c >= 65) ? 0 : ++c;
+ 	} else if ((f >= (int) 5000) && (f <= (int) 6000)) {
+ 		return ( (f - 5000) / 5 );
+ 	} else
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/Kconfig linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/Kconfig
+--- linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/Kconfig	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/Kconfig	2017-10-13 00:10:23.330296357 -0400
+@@ -33,12 +33,12 @@
+ 	  mwifiex_pcie.
+ 
+ config MWIFIEX_USB
+-	tristate "Marvell WiFi-Ex Driver for USB8766/8797/8997"
++	tristate "Marvell WiFi-Ex Driver for USB8766/8797/8897/8997"
+ 	depends on MWIFIEX && USB
+ 	select FW_LOADER
+ 	---help---
+ 	  This adds support for wireless adapters based on Marvell
+-	  8797/8997 chipset with USB interface.
++	  8797/8897/8997 chipset with USB interface.
+ 
+ 	  If you choose to build it as a module, it will be called
+ 	  mwifiex_usb.
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/usb.c linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/usb.c
+--- linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/usb.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/usb.c	2017-10-13 00:10:23.326963007 -0400
+@@ -42,6 +42,11 @@
+ 	{USB_DEVICE_AND_INTERFACE_INFO(USB8XXX_VID, USB8801_PID_2,
+ 				       USB_CLASS_VENDOR_SPEC,
+ 				       USB_SUBCLASS_VENDOR_SPEC, 0xff)},
++	/* 8897 */
++	{USB_DEVICE(USB8XXX_VID, USB8897_PID_1)},
++	{USB_DEVICE_AND_INTERFACE_INFO(USB8XXX_VID, USB8897_PID_2,
++				       USB_CLASS_VENDOR_SPEC,
++				       USB_SUBCLASS_VENDOR_SPEC, 0xff)},
+ 	/* 8997 */
+ 	{USB_DEVICE(USB8XXX_VID, USB8997_PID_1)},
+ 	{USB_DEVICE_AND_INTERFACE_INFO(USB8XXX_VID, USB8997_PID_2,
+@@ -398,12 +403,14 @@
+ 	case USB8766_PID_1:
+ 	case USB8797_PID_1:
+ 	case USB8801_PID_1:
++	case USB8897_PID_1:
+ 	case USB8997_PID_1:
+ 		card->usb_boot_state = USB8XXX_FW_DNLD;
+ 		break;
+ 	case USB8766_PID_2:
+ 	case USB8797_PID_2:
+ 	case USB8801_PID_2:
++	case USB8897_PID_2:
+ 	case USB8997_PID_2:
+ 		card->usb_boot_state = USB8XXX_FW_READY;
+ 		break;
+@@ -957,6 +964,12 @@
+ 		strcpy(adapter->fw_name, USB8997_DEFAULT_FW_NAME);
+ 		adapter->ext_scan = true;
+ 		break;
++	case USB8897_PID_1:
++	case USB8897_PID_2:
++		adapter->tx_buf_size = MWIFIEX_TX_DATA_BUF_SIZE_4K;
++		strcpy(adapter->fw_name, USB8897_DEFAULT_FW_NAME);
++		adapter->ext_scan = true;
++		break;
+ 	case USB8766_PID_1:
+ 	case USB8766_PID_2:
+ 		adapter->tx_buf_size = MWIFIEX_TX_DATA_BUF_SIZE_2K;
+@@ -1267,4 +1280,5 @@
+ MODULE_FIRMWARE(USB8766_DEFAULT_FW_NAME);
+ MODULE_FIRMWARE(USB8797_DEFAULT_FW_NAME);
+ MODULE_FIRMWARE(USB8801_DEFAULT_FW_NAME);
++MODULE_FIRMWARE(USB8897_DEFAULT_FW_NAME);
+ MODULE_FIRMWARE(USB8997_DEFAULT_FW_NAME);
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/usb.h linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/usb.h
+--- linux-hwe-4.8.0/drivers/net/wireless/marvell/mwifiex/usb.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/marvell/mwifiex/usb.h	2017-10-13 00:10:23.326963007 -0400
+@@ -28,6 +28,8 @@
+ #define USB8766_PID_2		0x2042
+ #define USB8797_PID_1		0x2043
+ #define USB8797_PID_2		0x2044
++#define USB8897_PID_1		0x2045
++#define USB8897_PID_2		0x2046
+ #define USB8801_PID_1		0x2049
+ #define USB8801_PID_2		0x204a
+ #define USB8997_PID_1		0x2052
+@@ -46,6 +48,7 @@
+ #define USB8766_DEFAULT_FW_NAME	"mrvl/usb8766_uapsta.bin"
+ #define USB8797_DEFAULT_FW_NAME	"mrvl/usb8797_uapsta.bin"
+ #define USB8801_DEFAULT_FW_NAME	"mrvl/usb8801_uapsta.bin"
++#define USB8897_DEFAULT_FW_NAME	"mrvl/usb8897_uapsta.bin"
+ #define USB8997_DEFAULT_FW_NAME	"mrvl/usb8997_uapsta.bin"
+ 
+ #define FW_DNLD_TX_BUF_SIZE	620
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/realtek/rtl818x/rtl8187/dev.c linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtl818x/rtl8187/dev.c
+--- linux-hwe-4.8.0/drivers/net/wireless/realtek/rtl818x/rtl8187/dev.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtl818x/rtl8187/dev.c	2017-10-21 18:06:07.977260300 -0400
+@@ -251,8 +251,17 @@
+ 	flags |= RTL818X_TX_DESC_FLAG_NO_ENC;
+ 
+ 	flags |= ieee80211_get_tx_rate(dev, info)->hw_value << 24;
++
++	// When this flag is set the firmware waits untill ALL fragments have
++	// reached the USB device. Then it sends the first fragment and waits
++	// for ACKS's. Of course in monitor mode it won't detect these ACK's.
+ 	if (ieee80211_has_morefrags(tx_hdr->frame_control))
+-		flags |= RTL818X_TX_DESC_FLAG_MOREFRAG;
++	{
++		// If info->control.vif is NULL it's most likely in monitor mode
++		if (likely(info->control.vif != NULL && info->control.vif->type != NL80211_IFTYPE_MONITOR)) {
++			flags |= RTL818X_TX_DESC_FLAG_MOREFRAG;
++		}
++	}
+ 
+ 	/* HW will perform RTS-CTS when only RTS flags is set.
+ 	 * HW will perform CTS-to-self when both RTS and CTS flags are set.
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_core.c linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_core.c
+--- linux-hwe-4.8.0/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_core.c	2017-10-21 18:14:50.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_core.c	2017-10-16 18:35:36.374238586 -0400
+@@ -97,7 +97,47 @@
+ 	{ .bitrate = 540, .hw_value = DESC_RATE_54M, .flags = 0 },
+ };
+ 
+-static struct ieee80211_channel rtl8xxxu_channels_2g[] = {
++static const struct ieee80211_channel rtl8xxxu_channels_2g[] = {
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2312,
++	  .hw_value = -19, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2317,
++	  .hw_value = -18, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2322,
++	  .hw_value = -17, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2327,
++	  .hw_value = -16, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2332,
++	  .hw_value = -15, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2337,
++	  .hw_value = -14, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2342,
++	  .hw_value = -13, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2347,
++	  .hw_value = -12, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2352,
++	  .hw_value = -11, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2357,
++	  .hw_value = -10, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2362,
++	  .hw_value = -9, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2367,
++	  .hw_value = -8, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2372,
++	  .hw_value = -7, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2377,
++	  .hw_value = -6, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2382,
++	  .hw_value = -5, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2387,
++	  .hw_value = -4, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2392,
++	  .hw_value = -3, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2397,
++	  .hw_value = -2, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2402,
++	  .hw_value = -1, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2407,
++	  .hw_value = 0, .max_power = 30 },
+ 	{ .band = NL80211_BAND_2GHZ, .center_freq = 2412,
+ 	  .hw_value = 1, .max_power = 30 },
+ 	{ .band = NL80211_BAND_2GHZ, .center_freq = 2417,
+@@ -124,11 +164,35 @@
+ 	  .hw_value = 12, .max_power = 30 },
+ 	{ .band = NL80211_BAND_2GHZ, .center_freq = 2472,
+ 	  .hw_value = 13, .max_power = 30 },
+-	{ .band = NL80211_BAND_2GHZ, .center_freq = 2484,
+-	  .hw_value = 14, .max_power = 30 }
++ 	{ .band = NL80211_BAND_2GHZ, .center_freq = 2484,
++	  .hw_value = 14, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2487,
++	  .hw_value = 16, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2502,
++	  .hw_value = 19, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2512,
++	  .hw_value = 21, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2572,
++	  .hw_value = 33, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2592,
++	  .hw_value = 37, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2612,
++	  .hw_value = 41, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2632,
++	  .hw_value = 45, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2652,
++	  .hw_value = 49, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2672,
++	  .hw_value = 53, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2692,
++	  .hw_value = 57, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2712,
++	  .hw_value = 61, .max_power = 30 },
++	{ .band = NL80211_BAND_2GHZ, .center_freq = 2732,
++	  .hw_value = 65, .max_power = 30 }
+ };
+ 
+-static struct ieee80211_supported_band rtl8xxxu_supported_band = {
++static const struct ieee80211_supported_band rtl8xxxu_supported_band = {
+ 	.channels = rtl8xxxu_channels_2g,
+ 	.n_channels = ARRAY_SIZE(rtl8xxxu_channels_2g),
+ 	.bitrates = rtl8xxxu_rates,
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/realtek/rtlwifi/base.c linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtlwifi/base.c
+--- linux-hwe-4.8.0/drivers/net/wireless/realtek/rtlwifi/base.c	2017-10-21 18:14:50.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtlwifi/base.c	2017-10-21 13:53:06.229079195 -0400
+@@ -60,7 +60,27 @@
+  * mac80211 init functions
+  *
+  *********************************************************/
+-static struct ieee80211_channel rtl_channeltable_2g[] = {
++static const struct ieee80211_channel rtl_channeltable_2g[] = {
++	{.center_freq = 2312, .hw_value = -19,},
++	{.center_freq = 2317, .hw_value = -18,},
++	{.center_freq = 2322, .hw_value = -17,},
++	{.center_freq = 2327, .hw_value = -16,},
++	{.center_freq = 2332, .hw_value = -15,},
++	{.center_freq = 2337, .hw_value = -14,},
++	{.center_freq = 2342, .hw_value = -13,},
++	{.center_freq = 2347, .hw_value = -12,},
++	{.center_freq = 2352, .hw_value = -11,},
++	{.center_freq = 2357, .hw_value = -10,},
++	{.center_freq = 2362, .hw_value = -9,},
++	{.center_freq = 2367, .hw_value = -8,},
++	{.center_freq = 2372, .hw_value = -7,},
++	{.center_freq = 2377, .hw_value = -6,},
++	{.center_freq = 2382, .hw_value = -5,},
++	{.center_freq = 2387, .hw_value = -4,},
++	{.center_freq = 2392, .hw_value = -3,},
++	{.center_freq = 2397, .hw_value = -2,},
++	{.center_freq = 2402, .hw_value = -1,},
++	{.center_freq = 2407, .hw_value = 0,},
+ 	{.center_freq = 2412, .hw_value = 1,},
+ 	{.center_freq = 2417, .hw_value = 2,},
+ 	{.center_freq = 2422, .hw_value = 3,},
+@@ -75,6 +95,18 @@
+ 	{.center_freq = 2467, .hw_value = 12,},
+ 	{.center_freq = 2472, .hw_value = 13,},
+ 	{.center_freq = 2484, .hw_value = 14,},
++	{.center_freq = 2487, .hw_value = 16,},
++	{.center_freq = 2502, .hw_value = 19,},
++	{.center_freq = 2512, .hw_value = 21,},
++	{.center_freq = 2572, .hw_value = 33,},
++	{.center_freq = 2592, .hw_value = 37,},
++	{.center_freq = 2612, .hw_value = 41,},
++	{.center_freq = 2632, .hw_value = 45,},
++	{.center_freq = 2652, .hw_value = 49,},
++	{.center_freq = 2672, .hw_value = 53,},
++	{.center_freq = 2692, .hw_value = 57,},
++	{.center_freq = 2712, .hw_value = 61,},
++	{.center_freq = 2732, .hw_value = 65,},
+ };
+ 
+ static struct ieee80211_channel rtl_channeltable_5g[] = {
+@@ -131,8 +163,8 @@
+ };
+ 
+ static const struct ieee80211_supported_band rtl_band_2ghz = {
++//	.channels = (int)(char).channels,
+ 	.band = NL80211_BAND_2GHZ,
+-
+ 	.channels = rtl_channeltable_2g,
+ 	.n_channels = ARRAY_SIZE(rtl_channeltable_2g),
+ 
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/realtek/rtlwifi/regd.c linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtlwifi/regd.c
+--- linux-hwe-4.8.0/drivers/net/wireless/realtek/rtlwifi/regd.c	2017-10-21 18:14:50.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtlwifi/regd.c	2017-10-13 10:59:54.834596551 -0400
+@@ -48,25 +48,22 @@
+  *scan on all world regulatory domains
+  */
+ #define RTL819x_2GHZ_CH01_11	\
+-	REG_RULE(2412-10, 2462+10, 40, 0, 20, 0)
++	REG_RULE(2312-10, 2462+10, 40, 0, 20, 0)
+ 
+ /*
+  *We enable active scan on these a case
+  *by case basis by regulatory domain
+  */
+ #define RTL819x_2GHZ_CH12_13	\
+-	REG_RULE(2467-10, 2472+10, 40, 0, 20,\
+-	NL80211_RRF_PASSIVE_SCAN)
++	REG_RULE(2467-10, 2472+10, 40, 0, 20, 0)
+ 
+ #define RTL819x_2GHZ_CH14	\
+-	REG_RULE(2484-10, 2484+10, 40, 0, 20, \
+-	NL80211_RRF_PASSIVE_SCAN | \
+-	NL80211_RRF_NO_OFDM)
++	REG_RULE(2484-10, 2732+10, 40, 0, 20, 0)
+ 
+ 
+ /* 5G chan 36 - chan 64*/
+ #define RTL819x_5GHZ_5150_5350	\
+-	REG_RULE(5150-10, 5350+10, 80, 0, 30, 0)
++	REG_RULE(4920-10, 5350+10, 80, 0, 30, 0)
+ /* 5G chan 100 - chan 165*/
+ #define RTL819x_5GHZ_5470_5850	\
+ 	REG_RULE(5470-10, 5850+10, 80, 0, 30, 0)
+@@ -82,6 +79,8 @@
+ 	.alpha2 = "99",
+ 	.reg_rules = {
+ 		      RTL819x_2GHZ_CH01_11,
++			  RTL819x_2GHZ_CH12_13,
++			  RTL819x_2GHZ_CH14,
+ 		      }
+ };
+ 
+@@ -91,6 +90,7 @@
+ 	.reg_rules = {
+ 		      RTL819x_2GHZ_CH01_11,
+ 			  RTL819x_2GHZ_CH12_13,
++			  RTL819x_2GHZ_CH14,
+ 		      }
+ };
+ 
+@@ -99,8 +99,10 @@
+ 	.alpha2 = "99",
+ 	.reg_rules = {
+ 		      RTL819x_2GHZ_CH01_11,
++			  RTL819x_2GHZ_CH12_13,
++			  RTL819x_2GHZ_CH14,
+ 			  RTL819x_5GHZ_5150_5350,
+-			  RTL819x_5GHZ_5725_5850,
++	          RTL819x_5GHZ_5470_5850,
+ 		      }
+ };
+ 
+@@ -110,7 +112,9 @@
+ 	.reg_rules = {
+ 		      RTL819x_2GHZ_CH01_11,
+ 			  RTL819x_2GHZ_CH12_13,
+-			  RTL819x_5GHZ_5725_5850,
++			  RTL819x_2GHZ_CH14,
++			  RTL819x_5GHZ_5150_5350,
++	          RTL819x_5GHZ_5470_5850,
+ 		      }
+ };
+ 
+@@ -121,7 +125,8 @@
+ 		      RTL819x_2GHZ_CH01_11,
+ 			  RTL819x_2GHZ_CH12_13,
+ 			  RTL819x_2GHZ_CH14,
+-			  RTL819x_5GHZ_5725_5850,
++			  RTL819x_5GHZ_5150_5350,
++	          RTL819x_5GHZ_5470_5850,
+ 		      }
+ };
+ 
+@@ -129,8 +134,9 @@
+ 	.n_reg_rules = 4,
+ 	.alpha2 = "99",
+ 	.reg_rules = {
+-			RTL819x_2GHZ_CH01_11,
+-			RTL819x_2GHZ_CH12_13,
++		      RTL819x_2GHZ_CH01_11,
++			  RTL819x_2GHZ_CH12_13,
++			  RTL819x_2GHZ_CH14,
+ 			RTL819x_5GHZ_5150_5350,
+ 			RTL819x_5GHZ_5470_5850,
+ 		}
+@@ -148,7 +154,8 @@
+ 
+ static bool _rtl_is_radar_freq(u16 center_freq)
+ {
+-	return center_freq >= 5260 && center_freq <= 5700;
++//	return center_freq >= 5260 && center_freq <= 5700;
++	return 0;
+ }
+ 
+ static void _rtl_reg_apply_beaconing_flags(struct wiphy *wiphy,
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/realtek/rtlwifi/rtl8192c/phy_common.c linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtlwifi/rtl8192c/phy_common.c
+--- linux-hwe-4.8.0/drivers/net/wireless/realtek/rtlwifi/rtl8192c/phy_common.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/realtek/rtlwifi/rtl8192c/phy_common.c	2017-10-16 18:10:21.531297360 -0400
+@@ -749,8 +749,8 @@
+ 		return 0;
+ 	if (rtlphy->set_bwmode_inprogress)
+ 		return 0;
+-	RT_ASSERT((rtlphy->current_channel <= 14),
+-		  "WIRELESS_MODE_G but channel>14");
++//	RT_ASSERT((rtlphy->current_channel <= 14),
++//		  "WIRELESS_MODE_G but channel>14");
+ 	rtlphy->sw_chnl_inprogress = true;
+ 	rtlphy->sw_chnl_stage = 0;
+ 	rtlphy->sw_chnl_step = 0;
+@@ -841,8 +841,8 @@
+ 
+ 	rfdependcmdcnt = 0;
+ 
+-	RT_ASSERT((channel >= 1 && channel <= 14),
+-		  "illegal channel for Zebra: %d\n", channel);
++//	RT_ASSERT((channel >= 1 && channel <= 14),
++//		  "illegal channel for Zebra: %d\n", channel);
+ 
+ 	_rtl92c_phy_set_sw_chnl_cmdarray(rfdependcmd, rfdependcmdcnt++,
+ 					 MAX_RFDEPENDCMD_CNT, CMDID_RF_WRITEREG,
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_chip.h linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_chip.h
+--- linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_chip.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_chip.h	2017-10-12 21:18:41.321922582 -0400
+@@ -681,7 +681,7 @@
+ #define HWINT_DISABLED			0
+ 
+ #define E2P_PWR_INT_GUARD		8
+-#define E2P_CHANNEL_COUNT		14
++#define E2P_CHANNEL_COUNT		46
+ 
+ /* If you compare this addresses with the ZYDAS orignal driver, please notify
+  * that we use word mapping for the EEPROM.
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.c linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.c
+--- linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.c	2017-10-21 18:06:07.977260300 -0400
+@@ -118,6 +118,26 @@
+ };
+ 
+ static const struct ieee80211_channel zd_channels[] = {
++	{ .center_freq = 2312, .hw_value = -19,},
++	{ .center_freq = 2317, .hw_value = -18,},
++	{ .center_freq = 2322, .hw_value = -17,},
++	{ .center_freq = 2327, .hw_value = -16,},
++	{ .center_freq = 2332, .hw_value = -15,},
++	{ .center_freq = 2337, .hw_value = -14,},
++	{ .center_freq = 2342, .hw_value = -13,},
++	{ .center_freq = 2347, .hw_value = -12,},
++	{ .center_freq = 2352, .hw_value = -11,},
++	{ .center_freq = 2357, .hw_value = -10,},
++	{ .center_freq = 2362, .hw_value = -9,},
++	{ .center_freq = 2367, .hw_value = -8,},
++	{ .center_freq = 2372, .hw_value = -7,},
++	{ .center_freq = 2377, .hw_value = -6,},
++	{ .center_freq = 2382, .hw_value = -5,},
++	{ .center_freq = 2387, .hw_value = -4,},
++	{ .center_freq = 2392, .hw_value = -3,},
++	{ .center_freq = 2397, .hw_value = -2,},
++	{ .center_freq = 2402, .hw_value = -1,},
++	{ .center_freq = 2407, .hw_value = 0,},
+ 	{ .center_freq = 2412, .hw_value = 1 },
+ 	{ .center_freq = 2417, .hw_value = 2 },
+ 	{ .center_freq = 2422, .hw_value = 3 },
+@@ -132,6 +152,18 @@
+ 	{ .center_freq = 2467, .hw_value = 12 },
+ 	{ .center_freq = 2472, .hw_value = 13 },
+ 	{ .center_freq = 2484, .hw_value = 14 },
++	{ .center_freq = 2487, .hw_value = 16,},
++	{ .center_freq = 2502, .hw_value = 19,},
++	{ .center_freq = 2512, .hw_value = 21,},
++	{ .center_freq = 2572, .hw_value = 33,},
++	{ .center_freq = 2592, .hw_value = 37,},
++	{ .center_freq = 2612, .hw_value = 41,},
++	{ .center_freq = 2632, .hw_value = 45,},
++	{ .center_freq = 2652, .hw_value = 49,},
++	{ .center_freq = 2672, .hw_value = 53,},
++	{ .center_freq = 2692, .hw_value = 57,},
++	{ .center_freq = 2712, .hw_value = 61,},
++	{ .center_freq = 2732, .hw_value = 65,},
+ };
+ 
+ static void housekeeping_init(struct zd_mac *mac);
+@@ -242,14 +274,19 @@
+ static int set_rx_filter(struct zd_mac *mac)
+ {
+ 	unsigned long flags;
+-	u32 filter = STA_RX_FILTER;
++	struct zd_ioreq32 ioreqs[] = {
++		{CR_RX_FILTER, STA_RX_FILTER},
++		{ CR_SNIFFER_ON, 0U },
++	};
+ 
+ 	spin_lock_irqsave(&mac->lock, flags);
+-	if (mac->pass_ctrl)
+-		filter |= RX_FILTER_CTRL;
++	if (mac->pass_ctrl) {
++		ioreqs[0].value |= 0xFFFFFFFF;
++		ioreqs[1].value = 0x1;
++	}
+ 	spin_unlock_irqrestore(&mac->lock, flags);
+ 
+-	return zd_iowrite32(&mac->chip, CR_RX_FILTER, filter);
++	return zd_iowrite32a(&mac->chip, ioreqs, ARRAY_SIZE(ioreqs));
+ }
+ 
+ static int set_mac_and_bssid(struct zd_mac *mac)
+@@ -1057,7 +1094,8 @@
+ 	/* Caller has to ensure that length >= sizeof(struct rx_status). */
+ 	status = (struct rx_status *)
+ 		(buffer + (length - sizeof(struct rx_status)));
+-	if (status->frame_status & ZD_RX_ERROR) {
++	if ((status->frame_status & ZD_RX_ERROR) || 
++		(status->frame_status & ~0x21)) {
+ 		if (mac->pass_failed_fcs &&
+ 				(status->frame_status & ZD_RX_CRC32_ERROR)) {
+ 			stats.flag |= RX_FLAG_FAILED_FCS_CRC;
+@@ -1400,7 +1438,7 @@
+ 	ieee80211_hw_set(hw, MFP_CAPABLE);
+ 	ieee80211_hw_set(hw, HOST_BROADCAST_PS_BUFFERING);
+ 	ieee80211_hw_set(hw, RX_INCLUDES_FCS);
+-	ieee80211_hw_set(hw, SIGNAL_UNSPEC);
++	ieee80211_hw_set(hw, SIGNAL_DBM);
+ 
+ 	hw->wiphy->interface_modes =
+ 		BIT(NL80211_IFTYPE_MESH_POINT) |
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.h linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.h
+--- linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.h	2017-10-12 21:18:43.971926400 -0400
+@@ -197,7 +197,7 @@
+ 	int associated;
+ 	unsigned long flags;
+ 	struct sk_buff_head ack_wait_queue;
+-	struct ieee80211_channel channels[14];
++	struct ieee80211_channel channels[46];
+ 	struct ieee80211_rate rates[12];
+ 	struct ieee80211_supported_band band;
+ 
+@@ -228,7 +228,7 @@
+ 
+ enum {
+ 	MIN_CHANNEL24 = 1,
+-	MAX_CHANNEL24 = 14,
++	MAX_CHANNEL24 = 46,
+ };
+ 
+ #define ZD_PLCP_SERVICE_LENGTH_EXTENSION 0x80

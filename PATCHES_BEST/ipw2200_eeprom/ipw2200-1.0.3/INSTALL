@@ -1,0 +1,234 @@
+
+IPW2200 Driver for Linux in support of:
+
+Intel PRO/Wireless 2200BG Network Connection Adapter
+Intel PRO/Wireless 2915ABG Network Connection Adapter
+
+Copyright (C) 2004-2005, Intel Corporation
+
+INSTALL
+
+Version: 1.0.3
+Date   : April 08, 2005
+
+
+NOTE ON UPGRADING FROM PRIOR VERSIONS
+---------   ------     ----       ---    --       --       -          -
+
+Whenever you upgrade your driver, you need to make sure that your system
+no longer has older versions of the modules in various locations that 
+could be found by modprobe instead of the new version.  If you see 
+problems about unresolved symbols, chances are good you have an old 
+module someplace.  You can typically find the offending modules via:
+
+	% for i in ieee80211 ipw2200; do \
+		find /lib/modules/`uname -r` -iname ${i}*; done
+
+And then you can go and remove whatever that finds.  
+
+You should also check your kernel's configuration for any old 
+declarations from old installs:
+
+	% for i in IEEE80211 IPW; do \
+		grep CONFIG_${i} \
+		/lib/modules/`uname -r`/build/include/linux/autoconf.h; done
+
+
+KERNEL REQUIREMENTS - 2.6 
+---------   ------     ----       ---    --       --       -          -
+This driver is currently a 2.6 only driver.  Due to time 
+constraints, we can not maintain a 2.4 backport of the driver.  
+If you would like to assist in this and maintain 2.4 backports, 
+please let us know.
+
+OPTIONAL: WPA Support
+
+If you wish to enable WPA support, you also need to enable the following Crypto
+library modules (in addition to those required for WEP above):
+
+	Michael MIC (CONFIG_CRYPTO_MICHAEL_MIC)
+	AES (CONFIG_CRYPTO_AES_586)
+
+
+INSTALLING THE BITS
+------------ -----   -----       ----       ---       --         -     
+
+Before installing ipw2200.ko, both firmware_class and ieee80211 need to
+be installed first.  For now the ieee80211 module code is included with
+the ipw2200 code, so building and installing the ipw2200 should enable
+you to:
+
+$ modprobe ipw2200
+
+Or... you can modprobe ieee80211 and firmware_class first, and then manually
+insmod your build of ipw2200.ko
+
+KERNEL REQUIREMENTS - Crypto Library
+---------- --------  ---------    -----     -----      ---      --        -
+IPW2200 uses the WEP encryption and decryption algorithms provided
+by the Linux kernel.  As such, in order to use WEP you must enable the 
+Crypto library support (CONFIG_CRYPTO) and the following algorithms:
+
+        ARC4 cipher algorithm (CONFIG_CRYPTO_ARC4)
+
+You also need to enable the following from Library routines:
+
+        CRC32 (CONFIG_CRC32)
+
+Check for these with:
+
+	% for i in CRYPTO_ARC4 CRC32; do \
+		grep CONFIG_pci \
+		/lib/modules/2.6.10/build/include/linux/autoconf.h; done
+
+BUILDING EXTERNAL
+----------- -----   ----   ----      ---       --       -             -
+
+First, you need to unpack the source code:
+
+	% tar xzvf ipw2200-1.0.3.tgz
+	% cd ipw2200-1.0.3
+
+The driver package contains a Makefile that can be used for building the driver
+outside of the kernel tree.  To build it for the currently running kernel,
+simply type:
+
+	% make  <--- You may need to run this as root
+
+NOTE: If you see any errors during the build process be sure to check the
+Issues section on the http://ipw2200.sf.net website as a patch may be available
+for your specific kernel configuration.  
+
+To build it for a different kernel than the running one, use the KSRC
+parameter:
+
+	% make KSRC=/path/to/kernel
+
+If you wish to install the modules into your currently running kernel you can
+do so via:
+
+	# make install <--- You need to run this as root
+
+
+BUILDING IN THE KERNEL SOURCE TREE
+-------- ------  -----   ----  ---    ---      --          -        -
+There exists a patches directory with an in-kernel patch.  However, it is not 
+tested and not supported at this time.
+
+
+CONFIGURING THE KERNEL
+------------ -----   -----       ----       ---       --         -     
+You need to enable firmware loading
+
+The kernel must be configured to enable wireless capabilities 
+(CONFIG_NET_RADIO=y).
+
+Failure to do this will result in the Wireless Tools (iwconfig, iwlist, 
+etc.) not functioning.
+
+You can check if your kernel is configured with CONFIG_NET_RADIO by 
+running:
+
+	% grep CONFIG_NET_RADIO \
+        	/lib/modules/`uname -r`/build/include/linux/autoconf.h
+
+You should see the line:
+
+#define CONFIG_NET_RADIO 1
+
+If you have to turn on CONFIG_NET_RADIO in your kernel configuration, make 
+sure you also rebuild, install, and reboot to the new kernel image.  For help 
+or instructions on configuring and building the kernel please consult the
+documentation contained in your distribution.
+
+You also need to enable the firmware loading capabilities of hotplug.  
+To do this, see below.
+
+
+LOADING FIRMWARE VIA HOT-PLUG 
+------- ----    --    -      -        -
+
+Before you can load the driver, you need the firmware image.  You can find
+instructions for obtaining the firmware by going to
+http://ipw2200.sf.net/firmware.php.
+
+Once you have the firmware, unzip the archive.  You should find five
+files within it:
+
+        LICENSE			A copy of the firmware license
+	ipw-2.2-boot.fw		Boot strap image
+	ipw-2.2-bss_ucode.fw	Used in BSS mode
+	ipw-2.2-bss.fw		Used in BSS mode
+	ipw-2.2-ibss_ucode.fw	Used in BSS mode
+	ipw-2.2-ibss.fw		Used in BSS mode
+
+You need to place all of these files into the hotplug firmware directory
+(typically /usr/lib/hotplug/firmware/ -- check the contents of the 
+/etc/hotplug/firmware.agent to determine the specific location for your 
+distribution)
+
+NOTE:  Loading the firmware image will not affect the IPW2200 in any other
+operating systems you may boot.  The firmware is loaded onto the hardware 
+every time the card is initialized--regardless of the operating system.
+
+The IPW2200 supports loading of firmware via the Linux firmware hotplug
+capability.  In order to use this, you must enable CONFIG_FW_LOADER in 
+your kernel configuration.  In 2.6.x this option is enabled via:
+
+        Device Drivers ->
+                Generic Driver Options ->
+                        Hotplug firmware loading support
+
+You can check if it is enabled with:
+
+	% grep CONFIG_FW_LOADER \
+		/lib/modules/2.6.10/build/include/linux/autoconf.h
+
+In addition, you will need the Linux hotplug scripts dated later than
+2003_10_07 (if you do not have /etc/hotplug/firmware.agent then you need 
+to upgrade).
+
+You will also need to have sysfs mounted.  You can do this by adding an 
+entry to /etc/fstab similar to this:
+
+none            /sys            sysfs   defaults                0       0
+
+If the directory /sys does not already exist, you will need to create it:
+
+	% mkdir /sys
+
+You can then mount the sysfs partition via:
+
+	% mount -a
+
+You can obtain the latest hotplug scripts via the following link:
+
+http://sourceforge.net/project/showfiles.php?group_id=17679
+
+
+LOADING THE DRIVER
+------------ -----   -----       ----       ---       --         -     
+Loading the driver (as root):
+
+	% . load
+
+Unloading the driver (as root):
+
+	% . unload
+
+The above scripts will allow you to load the required modules without 
+performing a make install.  If you do a make install, then you can load the 
+driver by simply running (as root):
+
+	% modprobe ipw2200
+
+INSTALLING IN YOUR DISTRIBUTION
+------------ -----   -----       ----       ---       --         -     
+As the specifics for each distribution varies, we can not cover the 
+steps required to install and configure your device for the distribution 
+being used.
+
+Please refer to the documentation for your distribution on issues 
+related to auto-detection and installation of the driver within your 
+environment.
+

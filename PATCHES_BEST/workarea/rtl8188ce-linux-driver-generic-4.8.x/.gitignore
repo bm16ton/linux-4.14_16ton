@@ -1,0 +1,34 @@
+# Object files
+*.o
+*.o.d
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# project specific output files
+*.o.cmd
+*.ko.cmd
+.tmp_versions
+rtl*.ko
+rtl*.mod.c
+Module.symvers
+modules.order
+
+# vim swap files
+*.swp
+
+# YouCompleteMe config file
+*.ycm_extra_conf.pyc
+

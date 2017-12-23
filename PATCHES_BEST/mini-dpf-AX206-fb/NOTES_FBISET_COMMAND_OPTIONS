@@ -1,0 +1,7 @@
+sudo fbset -depth 16 -fb/dev/fb1
+sudo fbset -rgba 8,8,8,0 -fb/dev/fb1
+
+
+
+sudo fbset -rgba 8,8,8,0 -depth 24 -fb /dev/fb1       WORKS NO MORE ONE VIDEO ONLY BS
+sudo fbset -rgba 8,8,8,0 -fb /dev/fb1

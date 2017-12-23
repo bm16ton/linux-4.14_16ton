@@ -1,0 +1,41 @@
+QUINTESSENTIAL refactoring of known patches. The value 0x8044 is the code for BO (Bolivia): this sets TX power to ~30dBm. If another country is needed, the contry codes are listed in ath/regd.h .If maximum device power is needed, apply also the array mod_eeprompwr setting.
+STANDARD DISCLAIMER APPLIES.
+--- backports-3.12.8-1-orig/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	Sun Jan 19 19:13:39 2014
++++ backports-3.12.8-1/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	Sun Jan 19 19:13:39 2014
+@@ -19,7 +19,7 @@
+ #include "ar9003_phy.h"
+ #include "ar9003_eeprom.h"
+ #include "ar9003_mci.h"
+-
++u8 mod_eeprompwr[ar9300RateSize];
+ #define COMP_HDR_LEN 4
+ #define COMP_CKSUM_LEN 2
+ 
+@@ -4585,6 +4585,7 @@
+ 		ath_dbg(common, REGULATORY, "TPC[%02d] 0x%08x\n",
+ 			i, targetPowerValT2[i]);
+ 	}
++memcpy(mod_eeprompwr,targetPowerValT2,ar9300RateSize);
+ }
+ 
+ static int ar9003_hw_cal_pier_get(struct ath_hw *ah,
+@@ -5306,7 +5307,7 @@
+ 
+ 	if (test)
+ 		return;
+-
++memcpy(targetPowerValT2,mod_eeprompwr,ar9300RateSize);
+ 	for (i = 0; i < ar9300RateSize; i++) {
+ 		ath_dbg(common, REGULATORY, "TPC[%02d] 0x%08x\n",
+ 			i, targetPowerValT2[i]);
+--- backports-3.12.8-1-orig/drivers/net/wireless/ath/ath9k/hw.c	Sun Jan 19 19:13:39 2014
++++ backports-3.12.8-1/drivers/net/wireless/ath/ath9k/hw.c	Sun Jan 19 19:13:39 2014
+@@ -2426,7 +2426,7 @@
+ 		ath_dbg(common, REGULATORY, "regdomain mapped to 0x%x\n",
+ 			regulatory->current_rd);
+ 	}
+-
++regulatory->current_rd=0x8044;
+ 	eeval = ah->eep_ops->get_eeprom(ah, EEP_OP_MODE);
+ 	if ((eeval & (AR5416_OPFLAGS_11G | AR5416_OPFLAGS_11A)) == 0) {
+ 		ath_err(common,

@@ -1,0 +1,17 @@
+diff -Naur linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/net/wireless/util.c linux-arcman-4.8.17/net/wireless/util.c
+--- linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/net/wireless/util.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-arcman-4.8.17/net/wireless/util.c	2017-10-07 10:05:35.916708398 -0400
+@@ -69,10 +69,11 @@
+ {
+ 	/* see 802.11 17.3.8.3.2 and Annex J
+ 	 * there are overlapping channel numbers in 5GHz and 2GHz bands */
+-	if (chan <= 0)
+-		return 0; /* not supported */
++	/* if (chan <= 0) */
++		/* return 0; */ /* not supported */
+ 	switch (band) {
+ 	case NL80211_BAND_2GHZ:
++		chan = (int)(char)chan;
+ 		if (chan == 14)
+ 			return 2484;
+ 		else if (chan < 14)

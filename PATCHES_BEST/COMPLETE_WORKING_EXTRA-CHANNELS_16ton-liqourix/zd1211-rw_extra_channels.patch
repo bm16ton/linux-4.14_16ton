@@ -1,0 +1,82 @@
+diff -Naur linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_chip.h linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_chip.h
+--- linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_chip.h	2017-10-12 21:18:41.321922582 -0400
++++ linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_chip.h	2016-10-02 19:24:33.000000000 -0400
+@@ -681,7 +681,7 @@
+ #define HWINT_DISABLED			0
+ 
+ #define E2P_PWR_INT_GUARD		8
+-#define E2P_CHANNEL_COUNT		46
++#define E2P_CHANNEL_COUNT		14
+ 
+ /* If you compare this addresses with the ZYDAS orignal driver, please notify
+  * that we use word mapping for the EEPROM.
+diff -Naur linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.c linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.c
+--- linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.c	2017-10-12 18:15:25.678707171 -0400
++++ linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.c	2016-10-02 19:24:33.000000000 -0400
+@@ -118,26 +118,6 @@
+ };
+ 
+ static const struct ieee80211_channel zd_channels[] = {
+-	{ .center_freq = 2312, .hw_value = -19,},
+-	{ .center_freq = 2317, .hw_value = -18,},
+-	{ .center_freq = 2322, .hw_value = -17,},
+-	{ .center_freq = 2327, .hw_value = -16,},
+-	{ .center_freq = 2332, .hw_value = -15,},
+-	{ .center_freq = 2337, .hw_value = -14,},
+-	{ .center_freq = 2342, .hw_value = -13,},
+-	{ .center_freq = 2347, .hw_value = -12,},
+-	{ .center_freq = 2352, .hw_value = -11,},
+-	{ .center_freq = 2357, .hw_value = -10,},
+-	{ .center_freq = 2362, .hw_value = -9,},
+-	{ .center_freq = 2367, .hw_value = -8,},
+-	{ .center_freq = 2372, .hw_value = -7,},
+-	{ .center_freq = 2377, .hw_value = -6,},
+-	{ .center_freq = 2382, .hw_value = -5,},
+-	{ .center_freq = 2387, .hw_value = -4,},
+-	{ .center_freq = 2392, .hw_value = -3,},
+-	{ .center_freq = 2397, .hw_value = -2,},
+-	{ .center_freq = 2402, .hw_value = -1,},
+-	{ .center_freq = 2407, .hw_value = 0,},
+ 	{ .center_freq = 2412, .hw_value = 1 },
+ 	{ .center_freq = 2417, .hw_value = 2 },
+ 	{ .center_freq = 2422, .hw_value = 3 },
+@@ -152,18 +132,6 @@
+ 	{ .center_freq = 2467, .hw_value = 12 },
+ 	{ .center_freq = 2472, .hw_value = 13 },
+ 	{ .center_freq = 2484, .hw_value = 14 },
+-	{ .center_freq = 2487, .hw_value = 16,},
+-	{ .center_freq = 2502, .hw_value = 19,},
+-	{ .center_freq = 2512, .hw_value = 21,},
+-	{ .center_freq = 2572, .hw_value = 33,},
+-	{ .center_freq = 2592, .hw_value = 37,},
+-	{ .center_freq = 2612, .hw_value = 41,},
+-	{ .center_freq = 2632, .hw_value = 45,},
+-	{ .center_freq = 2652, .hw_value = 49,},
+-	{ .center_freq = 2672, .hw_value = 53,},
+-	{ .center_freq = 2692, .hw_value = 57,},
+-	{ .center_freq = 2712, .hw_value = 61,},
+-	{ .center_freq = 2732, .hw_value = 65,},
+ };
+ 
+ static void housekeeping_init(struct zd_mac *mac);
+diff -Naur linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.h linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.h
+--- linux-wifibrdcst-4.8.17/drivers/net/wireless/zydas/zd1211rw/zd_mac.h	2017-10-12 21:18:43.971926400 -0400
++++ linux-hwe-4.8.0/drivers/net/wireless/zydas/zd1211rw/zd_mac.h	2016-10-02 19:24:33.000000000 -0400
+@@ -197,7 +197,7 @@
+ 	int associated;
+ 	unsigned long flags;
+ 	struct sk_buff_head ack_wait_queue;
+-	struct ieee80211_channel channels[46];
++	struct ieee80211_channel channels[14];
+ 	struct ieee80211_rate rates[12];
+ 	struct ieee80211_supported_band band;
+ 
+@@ -228,7 +228,7 @@
+ 
+ enum {
+ 	MIN_CHANNEL24 = 1,
+-	MAX_CHANNEL24 = 46,
++	MAX_CHANNEL24 = 14,
+ };
+ 
+ #define ZD_PLCP_SERVICE_LENGTH_EXTENSION 0x80

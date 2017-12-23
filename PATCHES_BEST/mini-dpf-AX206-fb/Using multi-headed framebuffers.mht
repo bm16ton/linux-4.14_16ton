@@ -1,0 +1,487 @@
+From: <Saved by UnMHT Ver.8.3.1>
+Subject: Using multi-headed framebuffers
+Date: Mon, 17 Apr 2017 10:16:22 -0400
+MIME-Version: 1.0
+X-UnMHT-Save-State: Current-State
+Content-Type: multipart/related;
+	boundary="----=_Part_C9457074_C062FAC3.15B7C4583C8";
+	type="text/html"
+
+------=_Part_C9457074_C062FAC3.15B7C4583C8
+Content-Location: http://www.tldp.org/HOWTO/Framebuffer-HOWTO/x1010.html
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset="windows-1252"
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; charset=
+=3Dwindows-1252"><link href=3D"data:image/png;base64,iVBORw0KGgoAAAANSUhEUg=
+AAACAAAAAgCAYAAABzenr0AAAB+UlEQVRYhe3VP28SYRzA8SdxcelkrIuJ0ddiBwfT1cRNo5MvQ=
+TeJSdMarNQW/76AqoVwwxmlxgiBSVubthzHaaAVGkWOO8r94XL3dYC0JopDaY8O/JLv+jyf5Hnu=
+OSGOw0RVuLjUZFIyQ+lyymQiYbDugRBCiImEwdh0kfGoGlon7hWY3/C7gEnJZDyqci5WCq2x6SL=
+PleMCuJQ0OHVf5exseJ2cUohv9gA3li3ORFUuPNL2mysdctpe5+c0TkdLpLaCLmAX+NaGstXLhr=
+LpUzY6VEyPijFYZaPDtgnfW922Tai2AHpfAV8zkI7Bh8fwfgE+PgNHB8B3LHz3gDkWeA4ATbvA5=
+o+XFOtJivUkys/XeOg9wJsprNhVrIVr3WavEJRXsANoNBrouj5QAJ+ri6QKd5DVCLIaIaXcpu6v=
+9QDpB9hPbmK/uNUtfp1gaw0nAF3XaTabAwXwZSeBrEZIazOktRlk9S6//PURYAQYAcIDDPUdCIK=
+AndYGn6qLrNYSrNaWWKm9orP3Eh4xwPd9+s0IcEwAff6G4QG0DK78EPddHPftPJ3lp7DbwPG8kA=
+B9xrHt4QJc1x14c9M0CYLgYIAwRgghRKVSIZPJkMvl/iqfzw/cv9bNZrO02+0uQFEUJElCluXQk=
+iQJwzD2j+B/53TY8+deQ78DvwEKDRWvw08ftgAAAABJRU5ErkJggg=3D=3D" rel=3D"shortcu=
+t icon" type=3D"image/png"><title>Using multi-headed framebuffers</title><m=
+eta content=3D"Modular DocBook HTML Stylesheet Version 1.7" name=3D"GENERAT=
+OR"><link href=3D"index.html" rel=3D"HOME" title=3D"Framebuffer HOWTO"><lin=
+k href=3D"x998.html" rel=3D"PREVIOUS" title=3D"Using framebuffer devices on=
+ ARM platforms"><link href=3D"x1223.html" rel=3D"NEXT" title=3D"Using / Cha=
+nging Fonts"><base href=3D"http://www.tldp.org/HOWTO/Framebuffer-HOWTO/"></=
+head><body alink=3D"#0000FF" bgcolor=3D"#FFFFFF" class=3D"section" link=3D"=
+#0000FF" text=3D"#000000" vlink=3D"#840084"><div class=3D"NAVHEADER"><table=
+ border=3D"0" cellpadding=3D"0" cellspacing=3D"0" summary=3D"Header navigat=
+ion table" width=3D"100%"><tbody><tr><th align=3D"center" colspan=3D"3">Fra=
+mebuffer HOWTO</th></tr><tr><td align=3D"left" valign=3D"bottom" width=3D"1=
+0%"><a accesskey=3D"P" href=3D"x998.html">Prev</a></td><td align=3D"center"=
+ valign=3D"bottom" width=3D"80%"></td><td align=3D"right" valign=3D"bottom"=
+ width=3D"10%"><a accesskey=3D"N" href=3D"x1223.html">Next</a></td></tr></t=
+body></table><hr align=3D"LEFT" width=3D"100%"></div><div class=3D"section"=
+><h1 class=3D"section"><a name=3D"AEN1010"></a>11. Using multi-headed frame=
+buffers</h1><p>This part of the document was very kindly donated by
+			Frederick A. Niles, who retains all rights to the
+			information contained herewith in this section of the
+			HOWTO.</p><div class=3D"section"><h2 class=3D"section"><a name=3D"AEN101=
+3"></a>11.1. Introduction</h2><p>The main goal of this document is to get y=
+ou
+				started with running a dual head configuration
+				of Linux.  While this process is pretty
+				straight forward there are numerous things that
+				one can do wrong along the way.</p><p>The example I concentrate on is g=
+etting an
+				X-server running on a second monitor.  I find
+				this nice as you can usually find old large 19&quot;
+				to 21&quot; fixed frequency monitors around that
+				people are giving away because they can&#x27;t use
+				them.  This way you can boot off a small
+				multisync and then use X on a nice big
+				monitor.</p><p>Please understand dual head support is currently
+				developing so this information changes rapidly.
+				Anything in this document could be out of date
+				or just plain incorrect by the time you are
+				reading this.</p><p>** WARNING ** This document was written before
+				any XFree86 4.0 release.  If you are reading
+				this and XFree86 4.0 is already released many
+				things may have changed.  Try getting a newer
+				version of this document if it&#x27;s
+				available.</p></div><div class=3D"section"><h2 class=3D"section"><a nam=
+e=3D"AEN1019"></a>11.2. Feedback</h2><p>Feedback is most certainly welcome =
+for this
+				document. Without your submissions and input,
+				this document wouldn&#x27;t exist. So, please post
+				your additions, comments and criticisms to:
+				<tt class=3D"email">&lt;<a href=3D"mailto:Frederick.A.Niles@gsfc.nasa.g=
+ov">Frederick.A.Niles@gsfc.nasa.gov</a>&gt;</tt>.</p></div><div class=3D"se=
+ction"><h2 class=3D"section"><a name=3D"AEN1023"></a>11.3. Contributors</h2=
+><p>The following people have contributed to this
+				mini-HOWTO.</p><p></p><ul><li><p>Petr
+						Vandrovec</p></li><li><p>Andreas Ehliar
+						(x2x)</p></li><li><p>Marco Bizzarri (multiple X
+						servers)</p></li></ul></div><div class=3D"section"><h2 class=3D"secti=
+on"><a name=3D"AEN1033"></a>11.4. Standard Disclaimer</h2><p>No liability f=
+or the contents of this document
+				can be accepted.  Use the concepts, examples
+				and other content at your own risk.  As this is
+				a new edition of this document, there may be
+				errors and inaccuracies that could be damaging
+				to your system.  Proceed with caution, and
+				although this is highly unlikely, I don&#x27;t take
+				any responsibility for that.</p></div><div class=3D"section"><h2 class=
+=3D"section"><a name=3D"AEN1036"></a>11.5. Copyright Information</h2><p>Thi=
+s section of the document is copyrighted
+				=A9 1999 Frederick Niles and distributed
+				under the following terms:</p><p></p><ul><li><p>Linux HOWTO documents m=
+ay be
+						reproduced and distributed in
+						whole or in part, in any medium
+						physical or electronic, as long
+						as this copyright notice is
+						retained on all copies.
+						Commercial redistribution is
+						allowed and encouraged;
+						however, the author would like
+						to be notified of any such
+						distributions.</p></li><li><p>All translations, derivative
+						works, or aggregate works
+						incorporating any Linux HOWTO
+						documents must be covered under
+						this copyright notice.  That
+						is, you may not produce a
+						derivative work from a HOWTO
+						and impose additional
+						restrictions on its
+						distribution. Exceptions to
+						these rules may be granted
+						under certain conditions;
+						please contact the Linux HOWTO
+						coordinator at the address
+						given below.</p></li><li><p>If you have questions, please
+						contact, the Linux HOWTO
+						coordinator, at
+						<tt class=3D"email">&lt;<a href=3D"mailto:linux-howto@sunsite.unc.edu=
+">linux-howto@sunsite.unc.edu</a>&gt;</tt></p></li></ul></div><div class=3D=
+"section"><h2 class=3D"section"><a name=3D"AEN1047"></a>11.6. What hardware=
+ is supported?</h2><p>Most video cards assume they will be the only one
+				in the system and are permanently set with the
+				addressing of the primary display adapter.
+				There are a few exceptions.</p><p></p><ul><li><p>Matrox cards: This inc=
+ludes
+						Matrox Millennium, Matrox
+						Millennium II, Matrox Mystique,
+						Matrox Mystique 220, Matrox
+						Productiva G100, Matrox
+						Mystique G200, Matrox
+						Millennium G200 and Matrox
+						Marvel G200 video
+						cards</p></li><li><p>MDA: This includes monochrome
+						Hercules graphics adapters among
+						others. This for text only
+						second head
+						support.</p></li></ul><p>Note: it&#x27;s only the second adapter that
+					has to be one of the above.</p></div><div class=3D"section"><h2 class=
+=3D"section"><a name=3D"AEN1056"></a>11.7. Commercial support</h2><p>This m=
+ini-HOWTO in primarily concerned with free
+				software.  However, there are commercial X
+				servers with multi-head support.  These include
+				Metro Link&#x27;s (www.metrolink.com) Metro-X and Xi
+				Graphics&#x27; (www.xig.com) Accelerated-X.</p></div><div class=3D"sect=
+ion"><h2 class=3D"section"><a name=3D"AEN1059"></a>11.8. Getting all the st=
+uff</h2><p>You&#x27;ll need the following patches and programs:</p><p></p><=
+ul><li><p>fbset program -
+						try <a href=3D"http://www.cs.kuleuven.ac.be/~geert/bin/" target=3D"_t=
+op">http://www.cs.kuleuven.ac.be/~geert/bin/</a>
+						(note: RedHat 6.0 already has
+						this program
+						included)</p></li><li><p>fbaddon Matrix
+						dual head patches for Linux
+						kernel - try <a href=3D"ftp://platan.vc.cvut.cz/pub/linux/matrox-late=
+st/" target=3D"_top">ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/</a></=
+p></li><li><p>con2fb program -
+						try <a href=3D"ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/" targ=
+et=3D"_top">ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/</a></p></li><l=
+i><p>The X11 frame buffer server
+						XF86_FBDev.  This
+						is a standard part of XFree86
+						3.3.1.</p></li></ul></div><div class=3D"section"><h2 class=3D"section=
+"><a name=3D"AEN1078"></a>11.9. Getting Started</h2><p>The first thing you&=
+#x27;ll need to do is to patch a
+				copy of the Linux source with the
+				&quot;fbaddon&quot; patch.  Then you need to
+				configure the kernel and turn on frame buffer
+				support.  If you have Matrox cards turn on
+				Matrox unified accelerated driver support as
+				well as the particular type of card you have.
+				Don&#x27;t turn on VESA frame buffer support. It can
+				cause a conflict.  Do turn on multi-head
+				support (obviously). Build the kernel and
+				reboot.</p><p>Now you need to install the &quot;fbset&quot;
+				program and carefully read all the
+				documentation on how to adjust the settings.
+				Using a &quot;/etc/fb.modes&quot; file is
+				highly recommended once you&#x27;ve decided on your
+				settings.  The fbset program includes a Perl
+				script to convert your XF86Config file to
+				fb.modes settings.  I&#x27;ve included my
+				octave/Borne shell script to convert your
+				XF86Config file in Appendix A &amp; B.</p><p>You need to get comfortabl=
+e with using the frame
+				buffer device on one monitor, understanding any
+				issues that can arise from your set up that
+				have nothing to do with multi-head support.
+				This can save a lot of head scratching
+				later.</p><p>I&#x27;m going to concentrate my explanation on
+				getting X running on the second monitor as
+				doing most other configurations will just be a
+				obvious subset of the procedure.</p><div class=3D"section"><h3 class=3D=
+"section"><a name=3D"AEN1087"></a>11.9.1. Move a console over...</h3><p>Com=
+pile the &quot;con2fb&quot; program.  If you run
+					it without any arguments you&#x27;ll get the
+					following usage message: &quot;usage:
+						con2fb fbdev
+						console&quot;.</p><p>Thus, an example command would be
+					&quot;con2fb /dev/fb1
+						/dev/tty6&quot; to move
+					virtual console number six over to the
+					second monitor.  Use Ctrl-Alt-F6 to
+					move over to that console and see that
+					it does indeed show up on the second
+					monitor.</p></div><div class=3D"section"><h3 class=3D"section"><a name=
+=3D"AEN1093"></a>11.9.2. Use &quot;&quot; to adjust the
+					settings on this second display</h3><p>Only set the &quot;fbset&quot;
+					settings on the monitor you run the
+					&quot;fbset&quot; command on.
+					Therefore, you must be careful to use
+					the &quot;-fb&quot; flag on the
+					second monitor.  In particular, if you
+					do nothing else you&#x27;ll probably want to
+					at least set the virtual vertical
+					resolution to your actually vertical
+					resolution.</p><p>e.g. &quot;fbset -fb /dev/fb1 -vyres
+						600&quot;</p><p>This will seriously slow down text mode,
+					but X will be obnoxious without
+					it.</p></div><div class=3D"section"><h3 class=3D"section"><a name=3D"A=
+EN1103"></a>11.9.3. Set up X for framebuffer support.</h3><p>The framebuffe=
+r.txt file explains this
+					better than I can, but here&#x27;s the two
+					important points.</p><p>Make sure you set the link for &quot;X&quot; to
+					point to &quot;XF86_FBDev&quot;.</p><p>Next you need to add a monitor =
+section to
+					your XF86Config file for the frame
+					buffer device.  Here&#x27;s an example:</p><p></p><p class=3D"literall=
+ayout">
+# The Frame Buffer server
+
+Section &quot;Screen&quot;
+    Driver      &quot;fbdev&quot;
+    Device      &quot;Millennium&quot;
+    Monitor     &quot;NEC MultiSync 5FGp&quot;
+    Subsection &quot;Display&quot;
+        Depth       8
+        Modes       &quot;default&quot;
+        ViewPort    0 0
+    EndSubsection Subsection &quot;Display&quot;
+        Depth       16
+        Modes       &quot;default&quot;
+        ViewPort    0 0
+    EndSubsection
+    Subsection &quot;Display&quot;
+        Depth       24
+        Modes       &quot;default&quot;
+        ViewPort    0 0
+    EndSubsection
+    Subsection &quot;Display&quot;
+        Depth       32
+        Modes       &quot;default&quot;
+        ViewPort    0 0
+    EndSubsection
+EndSection
+				</p><p></p><p>Use the &quot;default&quot; modes as I don&#x27;t think
+					any other ones will work with the Matrox
+					frame buffer.</p></div><div class=3D"section"><h3 class=3D"section"><a=
+ name=3D"AEN1113"></a>11.9.4. Try starting the X server on the second
+					display</h3><p>Set the environment variable
+					FRAMEBUFFER to the second
+					frame buffer.</p><p>&quot;export
+						FRAMEBUFFER=3D/dev/fb1&quot; or
+					&quot;setenv FRAMEBUFFER
+						/dev/fb1&quot;</p><p>You need to start the X server so that it
+					both matches the selected color depth
+					and it appears on the same monitor you
+					start the X server from.</p><p>e.g. &quot;startx -- :0 -bpp 16
+						vt06&quot;</p><p>This example will start the &quot;zeroth&quot; X
+					server on virtual console six with 16
+					bit color.  Using &quot;:1&quot; when launching
+					another X server for the other frame
+					buffer will allow you to have two X
+					servers running.</p></div></div><div class=3D"section"><h2 class=3D"se=
+ction"><a name=3D"AEN1124"></a>11.10. Summary</h2><p>The steps involved in =
+getting a X server running
+				on a second display can be summrized as
+				follows:</p><p></p><ul><li><p>Get the kernel patch,
+						fbset and
+						con2fb</p></li><li><p>Patch the kerenl, configure,
+						rebuild and
+						reboot</p></li><li><p>Add XF86_FBDev
+						section to XF86Config file and
+						set X symbolic
+						link</p></li></ul><p>Then each time you reboot:</p><p></p><ul><li><p>=
+Move a console over e.g.
+						&quot;con2fb /dev/fb1
+							/dev/tty6&quot;</p></li><li><p>Adjust the settings e.g.
+						&quot;fbset -fb /dev/fb1
+							1280x1024&quot;</p></li><li><p>Set the FRAMEBUFFER e.g. &quot;export=
+ FRAMEBUFFER=3D/dev/fb1&quot;</p></li><li><p>Start the X server e.g. &quot;=
+startx -- -bpp 16 vt06&quot;</p></li></ul><p>You can automate this each tim=
+e you reboot via a
+				shell alias.  It must be an alias and not a
+				shell script since it needs to detect the
+				current console number.  This is my csh alias
+				to start up X on a second fixed frequency
+				monitor:</p><p></p><p class=3D"literallayout">
+alias startxfb =3D &quot;
+setenv FRAMEBUFFER /dev/fb\!*;    # Set the env var to the cmd arg.
+con2fb $FRAMEBUFFER /dev/$tty;    # Move the fb to the current tty.
+fbset -fb $FRAMEBUFFER 1280x1024@62;  # Favorite from /etc/fb.modes
+startx -- :\!* -bpp 16 vt0`echo $tty | cut -dy f 2`&#x27; # X on this tty.
+&quot;
+			</p><p></p><p>In my .cshrc file these are all on the same line
+				together without the comments, but it&#x27;s easier
+				to read here with line breaks and comments
+				inserted.  I just give the number of the frame
+				buffer as an argument and it starts right
+				up.</p><p>I&#x27;m not sure how to do this same alias in bash.
+				I don&#x27;t know how to determine the current tty
+				or get the arguments to an alias in bash.  If
+				someone lets me know I&#x27;ll insert it here.
+				However, you can use the &quot;tty&quot; command to get
+				the name of the current VT and just make two
+				separate aliases for each X server.</p></div><div class=3D"section"><h2=
+ class=3D"section"><a name=3D"AEN1157"></a>11.11. Other Notes and Problems<=
+/h2><p></p><ul><li><p>Both &quot;fbset&quot; and
+						&quot;startx&quot; commands
+						MUST be run from the same frame
+						buffer as the one being
+						affected.  This places serious
+						limits on how much of these
+						commands can be automated via
+						scripts.</p></li><li><p>XFree86 4.0 will have &quot;proper&quot;
+						multi-head support, but 3.3.1
+						does not.  You can run two
+						servers with 3.3.1 and use
+						&quot;x2x&quot; to switch
+						between them
+						however...(see the next
+						bullet)</p></li><li><p>The inactive frame buffer will
+						just hold the last image of
+						when it was active, no updates
+						with occur.</p></li><li><p>The monitor that&#x27;s not selected
+						doesn&#x27;t always preseve it&#x27;s
+						state when not active. (But it
+						usually does)</p></li><li><p>Geert Uytterhoeven (the frame
+						buffer maintainer) and Linus
+						Torvalds don&#x27;t agree with the
+						current &quot;frame buffer per VT&quot;
+						multi-head console support
+						changes (i.e.
+						&quot;fbaddon&quot;) so it
+						may never be in the mainstream
+						kernel tree. (This was heard
+						third hand and may be wildly
+						untrue.)</p></li><li><p>If you &quot;break the rules&quot; and
+						start the X server (run
+						&quot;startx&quot;) from a
+						different monitor, the machine
+						can eventually crash badly with
+						the keyboard and mouse input
+						all mixed
+						together.</p></li><li><p>The documentation
+						framebuffer.txt in the kernel
+						source explains that you can
+						use the Modeline settings in
+						your XF86Config file directly
+						when running X.  Using the
+						Matrox frame buffer seems to
+						force the X server to drop all
+						of those.  So you can only have
+						the one
+						(&quot;default&quot;)
+						setting at at time (the same
+						one you had in text
+						mode).</p></li><li><p>The XF86_FBDev driver is
+						unaccelerated. However, there
+						are patches for accelerated
+						Matrox support at <a href=3D"http://www.in-berlin.de/User/kraxel/xfre=
+e86/" target=3D"_top">http://www.in-berlin.de/User/kraxel/xfree86/</a></p><=
+/li></ul><div class=3D"section"><h3 class=3D"section"><a name=3D"AEN1183"><=
+/a>11.11.1. Getting &quot;&quot;
+					(i.e.  /
+					) to work</h3><p>I have not yet figured out a way to boot
+					with init level 5 with a dual monitor
+					configuration (and actually have the
+					server on either the second montior or
+					both).  While it seems easy enough to
+					add a line to the gdm/xdm Xservers
+					file, the constraint that you must start
+					the X server from the same frame buffer
+					prevents the obvious solution from
+					working.  If anyone finds a way please
+					e-mail me and I&#x27;ll add it here.</p></div><div class=3D"section"><=
+h3 class=3D"section"><a name=3D"AEN1189"></a>11.11.2. Using the &quot;&quot=
+; program</h3><p>There&#x27;s a nice little program called
+					x2x that will switch X
+					servers for you when you get to the
+					edge of the screen.  Last known home
+					for this program was: <a href=3D"http://ftp.digital.com/pub/DEC/SRC/x2=
+x/" target=3D"_top">http://ftp.digital.com/pub/DEC/SRC/x2x/</a>
+					It&#x27;s also an optional Debian package.
+					I haven&#x27;t tried it yet but some users
+					have reported success.</p></div><div class=3D"section"><h3 class=3D"se=
+ction"><a name=3D"AEN1195"></a>11.11.3. Other useful commands</h3><p>These =
+are existing linux commands that
+					are worth remembering when dealing with
+					a multi-head configuration (especially
+					in writing scripts).</p><p></p><ul><li><p>&quot;chvt&quot;
+							will allow you to
+							switch between virtual
+							terminals.</p></li><li><p>&quot;openvt&quot;
+							start a program on a
+							new virtual terminal
+							(VT).</p></li><li><p>&quot;tty&quot; will
+							report the name of the
+							current
+							terminal.</p></li></ul></div></div><div class=3D"section"><h2 class=
+=3D"section"><a name=3D"AEN1208"></a>11.12. Appendix A. Octave &quot;&quot;=
+ script</h2><p>(note the bpp settings)</p><p></p><p class=3D"literallayout">
+#!/usr/bin/octave -q
+bpp =3D 16;
+DCF =3D sscanf(argv(1,:), &quot;%f&quot;);
+HR  =3D sscanf(argv(2,:), &quot;%f&quot;);
+SH1 =3D sscanf(argv(3,:), &quot;%f&quot;);
+SH2 =3D sscanf(argv(4,:), &quot;%f&quot;);
+HFL =3D sscanf(argv(5,:), &quot;%f&quot;);
+VR  =3D sscanf(argv(6,:), &quot;%f&quot;);
+SV1 =3D sscanf(argv(7,:), &quot;%f&quot;);
+SV2 =3D sscanf(argv(8,:), &quot;%f&quot;);
+VFL =3D sscanf(argv(9,:), &quot;%f&quot;);
+pixclock =3D 1000000 / DCF;
+left_margin =3D HFL - SH2;
+right_margin =3D SH1 - HR;
+hsync_len =3D SH2 - SH1;
+
+# 3) vertical timings:
+upper_margin =3D VFL - SV2;
+lower_margin =3D SV1 - VR;
+vsync_len =3D SV2 - SV1;
+
+RR =3D DCF / (HFL * VFL) *1e6;
+HSF =3D DCF / HFL * 1e3;
+printf(&quot;mode \&quot;%dx%d\&quot;\n&quot;,HR,VR);
+printf(&quot;   # D: %3.2f MHz, H: %3.2f kHz, V: %2.2f Hz\n&quot;, DCF, HSF=
+, RR);
+printf(&quot;   geometry %d %d %d %d %d\n&quot;, HR, VR, HR, VR, bpp);
+printf(&quot;   timings %d %d %d %d %d %d %d\n&quot;, ...
+	pixclock, left_margin, right_margin, ...
+	upper_margin, lower_margin, ...
+	hsync_len, vsync_len);
+printf(&quot;endmode\n&quot;);
+			</p><p></p></div><div class=3D"section"><h2 class=3D"section"><a name=3D=
+"AEN1215"></a>11.13. Appendix B. Bourne Shell &quot;&quot;
+				script</h2><p>(This calls the octave script
+				&quot;cvtmode&quot;)</p><p></p><p class=3D"literallayout">
+#!/bin/sh
+
+# Shell script to convert XF86Config file to fb.modes file.
+# Uses octave script cvtmode.m
+
+if [ -z $1 ]; then
+  FILE=3D/etc/X11/XF86Config
+else
+  FILE=3D$1
+fi
+
+i=3D1
+LEN=3D`grep Modeline $FILE | wc -l`
+while expr $i \&lt; $LEN &gt; /dev/null ;
+do
+  CURLINE=3D`grep Modeline $FILE | cut -d&#x27;&quot;&#x27; -f 3-20 | head =
+-$i | tail -1 `
+  ./cvtmode.m $CURLINE
+  echo &quot; &quot;
+  i=3D`expr $i + 1`
+done
+			</p><p></p></div></div><div class=3D"NAVFOOTER"><hr align=3D"LEFT" width=
+=3D"100%"><table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" summary=
+=3D"Footer navigation table" width=3D"100%"><tbody><tr><td align=3D"left" v=
+align=3D"top" width=3D"33%"><a accesskey=3D"P" href=3D"x998.html">Prev</a><=
+/td><td align=3D"center" valign=3D"top" width=3D"34%"><a accesskey=3D"H" hr=
+ef=3D"index.html">Home</a></td><td align=3D"right" valign=3D"top" width=3D"=
+33%"><a accesskey=3D"N" href=3D"x1223.html">Next</a></td></tr><tr><td align=
+=3D"left" valign=3D"top" width=3D"33%">Using framebuffer devices on ARM pla=
+tforms</td><td align=3D"center" valign=3D"top" width=3D"34%">&#xa0;</td><td=
+ align=3D"right" valign=3D"top" width=3D"33%">Using / Changing Fonts</td></=
+tr></tbody></table></div></body></html>
+------=_Part_C9457074_C062FAC3.15B7C4583C8--

@@ -1,0 +1,24 @@
+From bc479239e11dcefbd74cd75d38e128bbe0cdfd4b Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Thu, 7 Sep 2017 22:22:14 +0200
+Subject: [PATCH] Bluetooth: hci_bcm: Add support for BCM2E7E
+
+Tested on a GPD win with a BCM4356 PCI-E wifi/bt combo card.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/bluetooth/hci_bcm.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/bluetooth/hci_bcm.c b/drivers/bluetooth/hci_bcm.c
+index c69da0e8b79fd..707c2d1b84c7b 100644
+--- a/drivers/bluetooth/hci_bcm.c
++++ b/drivers/bluetooth/hci_bcm.c
+@@ -941,6 +941,7 @@ static const struct acpi_device_id bcm_acpi_match[] = {
+ 	{ "BCM2E71", (kernel_ulong_t)&acpi_bcm_int_last_gpios },
+ 	{ "BCM2E7B", (kernel_ulong_t)&acpi_bcm_int_last_gpios },
+ 	{ "BCM2E7C", (kernel_ulong_t)&acpi_bcm_int_last_gpios },
++	{ "BCM2E7E", (kernel_ulong_t)&acpi_bcm_int_first_gpios },
+ 	{ "BCM2E95", (kernel_ulong_t)&acpi_bcm_int_first_gpios },
+ 	{ "BCM2E96", (kernel_ulong_t)&acpi_bcm_int_first_gpios },
+ 	{ "BCM2EA4", (kernel_ulong_t)&acpi_bcm_int_first_gpios },

@@ -1,0 +1,113 @@
+diff -Naur linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/drivers/net/wireless/ath/ath9k/hw.c linux-4.8.17-16ton/drivers/net/wireless/ath/ath9k/hw.c
+--- linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/drivers/net/wireless/ath/ath9k/hw.c	2017-10-03 18:24:37.000000000 -0400
++++ linux-4.8.17-16ton/drivers/net/wireless/ath/ath9k/hw.c	2017-10-05 20:35:14.000000000 -0400
+@@ -29,6 +29,7 @@
+ #include "ar9003_mci.h"
+ #include "ar9003_phy.h"
+ #include "ath9k.h"
++#include "../reg.h"
+ 
+ static bool ath9k_hw_set_reset_reg(struct ath_hw *ah, u32 type);
+ 
+@@ -2923,8 +2924,14 @@
+ 	channel = chan->chan;
+ 	chan_pwr = min_t(int, channel->max_power * 2, MAX_RATE_POWER);
+ 	new_pwr = min_t(int, chan_pwr, reg->power_limit);
++	if (ath_16ton) {
++	ah->eep_ops->set_txpower(ah, chan, ctl, get_antenna_gain(ah, chan), new_pwr, test); 
++	} else { 
++ 	ah->eep_ops->set_txpower(ah, chan,
++ 				 ath9k_regd_get_ctl(reg, chan),
++ 				 get_antenna_gain(ah, chan), new_pwr, test);
++	}
+ 
+-	ah->eep_ops->set_txpower(ah, chan, ctl, get_antenna_gain(ah, chan), new_pwr, test);
+ }
+ 
+ void ath9k_hw_set_txpowerlimit(struct ath_hw *ah, u32 limit, bool test)
+diff -Naur linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/drivers/net/wireless/ath/regd.c linux-4.8.17-16ton/drivers/net/wireless/ath/regd.c
+--- linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/drivers/net/wireless/ath/regd.c	2017-10-03 18:24:37.000000000 -0400
++++ linux-4.8.17-16ton/drivers/net/wireless/ath/regd.c	2017-10-05 20:35:14.000000000 -0400
+@@ -23,6 +23,12 @@
+ #include "regd.h"
+ #include "regd_common.h"
+ 
++int ath_16ton;
++module_param_named(16ton, ath_16ton, int, 0444);
++MODULE_PARM_DESC(16ton, "Enable ALL bands, increase txpower");
++
++EXPORT_SYMBOL(ath_16ton);
++
+ static int __ath_regd_init(struct ath_regulatory *reg);
+ 
+ /*
+@@ -119,6 +125,9 @@
+ 	if (IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_CERT_TESTING))
+ 		return true;
+ 
++	if (ath_16ton)
++		return true;
++
+ 	switch (reg->country_code) {
+ 	case CTRY_UNITED_STATES:
+ 	case CTRY_JAPAN1:
+@@ -190,6 +199,8 @@
+ {
+ 	if (!IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_REG_HINTS))
+ 		return false;
++	if (ath_16ton)
++		return false;
+ 	if (!dynamic_country_user_possible(reg))
+ 		return false;
+ 	return true;
+@@ -345,6 +356,9 @@
+ 	return;
+ #endif
+ 
++	if (ath_16ton)
++		return;
++
+ 	for (band = 0; band < NUM_NL80211_BANDS; band++) {
+ 		if (!wiphy->bands[band])
+ 			continue;
+@@ -382,6 +396,9 @@
+ 	return;
+ #endif
+ 
++	if (ath_16ton)
++		return;
++
+ 	sband = wiphy->bands[NL80211_BAND_2GHZ];
+ 	if (!sband)
+ 		return;
+@@ -414,6 +431,9 @@
+ 	return;
+ #endif
+ 
++	if (ath_16ton)
++		return;
++
+ 	if (!wiphy->bands[NL80211_BAND_5GHZ])
+ 		return;
+ 
+@@ -650,6 +670,9 @@
+ 	return 0;
+ #endif
+ 
++	if (ath_16ton)
++		return 0;
++
+ 	wiphy->regulatory_flags |= REGULATORY_STRICT_REG |
+ 				   REGULATORY_CUSTOM_REG;
+ 
+diff -Naur linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/drivers/net/wireless/ath/reg.h linux-4.8.17-16ton/drivers/net/wireless/ath/reg.h
+--- linux-4.8.17-all-patched-good-txpower-4.8.17-all-patched-good-txpower/drivers/net/wireless/ath/reg.h	2016-10-02 19:24:33.000000000 -0400
++++ linux-4.8.17-16ton/drivers/net/wireless/ath/reg.h	2017-10-05 20:35:14.000000000 -0400
+@@ -14,6 +14,7 @@
+  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
++extern int ath_16ton;
+ #ifndef ATH_REGISTERS_H
+ #define ATH_REGISTERS_H
+ 

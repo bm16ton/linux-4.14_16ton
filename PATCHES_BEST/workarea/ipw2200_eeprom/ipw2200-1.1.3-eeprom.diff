@@ -1,0 +1,165 @@
+
+This patch was based on:
+	 http://stachon.webpark.cz/files/ipw-eeprom-write.patch
+
+diff -Naur ipw2200-1.1.3.orig/ipw2200.c ipw2200-1.1.3/ipw2200.c
+--- ipw2200-1.1.3.orig/ipw2200.c	2006-06-12 08:07:45.000000000 +0200
++++ ipw2200-1.1.3/ipw2200.c	2006-06-13 11:50:33.241138000 +0200
+@@ -98,6 +98,7 @@
+ 	'a', 'b', 'g', '?'
+ };
+ static int antenna = CFG_SYS_ANTENNA_BOTH;
++static int repair_eeprom = 0;
+ 
+ #ifdef CONFIG_IPW2200_PROMISCUOUS
+ static int rtap_iface = 0;	/* def: 0 -- do not create rtap interface */
+@@ -2601,6 +2602,8 @@
+  * NOTE: To better understand how these functions work (i.e what is a chip
+  *       select and why do have to keep driving the eeprom clock?), read
+  *       just about any data sheet for a Microwire compatible EEPROM.
++ *
++ * The chip is 93C66 in 16x256 mode.
+  */
+ 
+ /* write a 32 bit value into the indirect accessor register */
+@@ -2632,7 +2635,7 @@
+ }
+ 
+ /* push a single bit down to the eeprom */
+-static inline void eeprom_write_bit(struct ipw_priv *p, u8 bit)
++static inline void eeprom_write_bit(struct ipw_priv *p, u16 bit)
+ {
+ 	int d = (bit ? EEPROM_BIT_DI : 0);
+ 	eeprom_write_reg(p, EEPROM_BIT_CS | d);
+@@ -2681,6 +2684,39 @@
+ 	return r;
+ }
+ 
++/* write 16 bits to the eeprom */
++static void eeprom_write_u16(struct ipw_priv* priv, u8 addr, u16 data)
++{
++	int i;
++
++	printk(KERN_INFO DRV_NAME " eeprom_write_u16(%02x, %04x)\n", addr, data);
++
++	/* write/erase enable */
++	eeprom_op(priv, EEPROM_CMD_EWEN, EEPROM_CMD_EWEN_ADDR);
++	eeprom_disable_cs(priv);
++
++	/* Send WRITE Opcode */
++	eeprom_op(priv, EEPROM_CMD_WRITE, addr);
++
++	/* now the data bits follow */
++	for (i = 15; i >= 0; i--)
++		eeprom_write_bit(priv, data & (1 << i));
++
++	/* CS needs to be taken low before next clock */
++	eeprom_write_reg(priv, 0);
++	eeprom_write_reg(priv, EEPROM_BIT_SK);
++
++ 	/* wait for the write to complete */
++	msleep(10);
++
++	eeprom_write_reg(priv, 0);
++
++	/* write/erase disable */
++	eeprom_op(priv, EEPROM_CMD_EWDS, EEPROM_CMD_EWDS_ADDR);
++
++	eeprom_disable_cs(priv);
++}
++
+ /* helper function for pulling the mac address out of the private */
+ /* data's copy of the eeprom data                                 */
+ static void eeprom_parse_mac(struct ipw_priv *priv, u8 * mac)
+@@ -2731,6 +2767,38 @@
+ 	IPW_DEBUG_TRACE("<<\n");
+ }
+ 
++/*
++ * Calculate the EEPROM's checksum and optionally repair it.
++ * Return non-zero if a reparation was done.
++ */
++static int ipw_eeprom_verify_checksum(struct ipw_priv *priv)
++{
++	unsigned int i;
++	u16 eeprom[0x60];
++	u16 csum = 0;
++
++	priv->eeprom_delay = 1;
++
++	for (i = 0x00; i < 0x60; i++) {
++		eeprom[i] = le16_to_cpu(eeprom_read_u16(priv, i + 0x20));
++		if (i != 0)
++			csum ^= eeprom[i];
++	}
++
++	if (csum != eeprom[0]) {
++		IPW_ERROR("EEPROM checksum is invalid (0x%04x, should be 0x%04x instead).\n", eeprom[0], csum);
++		if (!repair_eeprom) {
++			IPW_ERROR("To let the driver fix it use the module option 'repair_eeprom'.\n");
++		} else {
++			IPW_DEBUG_INFO("Repairing EEPROM checksum (0x%04x -> 0x%04x)\n", eeprom[0], csum);
++			eeprom_write_u16(priv, 0x20, csum);
++			return 1;
++		}
++	}
++
++	return 0;
++}
++
+ static void ipw_zero_memory(struct ipw_priv *priv, u32 start, u32 count)
+ {
+ 	count >>= 2;
+@@ -3597,6 +3665,10 @@
+ 			  IPW_INTA_BIT_FW_INITIALIZATION_DONE, 500);
+ 	if (rc < 0) {
+ 		IPW_ERROR("device failed to start within 500ms\n");
++		if (ipw_eeprom_verify_checksum(priv)) {
++			retries--;
++			goto retry;
++		}
+ 		goto error;
+ 	}
+ 	IPW_DEBUG_INFO("device response after %dms\n", rc);
+@@ -11053,6 +11125,14 @@
+ 		return -EINVAL;
+ 	mutex_lock(&p->mutex);
+ 	memcpy(&p->eeprom[eeprom->offset], bytes, eeprom->len);
++	if (eeprom->magic == 0x2200) {
++		// adjust offset and length to 16 bit boundaries
++		eeprom->offset = eeprom->offset & ~1;	// round down by one if odd
++		eeprom->len = (eeprom->len + 1) & ~1;	// round up by one if odd
++		// write image from RAM to EEPROM
++		for (i = eeprom->offset; i < eeprom->offset + eeprom->len; i += 2)
++			eeprom_write_u16(p, i / 2, (p->eeprom[i + 1] << 8) | p->eeprom[i]);
++	}
+ 	for (i = 0; i < IPW_EEPROM_IMAGE_SIZE; i++)
+ 		ipw_write8(p, i + IPW_EEPROM_DATA, p->eeprom[i]);
+ 	mutex_unlock(&p->mutex);
+@@ -12603,5 +12683,9 @@
+ MODULE_PARM_DESC(antenna,
+ 		 "select antenna 1=Main, 3=Aux, default 0 [both], 2=slow_diversity (choose the one with lower background noise)");
+ 
++module_param(repair_eeprom, bool, 0444);
++MODULE_PARM_DESC(repair_eeprom,
++		 "fix the checksum of the card's EEPROM");
++
+ module_exit(ipw_exit);
+ module_init(ipw_init);
+diff -Naur ipw2200-1.1.3.orig/ipw2200.h ipw2200-1.1.3/ipw2200.h
+--- ipw2200-1.1.3.orig/ipw2200.h	2006-06-12 08:07:45.000000000 +0200
++++ ipw2200-1.1.3/ipw2200.h	2006-06-13 11:50:33.277140250 +0200
+@@ -1688,6 +1688,13 @@
+ #define EEPROM_BIT_DO                   (1<<4)
+ 
+ #define EEPROM_CMD_READ                 0x2
++#define EEPROM_CMD_WRITE                0x1
++#define EEPROM_CMD_EWEN                 0x0 /* write/erase enable */
++#define EEPROM_CMD_EWDS                 0x0 /* write/erase disable */
++
++/* these latter two are distinguished by two upper bits in address */
++#define EEPROM_CMD_EWEN_ADDR            0xc0
++#define EEPROM_CMD_EWDS_ADDR            0x00
+ 
+ /* Interrupts masks */
+ #define IPW_INTA_NONE   0x00000000

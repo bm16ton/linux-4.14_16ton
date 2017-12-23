@@ -1,0 +1,8 @@
+rtl8192cu modules (other drivers do exist i believe, check staging);
+
+	rtl8xxxu
+	rtl8192cu
+	rtl_usb
+	rtl8192c_common
+	rtlwifi
+

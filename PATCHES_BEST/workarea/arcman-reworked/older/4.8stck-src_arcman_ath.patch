@@ -1,0 +1,192 @@
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/common-init.c linux-arcman-4.8.17/drivers/net/wireless/ath/ath9k/common-init.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/common-init.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-arcman-4.8.17/drivers/net/wireless/ath/ath9k/common-init.c	2017-10-07 10:03:06.251621023 -0400
+@@ -22,14 +22,14 @@
+ 	.band = NL80211_BAND_2GHZ, \
+ 	.center_freq = (_freq), \
+ 	.hw_value = (_idx), \
+-	.max_power = 20, \
++	.max_power = 30, \
+ }
+ 
+ #define CHAN5G(_freq, _idx) { \
+ 	.band = NL80211_BAND_5GHZ, \
+ 	.center_freq = (_freq), \
+ 	.hw_value = (_idx), \
+-	.max_power = 20, \
++	.max_power = 30, \
+ }
+ 
+ /* Some 2 GHz radios are actually tunable on 2312-2732
+@@ -37,20 +37,40 @@
+  * we have calibration data for all cards though to make
+  * this static */
+ static const struct ieee80211_channel ath9k_2ghz_chantable[] = {
+-	CHAN2G(2412, 0), /* Channel 1 */
+-	CHAN2G(2417, 1), /* Channel 2 */
+-	CHAN2G(2422, 2), /* Channel 3 */
+-	CHAN2G(2427, 3), /* Channel 4 */
+-	CHAN2G(2432, 4), /* Channel 5 */
+-	CHAN2G(2437, 5), /* Channel 6 */
+-	CHAN2G(2442, 6), /* Channel 7 */
+-	CHAN2G(2447, 7), /* Channel 8 */
+-	CHAN2G(2452, 8), /* Channel 9 */
+-	CHAN2G(2457, 9), /* Channel 10 */
+-	CHAN2G(2462, 10), /* Channel 11 */
+-	CHAN2G(2467, 11), /* Channel 12 */
+-	CHAN2G(2472, 12), /* Channel 13 */
+-	CHAN2G(2484, 13), /* Channel 14 */
++		CHAN2G(2312, 0),  /* Channel -19 */
++        CHAN2G(2317, 1),  /* Channel -18 */
++        CHAN2G(2322, 2),  /* Channel -17 */
++        CHAN2G(2327, 3),  /* Channel -16 */
++        CHAN2G(2332, 4),  /* Channel -15 */
++        CHAN2G(2337, 5),  /* Channel -14 */
++        CHAN2G(2342, 6),  /* Channel -13 */
++        CHAN2G(2347, 7),  /* Channel -12 */
++        CHAN2G(2352, 8),  /* Channel -11 */
++        CHAN2G(2357, 9),  /* Channel -10 */
++        CHAN2G(2362, 10), /* Channel -9 */
++        CHAN2G(2367, 11), /* Channel -8 */
++        CHAN2G(2372, 12), /* Channel -7 */
++        CHAN2G(2377, 13), /* Channel -6 */
++        CHAN2G(2382, 14), /* Channel -5 */
++        CHAN2G(2387, 15), /* Channel -4 */
++        CHAN2G(2392, 16), /* Channel -3 */
++        CHAN2G(2397, 17), /* Channel -2 */
++        CHAN2G(2402, 18), /* Channel -1 */
++        CHAN2G(2407, 19), /* Channel 0 */
++        CHAN2G(2412, 20), /* Channel 1 */
++        CHAN2G(2417, 21), /* Channel 2 */
++        CHAN2G(2422, 22), /* Channel 3 */
++        CHAN2G(2427, 23), /* Channel 4 */
++        CHAN2G(2432, 24), /* Channel 5 */
++        CHAN2G(2437, 25), /* Channel 6 */
++        CHAN2G(2442, 26), /* Channel 7 */
++        CHAN2G(2447, 27), /* Channel 8 */
++        CHAN2G(2452, 28), /* Channel 9 */
++        CHAN2G(2457, 29), /* Channel 10 */
++        CHAN2G(2462, 30), /* Channel 11 */
++        CHAN2G(2467, 31), /* Channel 12 */
++        CHAN2G(2472, 32), /* Channel 13 */
++        CHAN2G(2484, 33), /* Channel 14 */
+ };
+ 
+ /* Some 5 GHz radios are actually tunable on XXXX-YYYY
+@@ -59,33 +79,61 @@
+  * this static */
+ static const struct ieee80211_channel ath9k_5ghz_chantable[] = {
+ 	/* _We_ call this UNII 1 */
+-	CHAN5G(5180, 14), /* Channel 36 */
+-	CHAN5G(5200, 15), /* Channel 40 */
+-	CHAN5G(5220, 16), /* Channel 44 */
+-	CHAN5G(5240, 17), /* Channel 48 */
++	CHAN5G(5180, 34), /* Channel 36 */
++	CHAN5G(5200, 35), /* Channel 40 */
++	CHAN5G(5220, 36), /* Channel 44 */
++	CHAN5G(5240, 37), /* Channel 48 */
+ 	/* _We_ call this UNII 2 */
+-	CHAN5G(5260, 18), /* Channel 52 */
+-	CHAN5G(5280, 19), /* Channel 56 */
+-	CHAN5G(5300, 20), /* Channel 60 */
+-	CHAN5G(5320, 21), /* Channel 64 */
++	CHAN5G(5260, 38), /* Channel 52 */
++	CHAN5G(5280, 39), /* Channel 56 */
++	CHAN5G(5300, 40), /* Channel 60 */
++	CHAN5G(5320, 41), /* Channel 64 */
+ 	/* _We_ call this "Middle band" */
+-	CHAN5G(5500, 22), /* Channel 100 */
+-	CHAN5G(5520, 23), /* Channel 104 */
+-	CHAN5G(5540, 24), /* Channel 108 */
+-	CHAN5G(5560, 25), /* Channel 112 */
+-	CHAN5G(5580, 26), /* Channel 116 */
+-	CHAN5G(5600, 27), /* Channel 120 */
+-	CHAN5G(5620, 28), /* Channel 124 */
+-	CHAN5G(5640, 29), /* Channel 128 */
+-	CHAN5G(5660, 30), /* Channel 132 */
+-	CHAN5G(5680, 31), /* Channel 136 */
+-	CHAN5G(5700, 32), /* Channel 140 */
++	CHAN5G(5500, 42), /* Channel 100 */
++	CHAN5G(5520, 43), /* Channel 104 */
++	CHAN5G(5540, 44), /* Channel 108 */
++	CHAN5G(5560, 45), /* Channel 112 */
++	CHAN5G(5580, 46), /* Channel 116 */
++	CHAN5G(5600, 47), /* Channel 120 */
++	CHAN5G(5620, 48), /* Channel 124 */
++	CHAN5G(5640, 49), /* Channel 128 */
++	CHAN5G(5650, 50), /* channel 130 */
++	CHAN5G(5655, 51), /* channel 131 */
++	CHAN5G(5660, 52), /* Channel 132 */
++	CHAN5G(5665, 53), /* channel 133 */
++	CHAN5G(5670, 54), /* channel 134 */
++	CHAN5G(5675, 55), /* channel 135 */
++	CHAN5G(5680, 56), /* Channel 136 */
++	CHAN5G(5685, 57), /* Channel 137 */
++	CHAN5G(5690, 58), /* channel 138 */
++	CHAN5G(5695, 59), /* channel 139 */
++	CHAN5G(5700, 60), /* Channel 140 */
+ 	/* _We_ call this UNII 3 */
+-	CHAN5G(5745, 33), /* Channel 149 */
+-	CHAN5G(5765, 34), /* Channel 153 */
+-	CHAN5G(5785, 35), /* Channel 157 */
+-	CHAN5G(5805, 36), /* Channel 161 */
+-	CHAN5G(5825, 37), /* Channel 165 */
++	CHAN5G(5705, 61), /* channel 141 */
++	CHAN5G(5710, 62), /* channel 142 */
++	CHAN5G(5715, 63), /* channel 143 */
++	CHAN5G(5720, 64), /* channel 144 */
++	CHAN5G(5725, 65), /* channel 145 */
++	CHAN5G(5730, 66), /* channel 146 */
++	CHAN5G(5735, 67), /* channel 147 */
++	CHAN5G(5740, 68), /* channel 148 */
++	CHAN5G(5745, 69), /* Channel 149 */
++	CHAN5G(5750, 70), /* channel 150 */
++	CHAN5G(5755, 71), /* channel 151 */
++	CHAN5G(5760, 72), /* channel 152 */
++	CHAN5G(5765, 73), /* Channel 153 */
++	CHAN5G(5770, 74), /* channel 154 */
++	CHAN5G(5775, 75), /* channel 155 */
++	CHAN5G(5780, 76), /* channel 156 */
++	CHAN5G(5785, 77), /* Channel 157 */
++	CHAN5G(5790, 78), /* channel 158 */
++	CHAN5G(5795, 79), /* channel 159 */
++	CHAN5G(5800, 80), /* channel 160 */
++	CHAN5G(5805, 81), /* Channel 161 */
++	CHAN5G(5810, 82), /* channel 162 */
++	CHAN5G(5815, 83), /* channel 163 */
++	CHAN5G(5820, 84), /* channel 164 */
++	CHAN5G(5825, 85), /* Channel 165 */
+ };
+ 
+ /* Atheros hardware rate code addition for short premble */
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/hw.h linux-arcman-4.8.17/drivers/net/wireless/ath/ath9k/hw.h
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/ath9k/hw.h	2017-10-07 10:58:30.000000000 -0400
++++ linux-arcman-4.8.17/drivers/net/wireless/ath/ath9k/hw.h	2017-10-07 10:06:11.603683530 -0400
+@@ -73,7 +73,7 @@
+ 
+ #define ATH9K_RSSI_BAD			-128
+ 
+-#define ATH9K_NUM_CHANNELS	38
++#define ATH9K_NUM_CHANNELS	86
+ 
+ /* Register read/write primitives */
+ #define REG_WRITE(_ah, _reg, _val) \
+diff -Naur linux-hwe-4.8.0/drivers/net/wireless/ath/regd.c linux-arcman-4.8.17/drivers/net/wireless/ath/regd.c
+--- linux-hwe-4.8.0/drivers/net/wireless/ath/regd.c	2016-10-02 19:24:33.000000000 -0400
++++ linux-arcman-4.8.17/drivers/net/wireless/ath/regd.c	2017-10-07 10:03:27.965265663 -0400
+@@ -33,12 +33,12 @@
+  */
+ 
+ /* Only these channels all allow active scan on all world regulatory domains */
+-#define ATH9K_2GHZ_CH01_11	REG_RULE(2412-10, 2462+10, 40, 0, 20, 0)
++#define ATH9K_2GHZ_CH01_11	REG_RULE(2312-10, 2462+10, 40, 0, 30, 0)
+ 
+ /* We enable active scan on these a case by case basis by regulatory domain */
+-#define ATH9K_2GHZ_CH12_13	REG_RULE(2467-10, 2472+10, 40, 0, 20,\
++#define ATH9K_2GHZ_CH12_13	REG_RULE(2467-10, 2472+10, 40, 0, 30,\
+ 					 NL80211_RRF_NO_IR)
+-#define ATH9K_2GHZ_CH14		REG_RULE(2484-10, 2484+10, 40, 0, 20,\
++#define ATH9K_2GHZ_CH14		REG_RULE(2484-10, 2484+10, 40, 0, 30,\
+ 					 NL80211_RRF_NO_IR | \
+ 					 NL80211_RRF_NO_OFDM)
+ 

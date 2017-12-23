@@ -1,0 +1,212 @@
+diff -Naur linux-4.8/drivers/cpufreq/cpufreq_ondemand.c zen-kernel-4.8-zen-tune/drivers/cpufreq/cpufreq_ondemand.c
+--- linux-4.8/drivers/cpufreq/cpufreq_ondemand.c	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/drivers/cpufreq/cpufreq_ondemand.c	2016-11-22 04:17:36.000000000 -0500
+@@ -21,7 +21,11 @@
+ 
+ /* On-demand governor macros */
+ #define DEF_FREQUENCY_UP_THRESHOLD		(80)
++#ifdef CONFIG_ZEN_INTERACTIVE
++#define DEF_SAMPLING_DOWN_FACTOR		(10)
++#else
+ #define DEF_SAMPLING_DOWN_FACTOR		(1)
++#endif
+ #define MAX_SAMPLING_DOWN_FACTOR		(100000)
+ #define MICRO_FREQUENCY_UP_THRESHOLD		(95)
+ #define MICRO_FREQUENCY_MIN_SAMPLE_RATE		(10000)
+diff -Naur linux-4.8/include/linux/blkdev.h zen-kernel-4.8-zen-tune/include/linux/blkdev.h
+--- linux-4.8/include/linux/blkdev.h	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/include/linux/blkdev.h	2016-11-22 04:17:36.000000000 -0500
+@@ -39,7 +39,11 @@
+ struct pr_ops;
+ 
+ #define BLKDEV_MIN_RQ	4
++#ifdef CONFIG_ZEN_INTERACTIVE
++#define BLKDEV_MAX_RQ	512
++#else
+ #define BLKDEV_MAX_RQ	128	/* Default maximum */
++#endif
+ 
+ /*
+  * Maximum number of blkcg policies allowed to be registered concurrently.
+diff -Naur linux-4.8/init/Kconfig zen-kernel-4.8-zen-tune/init/Kconfig
+--- linux-4.8/init/Kconfig	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/init/Kconfig	2016-11-22 04:17:36.000000000 -0500
+@@ -28,6 +28,33 @@
+ 
+ menu "General setup"
+ 
++config ZEN_INTERACTIVE
++	bool "Tune kernel for interactivity"
++	default y
++	help
++	  Tunes the kernel for responsiveness at the cost of throughput and power usage.
++
++	  --- Virtual Memory Subsystem ---------------------------
++
++	    Mem dirty before bg writeback..:  10 %  ->  20 %
++	    Mem dirty before sync writeback:  20 %  ->  50 %
++
++	  --- Block Layer ----------------------------------------
++
++	    Block Layer Queue Depth........: 128    ->  512
++
++	  --- CPU Scheduler --------------------------------------
++
++	    Scheduling latency.............:   6    ->   3    ms
++	    Minimal granularity............:   0.75 ->   0.3  ms
++	    Wakeup granularity.............:   1    ->   0.5  ms
++	    CPU migration cost.............:   0.5  ->   0.25 ms
++	    Bandwidth slice size...........:   5    ->   3    ms
++
++	  --- CPU Frequency Scaling ------------------------------
++
++	    Ondemand down scaling factor...:   1    ->  10
++
+ config BROKEN
+ 	bool
+ 
+@@ -1320,6 +1347,13 @@
+ 	  with the "-O2" compiler flag for best performance and most
+ 	  helpful compile-time warnings.
+ 
++config CC_OPTIMIZE_HARDER
++	bool "Optimize harder"
++	help
++	  This option will pass "-O3" to your compiler resulting in a
++	  larger and faster kernel. The more complex optimizations also
++	  increase compilation time and may affect stability.
++
+ config CC_OPTIMIZE_FOR_SIZE
+ 	bool "Optimize for size"
+ 	help
+diff -Naur linux-4.8/kernel/sched/fair.c zen-kernel-4.8-zen-tune/kernel/sched/fair.c
+--- linux-4.8/kernel/sched/fair.c	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/kernel/sched/fair.c	2016-11-22 04:17:36.000000000 -0500
+@@ -47,8 +47,13 @@
+  * (to see the precise effective timeslice length of your workload,
+  *  run vmstat and monitor the context-switches (cs) field)
+  */
++#ifdef CONFIG_ZEN_INTERACTIVE
++unsigned int sysctl_sched_latency = 3000000ULL;
++unsigned int normalized_sysctl_sched_latency = 3000000ULL;
++#else
+ unsigned int sysctl_sched_latency = 6000000ULL;
+ unsigned int normalized_sysctl_sched_latency = 6000000ULL;
++#endif
+ 
+ /*
+  * The initial- and re-scaling of tunables is configurable
+@@ -66,13 +71,22 @@
+  * Minimal preemption granularity for CPU-bound tasks:
+  * (default: 0.75 msec * (1 + ilog(ncpus)), units: nanoseconds)
+  */
++#ifdef CONFIG_ZEN_INTERACTIVE
++unsigned int sysctl_sched_min_granularity = 300000ULL;
++unsigned int normalized_sysctl_sched_min_granularity = 300000ULL;
++#else
+ unsigned int sysctl_sched_min_granularity = 750000ULL;
+ unsigned int normalized_sysctl_sched_min_granularity = 750000ULL;
++#endif
+ 
+ /*
+  * is kept at sysctl_sched_latency / sysctl_sched_min_granularity
+  */
++#ifdef CONFIG_ZEN_INTERACTIVE
++static unsigned int sched_nr_latency = 10;
++#else
+ static unsigned int sched_nr_latency = 8;
++#endif
+ 
+ /*
+  * After fork, child runs first. If set to 0 (default) then
+@@ -88,10 +102,17 @@
+  * and reduces their over-scheduling. Synchronous workloads will still
+  * have immediate wakeup/sleep latencies.
+  */
++#ifdef CONFIG_ZEN_INTERACTIVE
++unsigned int sysctl_sched_wakeup_granularity = 500000UL;
++unsigned int normalized_sysctl_sched_wakeup_granularity = 500000UL;
++
++const_debug unsigned int sysctl_sched_migration_cost = 250000UL;
++#else
+ unsigned int sysctl_sched_wakeup_granularity = 1000000UL;
+ unsigned int normalized_sysctl_sched_wakeup_granularity = 1000000UL;
+ 
+ const_debug unsigned int sysctl_sched_migration_cost = 500000UL;
++#endif
+ 
+ /*
+  * The exponential sliding  window over which load is averaged for shares
+@@ -111,8 +132,12 @@
+  *
+  * default: 5 msec, units: microseconds
+   */
++#ifdef CONFIG_ZEN_INTERACTIVE
++unsigned int sysctl_sched_cfs_bandwidth_slice = 3000UL;
++#else
+ unsigned int sysctl_sched_cfs_bandwidth_slice = 5000UL;
+ #endif
++#endif
+ 
+ static inline void update_load_add(struct load_weight *lw, unsigned long inc)
+ {
+diff -Naur linux-4.8/Makefile zen-kernel-4.8-zen-tune/Makefile
+--- linux-4.8/Makefile	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/Makefile	2016-11-22 04:17:36.000000000 -0500
+@@ -624,6 +624,8 @@
+ 
+ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= -Os
++else ifdef CONFIG_CC_OPTIMIZE_HARDER
++KBUILD_CFLAGS	+= -O3
+ else
+ ifdef CONFIG_PROFILE_ALL_BRANCHES
+ KBUILD_CFLAGS	+= -O2
+diff -Naur linux-4.8/mm/page-writeback.c zen-kernel-4.8-zen-tune/mm/page-writeback.c
+--- linux-4.8/mm/page-writeback.c	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/mm/page-writeback.c	2016-11-22 04:17:36.000000000 -0500
+@@ -70,7 +70,11 @@
+ /*
+  * Start background writeback (via writeback threads) at this percentage
+  */
++#ifdef CONFIG_ZEN_INTERACTIVE
++int dirty_background_ratio = 20;
++#else
+ int dirty_background_ratio = 10;
++#endif
+ 
+ /*
+  * dirty_background_bytes starts at 0 (disabled) so that it is a function of
+@@ -87,7 +91,11 @@
+ /*
+  * The generator of dirty data starts writeback at this percentage
+  */
++#ifdef CONFIG_ZEN_INTERACTIVE
++int vm_dirty_ratio = 50;
++#else
+ int vm_dirty_ratio = 20;
++#endif
+ 
+ /*
+  * vm_dirty_bytes starts at 0 (disabled) so that it is a function of
+diff -Naur linux-4.8/net/ipv4/Kconfig zen-kernel-4.8-zen-tune/net/ipv4/Kconfig
+--- linux-4.8/net/ipv4/Kconfig	2016-10-02 19:24:33.000000000 -0400
++++ zen-kernel-4.8-zen-tune/net/ipv4/Kconfig	2016-11-22 04:17:36.000000000 -0500
+@@ -662,6 +662,9 @@
+ 	config DEFAULT_VEGAS
+ 		bool "Vegas" if TCP_CONG_VEGAS=y
+ 
++	config DEFAULT_YEAH
++		bool "YeAH" if TCP_CONG_YEAH=y
++
+ 	config DEFAULT_VENO
+ 		bool "Veno" if TCP_CONG_VENO=y
+ 
+@@ -692,6 +695,7 @@
+ 	default "htcp" if DEFAULT_HTCP
+ 	default "hybla" if DEFAULT_HYBLA
+ 	default "vegas" if DEFAULT_VEGAS
++	default "yeah" if DEFAULT_YEAH
+ 	default "westwood" if DEFAULT_WESTWOOD
+ 	default "veno" if DEFAULT_VENO
+ 	default "reno" if DEFAULT_RENO

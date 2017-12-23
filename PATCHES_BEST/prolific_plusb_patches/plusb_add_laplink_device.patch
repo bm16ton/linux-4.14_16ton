@@ -1,0 +1,12 @@
+--- drivers/net/usb/plusb.c.og	2017-11-17 18:17:40.456756244 -0500
++++ drivers/net/usb/plusb.c	2017-11-17 18:20:49.489141112 -0500
+@@ -135,6 +135,9 @@
+ 	USB_DEVICE(0x067b, 0x25a1),     /* PL-25A1, no eeprom */
+ 	.driver_info =  (unsigned long) &prolific_info,
+ }, {
++	USB_DEVICE(0x0576, 0x1254),     /* laplink PL-25A1 */
++	.driver_info =  (unsigned long) &prolific_info,
++}, {
+ 	USB_DEVICE(0x050d, 0x258a),     /* Belkin F5U258/F5U279 (PL-25A1) */
+ 	.driver_info =  (unsigned long) &prolific_info,
+ }, {
