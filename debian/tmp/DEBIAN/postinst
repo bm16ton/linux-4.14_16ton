@@ -8,5 +8,5 @@ export DEB_MAINT_PARAMS="$*"
 # Tell initramfs builder whether it's wanted
 export INITRD=Yes
 
-test -d /etc/kernel/postinst.d && run-parts --arg="4.14.8-16ton-gpd-win-gaming-conf" --arg="/boot/vmlinuz-4.14.8-16ton-gpd-win-gaming-conf" /etc/kernel/postinst.d
+test -d /etc/kernel/postinst.d && run-parts --arg="4.14.8-16ton-full+" --arg="/boot/vmlinuz-4.14.8-16ton-full+" /etc/kernel/postinst.d
 exit 0

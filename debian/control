@@ -1,20 +1,20 @@
-Source: linux-4.14.8-16ton-gpd-win-gaming-conf
+Source: linux-4.14.8-16ton-full+
 Section: kernel
 Priority: optional
 Maintainer: Anonymous <root@maddocks-Q552UB>
 Build-Depends: bc, kmod, cpio 
 Homepage: http://www.kernel.org/
 
-Package: linux-image-4.14.8-16ton-gpd-win-gaming-conf
+Package: linux-image-4.14.8-16ton-full+
 Architecture: any
-Description: Linux kernel, version 4.14.8-16ton-gpd-win-gaming-conf
+Description: Linux kernel, version 4.14.8-16ton-full+
  This package contains the Linux kernel, modules and corresponding other
- files, version: 4.14.8-16ton-gpd-win-gaming-conf.
+ files, version: 4.14.8-16ton-full+.
 
-Package: linux-headers-4.14.8-16ton-gpd-win-gaming-conf
+Package: linux-headers-4.14.8-16ton-full+
 Architecture: any
-Description: Linux kernel headers for 4.14.8-16ton-gpd-win-gaming-conf on ${kernel:debarch}
- This package provides kernel header files for 4.14.8-16ton-gpd-win-gaming-conf on ${kernel:debarch}
+Description: Linux kernel headers for 4.14.8-16ton-full+ on ${kernel:debarch}
+ This package provides kernel header files for 4.14.8-16ton-full+ on ${kernel:debarch}
  .
  This is useful for people who need to build external modules
 

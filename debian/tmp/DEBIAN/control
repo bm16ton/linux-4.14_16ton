@@ -1,12 +1,12 @@
-Package: linux-image-4.14.8-16ton-gpd-win-gaming-conf
-Source: linux-4.14.8-16ton-gpd-win-gaming-conf
-Version: 4.14.8-16ton-gpd-win-gaming-conf-1
+Package: linux-image-4.14.8-16ton-full+
+Source: linux-4.14.8-16ton-full+
+Version: 4.14.8-16ton-full+-2
 Architecture: amd64
 Maintainer: Anonymous <root@maddocks-Q552UB>
-Installed-Size: 197247
+Installed-Size: 209610
 Section: kernel
 Priority: optional
 Homepage: http://www.kernel.org/
-Description: Linux kernel, version 4.14.8-16ton-gpd-win-gaming-conf
+Description: Linux kernel, version 4.14.8-16ton-full+
  This package contains the Linux kernel, modules and corresponding other
- files, version: 4.14.8-16ton-gpd-win-gaming-conf.
+ files, version: 4.14.8-16ton-full+.
