@@ -4,7 +4,7 @@ build:
 	$(MAKE)
 
 binary-arch:
-	$(MAKE) KDEB_SOURCENAME=linux-4.14.9-16ton-full+ KDEB_PKGVERSION=4.14.9-16ton-full+-1 bindeb-pkg
+	$(MAKE) KDEB_SOURCENAME=linux-4.14.9-16ton-full+ KDEB_PKGVERSION=4.14.9-16ton-full+-2 bindeb-pkg
 
 clean:
 	rm -rf debian/*tmp debian/files
