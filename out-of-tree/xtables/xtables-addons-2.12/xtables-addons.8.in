@@ -1,0 +1,14 @@
+.TH xtables-addons 8 "Not For Workgroups" "" "v2.12 (2017-01-11)"
+.SH Name
+Xtables-addons \(em additional extensions for iptables, ip6tables, etc.
+.SH Targets
+.\" @TARGET@
+.SH Matches
+.\" @MATCHES@
+.SH "See also"
+\fBiptables\fP(8), \fBip6tables\fP(8), \fBiptables-extensions\fP(8),
+\fBiptaccount\fP(8)
+.PP
+For developers, the book "Writing Netfilter modules" at
+http://inai.de/documents/Netfilter_Modules.pdf provides detailed
+information on how to write such modules/extensions.

@@ -1,0 +1,9 @@
+.PP
+The LOGMARK target will log packet and connection marks to syslog.
+.TP
+\fB\-\-log\-level\fR \fIlevel\fR
+A logging level between 0 and 8 (inclusive).
+.TP
+\fB\-\-log\-prefix\fR \fIstring\fR
+Prefix log messages with the specified prefix; up to 29 bytes long, and useful
+for distinguishing messages in the logs.

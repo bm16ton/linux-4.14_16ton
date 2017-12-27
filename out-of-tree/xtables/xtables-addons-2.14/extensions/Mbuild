@@ -1,0 +1,24 @@
+# -*- Makefile -*-
+
+obj-${build_ACCOUNT}     += ACCOUNT/
+obj-${build_CHAOS}       += libxt_CHAOS.so
+obj-${build_DELUDE}      += libxt_DELUDE.so
+obj-${build_DHCPMAC}     += libxt_DHCPMAC.so libxt_dhcpmac.so
+obj-${build_DNETMAP}     += libxt_DNETMAP.so
+obj-${build_ECHO}        += libxt_ECHO.so
+obj-${build_IPMARK}      += libxt_IPMARK.so
+obj-${build_LOGMARK}     += libxt_LOGMARK.so
+obj-${build_SYSRQ}       += libxt_SYSRQ.so
+obj-${build_TARPIT}      += libxt_TARPIT.so
+obj-${build_condition}   += libxt_condition.so
+obj-${build_fuzzy}       += libxt_fuzzy.so
+obj-${build_geoip}       += libxt_geoip.so
+obj-${build_iface}       += libxt_iface.so
+obj-${build_ipp2p}       += libxt_ipp2p.so
+obj-${build_ipv4options} += libxt_ipv4options.so
+obj-${build_length2}     += libxt_length2.so
+obj-${build_lscan}       += libxt_lscan.so
+obj-${build_pknock}      += pknock/
+obj-${build_psd}         += libxt_psd.so
+obj-${build_quota2}      += libxt_quota2.so
+obj-${build_gradm}       += libxt_gradm.so

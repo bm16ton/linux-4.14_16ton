@@ -1,0 +1,169 @@
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/common/inc/nvmisc.h 384.90/kernel/common/inc/nvmisc.h
+--- NVIDIA-Linux-x86_64-384.90/kernel/common/inc/nvmisc.h	2017-09-20 04:33:10.000000000 +0300
++++ 384.90/kernel/common/inc/nvmisc.h	2017-11-13 02:29:23.063790152 +0300
+@@ -53,6 +53,7 @@ extern "C" {
+ //
+ // Miscellaneous macros useful for bit field manipulations
+ //
++#undef  BIT
+ #define BIT(b)                  (1<<(b))
+ #define BIT32(b)                ((NvU32)1<<(b))
+ #define BIT64(b)                ((NvU64)1<<(b))
+Только в 384.90/kernel: nv_compiler.h
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia/nv.c 384.90/kernel/nvidia/nv.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia/nv.c	2017-09-20 04:33:09.000000000 +0300
++++ 384.90/kernel/nvidia/nv.c	2017-10-02 03:45:21.001709217 +0300
+@@ -38,7 +38,7 @@
+ 
+ #if (NV_BUILD_MODULE_INSTANCES != 0)
+ #if defined(MODULE_LICENSE)
+-MODULE_LICENSE("NVIDIA");
++MODULE_LICENSE("GPLv2");
+ #endif
+ #if defined(MODULE_INFO)
+ MODULE_INFO(supported, "external");
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia/nv-frontend.c 384.90/kernel/nvidia/nv-frontend.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia/nv-frontend.c	2017-09-20 04:33:10.000000000 +0300
++++ 384.90/kernel/nvidia/nv-frontend.c	2017-10-02 03:45:21.008707347 +0300
+@@ -15,7 +15,7 @@
+ #include "nv-frontend.h"
+ 
+ #if defined(MODULE_LICENSE)
+-MODULE_LICENSE("NVIDIA");
++MODULE_LICENSE("GPLv2");
+ #endif
+ #if defined(MODULE_INFO)
+ MODULE_INFO(supported, "external");
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia/nv-gpu-numa.c 384.90/kernel/nvidia/nv-gpu-numa.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia/nv-gpu-numa.c	2017-09-20 04:33:09.000000000 +0300
++++ 384.90/kernel/nvidia/nv-gpu-numa.c	2017-11-13 02:28:19.730516708 +0300
+@@ -111,7 +111,7 @@ static NV_STATUS bad_idea_read_string_fr
+                                                 size_t read_buffer_size)
+ {
+     struct file *filp;
+-    int read_count;
++    ssize_t read_count;
+ 
+     filp = filp_open(path_to_file, O_RDONLY, 0);
+     if (IS_ERR(filp)) 
+@@ -120,7 +120,7 @@ static NV_STATUS bad_idea_read_string_fr
+         return NV_ERR_NO_VALID_PATH;
+     }
+ 
+-    read_count = kernel_read(filp, 0, read_buffer, read_buffer_size - 1);
++    read_count = kernel_read(filp, (void *)read_buffer, read_buffer_size - 1, 0);
+ 
+     filp_close(filp, NULL);
+ 
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia-drm/nvidia-drm-crtc.c 384.90/kernel/nvidia-drm/nvidia-drm-crtc.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia-drm/nvidia-drm-crtc.c	2017-09-20 04:33:13.000000000 +0300
++++ 384.90/kernel/nvidia-drm/nvidia-drm-crtc.c	2017-11-13 02:31:54.897292978 +0300
+@@ -162,7 +162,7 @@ static void nvidia_crtc_disable(struct d
+ 
+ }
+ 
+-static void nvidia_crtc_enable(struct drm_crtc *crtc)
++static void nvidia_crtc_enable(struct drm_crtc *crtc, struct drm_crtc_state *old_state)
+ {
+ 
+ }
+@@ -170,7 +170,7 @@ static void nvidia_crtc_enable(struct dr
+ static const struct drm_crtc_helper_funcs nv_crtc_helper_funcs = {
+     .prepare    = nvidia_crtc_prepare,
+     .commit     = nvidia_crtc_commit,
+-    .enable     = nvidia_crtc_enable,
++    .atomic_enable = nvidia_crtc_enable,
+     .disable    = nvidia_crtc_disable,
+     .mode_fixup = nvidia_crtc_mode_fixup,
+ };
+@@ -220,10 +220,9 @@ static struct drm_plane *nvidia_plane_cr
+         dev,
+         plane, crtc_mask, funcs,
+         formats, formats_count,
++	NULL,
+         plane_type
+-#if defined(NV_DRM_INIT_FUNCTIONS_HAVE_NAME_ARG)
+         , NULL
+-#endif
+         );
+ 
+     if (ret != 0)
+@@ -349,9 +348,7 @@ struct drm_crtc *nvidia_drm_add_crtc(str
+                                     &nv_crtc->base,
+                                     primary_plane, cursor_plane,
+                                     &nv_crtc_funcs
+-#if defined(NV_DRM_INIT_FUNCTIONS_HAVE_NAME_ARG)
+                                     , NULL
+-#endif
+                                     );
+ 
+     if (ret != 0)
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia-drm/nvidia-drm-encoder.c 384.90/kernel/nvidia-drm/nvidia-drm-encoder.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia-drm/nvidia-drm-encoder.c	2017-09-20 04:33:13.000000000 +0300
++++ 384.90/kernel/nvidia-drm/nvidia-drm-encoder.c	2017-10-02 03:42:52.110505816 +0300
+@@ -150,9 +150,7 @@ nvidia_encoder_new(struct drm_device *de
+     ret = drm_encoder_init(dev,
+                            &nv_encoder->base, &nv_encoder_funcs,
+                            nvkms_connector_signal_to_drm_encoder_signal(format)
+-#if defined(NV_DRM_INIT_FUNCTIONS_HAVE_NAME_ARG)
+                            , NULL
+-#endif
+                            );
+ 
+     if (ret != 0)
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia-drm/nvidia-drm-linux.c 384.90/kernel/nvidia-drm/nvidia-drm-linux.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia-drm/nvidia-drm-linux.c	2017-09-20 04:33:13.000000000 +0300
++++ 384.90/kernel/nvidia-drm/nvidia-drm-linux.c	2017-10-02 03:45:21.031701200 +0300
+@@ -185,7 +185,7 @@ module_init(nv_linux_drm_init);
+ module_exit(nv_linux_drm_exit);
+ 
+ #if defined(MODULE_LICENSE)
+-  MODULE_LICENSE("MIT");
++  MODULE_LICENSE("GPLv2");
+ #endif
+ #if defined(MODULE_INFO)
+   MODULE_INFO(supported, "external");
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia-modeset/nvidia-modeset-linux.c 384.90/kernel/nvidia-modeset/nvidia-modeset-linux.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia-modeset/nvidia-modeset-linux.c	2017-09-20 04:33:12.000000000 +0300
++++ 384.90/kernel/nvidia-modeset/nvidia-modeset-linux.c	2017-10-02 03:46:56.059301612 +0300
+@@ -343,8 +343,8 @@ static void nvkms_resume(NvU32 gpuId)
+ 
+ static nvidia_modeset_rm_ops_t __rm_ops = { 0 };
+ static nvidia_modeset_callbacks_t nvkms_rm_callbacks = {
+-    nvkms_suspend,
+-    nvkms_resume
++    .suspend = nvkms_suspend,
++    .resume = nvkms_resume
+ };
+ 
+ static int nvkms_alloc_rm(void)
+@@ -1309,7 +1309,7 @@ module_init(nvkms_init);
+ module_exit(nvkms_exit);
+ 
+ #if defined(MODULE_LICENSE)
+-  MODULE_LICENSE("NVIDIA");
++  MODULE_LICENSE("GPLv2");
+ #endif
+ #if defined(MODULE_INFO)
+   MODULE_INFO(supported, "external");
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia-uvm/uvm_common.c 384.90/kernel/nvidia-uvm/uvm_common.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia-uvm/uvm_common.c	2017-09-20 04:33:10.000000000 +0300
++++ 384.90/kernel/nvidia-uvm/uvm_common.c	2017-10-02 03:45:21.011706545 +0300
+@@ -388,5 +388,5 @@ module_param(uvm_enable_builtin_tests, i
+ MODULE_PARM_DESC(uvm_enable_builtin_tests,
+                  "Enable the UVM built-in tests. (This is a security risk)");
+ 
+-MODULE_LICENSE("MIT");
++MODULE_LICENSE("GPLv2");
+ MODULE_INFO(supported, "external");
+diff -urp NVIDIA-Linux-x86_64-384.90/kernel/nvidia-uvm/uvm_unsupported.c 384.90/kernel/nvidia-uvm/uvm_unsupported.c
+--- NVIDIA-Linux-x86_64-384.90/kernel/nvidia-uvm/uvm_unsupported.c	2017-09-20 04:33:10.000000000 +0300
++++ 384.90/kernel/nvidia-uvm/uvm_unsupported.c	2017-10-02 03:45:21.014705743 +0300
+@@ -171,6 +171,6 @@ static void __exit uvm_unsupported_exit(
+ module_init(uvm_unsupported_module_init);
+ module_exit(uvm_unsupported_exit);
+ 
+-MODULE_LICENSE("MIT");
++MODULE_LICENSE("GPLv2");
+ MODULE_INFO(supported, "external");
+ 

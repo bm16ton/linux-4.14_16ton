@@ -1,0 +1,22 @@
+.PP
+Causes confusion on the other end by doing odd things with incoming packets.
+CHAOS will randomly reply (or not) with one of its configurable subtargets:
+.TP
+\fB\-\-delude\fP
+Use the REJECT and DELUDE targets as a base to do a sudden or deferred
+connection reset, fooling some network scanners to return non-deterministic
+(randomly open/closed) results, and in case it is deemed open, it is actually
+closed/filtered.
+.TP
+\fB\-\-tarpit\fP
+Use the REJECT and TARPIT target as a base to hold the connection until it
+times out. This consumes conntrack entries when connection tracking is loaded
+(which usually is on most machines), and routers inbetween you and the Internet
+may fail to do their connection tracking if they have to handle more
+connections than they can.
+.PP
+The randomness factor of not replying vs. replying can be set during load-time
+of the xt_CHAOS module or during runtime in /sys/modules/xt_CHAOS/parameters.
+.PP
+See http://inai.de/projects/chaostables/ for more information
+about CHAOS, DELUDE and lscan.

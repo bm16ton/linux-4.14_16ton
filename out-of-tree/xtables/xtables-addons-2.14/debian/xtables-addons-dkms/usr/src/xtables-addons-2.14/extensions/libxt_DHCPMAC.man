@@ -1,0 +1,26 @@
+.PP
+In conjunction with ebtables, DHCPMAC can be used to completely change all MAC
+addresses from and to a VMware-based virtual machine. This is needed because
+VMware does not allow to set a non-VMware MAC address before an operating
+system is booted (and the MAC be changed with `ip link set eth0 address
+aa:bb..`).
+.TP
+\fB\-\-set\-mac\fP \fIaa:bb:cc:dd:ee:ff\fP[\fB/\fP\fImask\fP]
+Replace the client host MAC address field in the DHCP message with the given
+MAC address. This option is mandatory. The \fImask\fP parameter specifies the
+prefix length of bits to change.
+.PP
+EXAMPLE, replacing all addresses from one of VMware's assigned vendor IDs
+(00:50:56) addresses with something else:
+.PP
+iptables \-t mangle \-A FORWARD \-p udp \-\-dport 67 \-m physdev
+\-\-physdev\-in vmnet1 \-m dhcpmac \-\-mac 00:50:56:00:00:00/24 \-j DHCPMAC
+\-\-set\-mac ab:cd:ef:00:00:00/24
+.PP
+iptables \-t mangle \-A FORWARD \-p udp \-\-dport 68 \-m physdev
+\-\-physdev\-out vmnet1 \-m dhcpmac \-\-mac ab:cd:ef:00:00:00/24 \-j DHCPMAC
+\-\-set\-mac 00:50:56:00:00:00/24
+.PP
+(This assumes there is a bridge interface that has vmnet1 as a port. You will
+also need to add appropriate ebtables rules to change the MAC address of the
+Ethernet headers.)
