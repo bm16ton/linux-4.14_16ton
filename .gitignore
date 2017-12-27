@@ -52,6 +52,7 @@ Module.symvers
 #
 # /debian/
 debian/hdrtmp/
+debian/tmp
 #
 # tar directory (make tar*-pkg)
 #
