@@ -688,7 +688,7 @@
 #define BUG_TABLE
 #endif
 
-#ifdef CONFIG_UNWINDER_ORC
+#ifdef CONFIG_ORC_UNWINDER
 #define ORC_UNWIND_TABLE						\
 	. = ALIGN(4);							\
 	.orc_unwind_ip : AT(ADDR(.orc_unwind_ip) - LOAD_OFFSET) {	\

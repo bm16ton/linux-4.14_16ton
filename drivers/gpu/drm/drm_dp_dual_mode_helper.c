@@ -410,7 +410,6 @@ int drm_lspcon_get_mode(struct i2c_adapter *adapter,
 {
 	u8 data;
 	int ret = 0;
-	int retry;
 
 	if (!mode) {
 		DRM_ERROR("NULL input\n");
@@ -418,19 +417,10 @@ int drm_lspcon_get_mode(struct i2c_adapter *adapter,
 	}
 
 	/* Read Status: i2c over aux */
-	for (retry = 0; retry < 6; retry++) {
-		if (retry)
-			usleep_range(500, 1000);
-
-		ret = drm_dp_dual_mode_read(adapter,
-					    DP_DUAL_MODE_LSPCON_CURRENT_MODE,
-					    &data, sizeof(data));
-		if (!ret)
-			break;
-	}
-
+	ret = drm_dp_dual_mode_read(adapter, DP_DUAL_MODE_LSPCON_CURRENT_MODE,
+				    &data, sizeof(data));
 	if (ret < 0) {
-		DRM_DEBUG_KMS("LSPCON read(0x80, 0x41) failed\n");
+		DRM_ERROR("LSPCON read(0x80, 0x41) failed\n");
 		return -EFAULT;
 	}
 

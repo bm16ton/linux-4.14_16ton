@@ -40,14 +40,9 @@ int sctp_stream_init(struct sctp_stream *stream, __u16 outcnt, __u16 incnt,
 {
 	int i;
 
-	gfp |= __GFP_NOWARN;
-
 	/* Initial stream->out size may be very big, so free it and alloc
-	 * a new one with new outcnt to save memory if needed.
+	 * a new one with new outcnt to save memory.
 	 */
-	if (outcnt == stream->outcnt)
-		goto in;
-
 	kfree(stream->out);
 
 	stream->out = kcalloc(outcnt, sizeof(*stream->out), gfp);
@@ -58,7 +53,6 @@ int sctp_stream_init(struct sctp_stream *stream, __u16 outcnt, __u16 incnt,
 	for (i = 0; i < stream->outcnt; i++)
 		stream->out[i].state = SCTP_STREAM_OPEN;
 
-in:
 	if (!incnt)
 		return 0;
 

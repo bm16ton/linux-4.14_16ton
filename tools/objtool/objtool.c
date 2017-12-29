@@ -70,7 +70,7 @@ static void cmd_usage(void)
 
 	printf("\n");
 
-	exit(129);
+	exit(1);
 }
 
 static void handle_options(int *argc, const char ***argv)
@@ -86,7 +86,9 @@ static void handle_options(int *argc, const char ***argv)
 			break;
 		} else {
 			fprintf(stderr, "Unknown option: %s\n", cmd);
-			cmd_usage();
+			fprintf(stderr, "\n Usage: %s\n",
+				objtool_usage_string);
+			exit(1);
 		}
 
 		(*argv)++;

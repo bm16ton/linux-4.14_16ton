@@ -253,15 +253,22 @@ unsigned long *unwind_get_return_address_ptr(struct unwind_state *state)
 	return NULL;
 }
 
-static bool stack_access_ok(struct unwind_state *state, unsigned long _addr,
+static bool stack_access_ok(struct unwind_state *state, unsigned long addr,
 			    size_t len)
 {
 	struct stack_info *info = &state->stack_info;
-	void *addr = (void *)_addr;
 
-	if (!on_stack(info, addr, len) &&
-	    (get_stack_info(addr, state->task, info, &state->stack_mask)))
-		return false;
+	/*
+	 * If the address isn't on the current stack, switch to the next one.
+	 *
+	 * We may have to traverse multiple stacks to deal with the possibility
+	 * that info->next_sp could point to an empty stack and the address
+	 * could be on a subsequent stack.
+	 */
+	while (!on_stack(info, (void *)addr, len))
+		if (get_stack_info(info->next_sp, state->task, info,
+				   &state->stack_mask))
+			return false;
 
 	return true;
 }
@@ -276,32 +283,42 @@ static bool deref_stack_reg(struct unwind_state *state, unsigned long addr,
 	return true;
 }
 
+#define REGS_SIZE (sizeof(struct pt_regs))
+#define SP_OFFSET (offsetof(struct pt_regs, sp))
+#define IRET_REGS_SIZE (REGS_SIZE - offsetof(struct pt_regs, ip))
+#define IRET_SP_OFFSET (SP_OFFSET - offsetof(struct pt_regs, ip))
+
 static bool deref_stack_regs(struct unwind_state *state, unsigned long addr,
-			     unsigned long *ip, unsigned long *sp)
+			     unsigned long *ip, unsigned long *sp, bool full)
 {
-	struct pt_regs *regs = (struct pt_regs *)addr;
+	size_t regs_size = full ? REGS_SIZE : IRET_REGS_SIZE;
+	size_t sp_offset = full ? SP_OFFSET : IRET_SP_OFFSET;
+	struct pt_regs *regs = (struct pt_regs *)(addr + regs_size - REGS_SIZE);
 
-	/* x86-32 support will be more complicated due to the &regs->sp hack */
-	BUILD_BUG_ON(IS_ENABLED(CONFIG_X86_32));
+	if (IS_ENABLED(CONFIG_X86_64)) {
+		if (!stack_access_ok(state, addr, regs_size))
+			return false;
 
-	if (!stack_access_ok(state, addr, sizeof(struct pt_regs)))
+		*ip = regs->ip;
+		*sp = regs->sp;
+
+		return true;
+	}
+
+	if (!stack_access_ok(state, addr, sp_offset))
 		return false;
 
 	*ip = regs->ip;
-	*sp = regs->sp;
-	return true;
-}
 
-static bool deref_stack_iret_regs(struct unwind_state *state, unsigned long addr,
-				  unsigned long *ip, unsigned long *sp)
-{
-	struct pt_regs *regs = (void *)addr - IRET_FRAME_OFFSET;
+	if (user_mode(regs)) {
+		if (!stack_access_ok(state, addr + sp_offset,
+				     REGS_SIZE - SP_OFFSET))
+			return false;
 
-	if (!stack_access_ok(state, addr, IRET_FRAME_SIZE))
-		return false;
+		*sp = regs->sp;
+	} else
+		*sp = (unsigned long)&regs->sp;
 
-	*ip = regs->ip;
-	*sp = regs->sp;
 	return true;
 }
 
@@ -310,6 +327,7 @@ bool unwind_next_frame(struct unwind_state *state)
 	unsigned long ip_p, sp, orig_ip, prev_sp = state->sp;
 	enum stack_type prev_type = state->stack_info.type;
 	struct orc_entry *orc;
+	struct pt_regs *ptregs;
 	bool indirect = false;
 
 	if (unwind_done(state))
@@ -417,7 +435,7 @@ bool unwind_next_frame(struct unwind_state *state)
 		break;
 
 	case ORC_TYPE_REGS:
-		if (!deref_stack_regs(state, sp, &state->ip, &state->sp)) {
+		if (!deref_stack_regs(state, sp, &state->ip, &state->sp, true)) {
 			orc_warn("can't dereference registers at %p for ip %pB\n",
 				 (void *)sp, (void *)orig_ip);
 			goto done;
@@ -429,14 +447,20 @@ bool unwind_next_frame(struct unwind_state *state)
 		break;
 
 	case ORC_TYPE_REGS_IRET:
-		if (!deref_stack_iret_regs(state, sp, &state->ip, &state->sp)) {
+		if (!deref_stack_regs(state, sp, &state->ip, &state->sp, false)) {
 			orc_warn("can't dereference iret registers at %p for ip %pB\n",
 				 (void *)sp, (void *)orig_ip);
 			goto done;
 		}
 
-		state->regs = (void *)sp - IRET_FRAME_OFFSET;
-		state->full_regs = false;
+		ptregs = container_of((void *)sp, struct pt_regs, ip);
+		if ((unsigned long)ptregs >= prev_sp &&
+		    on_stack(&state->stack_info, ptregs, REGS_SIZE)) {
+			state->regs = ptregs;
+			state->full_regs = false;
+		} else
+			state->regs = NULL;
+
 		state->signal = true;
 		break;
 
@@ -529,18 +553,8 @@ void __unwind_start(struct unwind_state *state, struct task_struct *task,
 	}
 
 	if (get_stack_info((unsigned long *)state->sp, state->task,
-			   &state->stack_info, &state->stack_mask)) {
-		/*
-		 * We weren't on a valid stack.  It's possible that
-		 * we overflowed a valid stack into a guard page.
-		 * See if the next page up is valid so that we can
-		 * generate some kind of backtrace if this happens.
-		 */
-		void *next_page = (void *)PAGE_ALIGN((unsigned long)state->sp);
-		if (get_stack_info(next_page, state->task, &state->stack_info,
-				   &state->stack_mask))
-			return;
-	}
+			   &state->stack_info, &state->stack_mask))
+		return;
 
 	/*
 	 * The caller can provide the address of the first frame directly

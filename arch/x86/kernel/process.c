@@ -47,25 +47,9 @@
  * section. Since TSS's are completely CPU-local, we want them
  * on exact cacheline boundaries, to eliminate cacheline ping-pong.
  */
-__visible DEFINE_PER_CPU_SHARED_ALIGNED(struct tss_struct, cpu_tss_rw) = {
+__visible DEFINE_PER_CPU_SHARED_ALIGNED(struct tss_struct, cpu_tss) = {
 	.x86_tss = {
-		/*
-		 * .sp0 is only used when entering ring 0 from a lower
-		 * privilege level.  Since the init task never runs anything
-		 * but ring 0 code, there is no need for a valid value here.
-		 * Poison it.
-		 */
-		.sp0 = (1UL << (BITS_PER_LONG-1)) + 1,
-
-#ifdef CONFIG_X86_64
-		/*
-		 * .sp1 is cpu_current_top_of_stack.  The init task never
-		 * runs user code, but cpu_current_top_of_stack should still
-		 * be well defined before the first context switch.
-		 */
-		.sp1 = TOP_OF_INIT_STACK,
-#endif
-
+		.sp0 = TOP_OF_INIT_STACK,
 #ifdef CONFIG_X86_32
 		.ss0 = __KERNEL_DS,
 		.ss1 = __KERNEL_CS,
@@ -81,8 +65,11 @@ __visible DEFINE_PER_CPU_SHARED_ALIGNED(struct tss_struct, cpu_tss_rw) = {
 	  */
 	.io_bitmap		= { [0 ... IO_BITMAP_LONGS] = ~0 },
 #endif
+#ifdef CONFIG_X86_32
+	.SYSENTER_stack_canary	= STACK_END_MAGIC,
+#endif
 };
-EXPORT_PER_CPU_SYMBOL(cpu_tss_rw);
+EXPORT_PER_CPU_SYMBOL(cpu_tss);
 
 DEFINE_PER_CPU(bool, __tss_limit_invalid);
 EXPORT_PER_CPU_SYMBOL_GPL(__tss_limit_invalid);
@@ -111,7 +98,7 @@ void exit_thread(struct task_struct *tsk)
 	struct fpu *fpu = &t->fpu;
 
 	if (bp) {
-		struct tss_struct *tss = &per_cpu(cpu_tss_rw, get_cpu());
+		struct tss_struct *tss = &per_cpu(cpu_tss, get_cpu());
 
 		t->io_bitmap_ptr = NULL;
 		clear_thread_flag(TIF_IO_BITMAP);

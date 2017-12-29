@@ -305,12 +305,6 @@ void hci_uart_set_flow_control(struct hci_uart *hu, bool enable)
 		return;
 	}
 
-	if (hu->serdev) {
-		serdev_device_set_flow_control(hu->serdev, !enable);
-		serdev_device_set_rts(hu->serdev, !enable);
-		return;
-	}
-
 	if (enable) {
 		/* Disable hardware flow control */
 		ktermios = tty->termios;

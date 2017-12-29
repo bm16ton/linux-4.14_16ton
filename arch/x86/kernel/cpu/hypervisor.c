@@ -26,12 +26,6 @@
 #include <asm/processor.h>
 #include <asm/hypervisor.h>
 
-extern const struct hypervisor_x86 x86_hyper_vmware;
-extern const struct hypervisor_x86 x86_hyper_ms_hyperv;
-extern const struct hypervisor_x86 x86_hyper_xen_pv;
-extern const struct hypervisor_x86 x86_hyper_xen_hvm;
-extern const struct hypervisor_x86 x86_hyper_kvm;
-
 static const __initconst struct hypervisor_x86 * const hypervisors[] =
 {
 #ifdef CONFIG_XEN_PV
@@ -47,52 +41,54 @@ static const __initconst struct hypervisor_x86 * const hypervisors[] =
 #endif
 };
 
-enum x86_hypervisor_type x86_hyper_type;
-EXPORT_SYMBOL(x86_hyper_type);
+const struct hypervisor_x86 *x86_hyper;
+EXPORT_SYMBOL(x86_hyper);
 
-static inline const struct hypervisor_x86 * __init
+static inline void __init
 detect_hypervisor_vendor(void)
 {
-	const struct hypervisor_x86 *h = NULL, * const *p;
+	const struct hypervisor_x86 *h, * const *p;
 	uint32_t pri, max_pri = 0;
 
 	for (p = hypervisors; p < hypervisors + ARRAY_SIZE(hypervisors); p++) {
-		pri = (*p)->detect();
-		if (pri > max_pri) {
+		h = *p;
+		pri = h->detect();
+		if (pri != 0 && pri > max_pri) {
 			max_pri = pri;
-			h = *p;
+			x86_hyper = h;
 		}
 	}
 
-	if (h)
-		pr_info("Hypervisor detected: %s\n", h->name);
-
-	return h;
-}
-
-static void __init copy_array(const void *src, void *target, unsigned int size)
-{
-	unsigned int i, n = size / sizeof(void *);
-	const void * const *from = (const void * const *)src;
-	const void **to = (const void **)target;
-
-	for (i = 0; i < n; i++)
-		if (from[i])
-			to[i] = from[i];
+	if (max_pri)
+		pr_info("Hypervisor detected: %s\n", x86_hyper->name);
 }
 
 void __init init_hypervisor_platform(void)
 {
-	const struct hypervisor_x86 *h;
 
-	h = detect_hypervisor_vendor();
+	detect_hypervisor_vendor();
 
-	if (!h)
+	if (!x86_hyper)
 		return;
 
-	copy_array(&h->init, &x86_init.hyper, sizeof(h->init));
-	copy_array(&h->runtime, &x86_platform.hyper, sizeof(h->runtime));
+	if (x86_hyper->init_platform)
+		x86_hyper->init_platform();
+}
 
-	x86_hyper_type = h->type;
-	x86_init.hyper.init_platform();
+bool __init hypervisor_x2apic_available(void)
+{
+	return x86_hyper                   &&
+	       x86_hyper->x2apic_available &&
+	       x86_hyper->x2apic_available();
+}
+
+void hypervisor_pin_vcpu(int cpu)
+{
+	if (!x86_hyper)
+		return;
+
+	if (x86_hyper->pin_vcpu)
+		x86_hyper->pin_vcpu(cpu);
+	else
+		WARN_ONCE(1, "vcpu pinning requested but not supported!\n");
 }

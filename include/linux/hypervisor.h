@@ -7,12 +7,8 @@
  *		Juergen Gross <jgross@suse.com>
  */
 
-#ifdef CONFIG_X86
-#include <asm/x86_init.h>
-static inline void hypervisor_pin_vcpu(int cpu)
-{
-	x86_platform.hyper.pin_vcpu(cpu);
-}
+#ifdef CONFIG_HYPERVISOR_GUEST
+#include <asm/hypervisor.h>
 #else
 static inline void hypervisor_pin_vcpu(int cpu)
 {

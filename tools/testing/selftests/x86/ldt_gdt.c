@@ -137,51 +137,30 @@ static void check_valid_segment(uint16_t index, int ldt,
 	}
 }
 
-static bool install_valid_mode(const struct user_desc *d, uint32_t ar,
-			       bool oldmode, bool ldt)
+static bool install_valid_mode(const struct user_desc *desc, uint32_t ar,
+			       bool oldmode)
 {
-	struct user_desc desc = *d;
-	int ret;
-
-	if (!ldt) {
-#ifndef __i386__
-		/* No point testing set_thread_area in a 64-bit build */
-		return false;
-#endif
-		if (!gdt_entry_num)
-			return false;
-		desc.entry_number = gdt_entry_num;
-
-		ret = syscall(SYS_set_thread_area, &desc);
-	} else {
-		ret = syscall(SYS_modify_ldt, oldmode ? 1 : 0x11,
-			      &desc, sizeof(desc));
-
-		if (ret < -1)
-			errno = -ret;
-
-		if (ret != 0 && errno == ENOSYS) {
-			printf("[OK]\tmodify_ldt returned -ENOSYS\n");
-			return false;
-		}
-	}
-
+	int ret = syscall(SYS_modify_ldt, oldmode ? 1 : 0x11,
+			  desc, sizeof(*desc));
+	if (ret < -1)
+		errno = -ret;
 	if (ret == 0) {
-		uint32_t limit = desc.limit;
-		if (desc.limit_in_pages)
+		uint32_t limit = desc->limit;
+		if (desc->limit_in_pages)
 			limit = (limit << 12) + 4095;
-		check_valid_segment(desc.entry_number, ldt, ar, limit, true);
+		check_valid_segment(desc->entry_number, 1, ar, limit, true);
 		return true;
+	} else if (errno == ENOSYS) {
+		printf("[OK]\tmodify_ldt returned -ENOSYS\n");
+		return false;
 	} else {
-		if (desc.seg_32bit) {
-			printf("[FAIL]\tUnexpected %s failure %d\n",
-			       ldt ? "modify_ldt" : "set_thread_area",
+		if (desc->seg_32bit) {
+			printf("[FAIL]\tUnexpected modify_ldt failure %d\n",
 			       errno);
 			nerrs++;
 			return false;
 		} else {
-			printf("[OK]\t%s rejected 16 bit segment\n",
-			       ldt ? "modify_ldt" : "set_thread_area");
+			printf("[OK]\tmodify_ldt rejected 16 bit segment\n");
 			return false;
 		}
 	}
@@ -189,15 +168,7 @@ static bool install_valid_mode(const struct user_desc *d, uint32_t ar,
 
 static bool install_valid(const struct user_desc *desc, uint32_t ar)
 {
-	bool ret = install_valid_mode(desc, ar, false, true);
-
-	if (desc->contents <= 1 && desc->seg_32bit &&
-	    !desc->seg_not_present) {
-		/* Should work in the GDT, too. */
-		install_valid_mode(desc, ar, false, false);
-	}
-
-	return ret;
+	return install_valid_mode(desc, ar, false);
 }
 
 static void install_invalid(const struct user_desc *desc, bool oldmode)

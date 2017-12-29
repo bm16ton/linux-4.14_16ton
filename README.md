@@ -1,10 +1,4 @@
-
-UPDATE Dec 27 2017; brought up to 4.14.9
-	nvidia 384 doesnt compile against 4.14.9, patches to fix this in CURRENTLY_APPLIED_PATCHES
-	directory out-of-tree now has the following out of tree kernel modules (I believe they all have dkms support)
-			i2c-ch341-usb    kernel i2c driver for ch341a
-			spi-ch341-usb	 kernel spi driver for ch341a
-			xtables-addons   iptables addons
+Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
 UPDATE Dec 22 2017; Brought up to 4.14.8
 
@@ -67,17 +61,3 @@ tools/16ton/dpf/st2205term*
 tools/16ton/dpf/FRAMEBUFFER/*
 	The userland application required for the tiny usb digital photo frame
 	based off the ax206 chipsets. and the stand alone kernel module source (maybe older then in tree)
-
-
-Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
-Special thanks and/or credit goes to so many ill hafta look and find everyone;
-	openwrt
-	Hans de Goede		https://hansdegoede.livejournal.com/17445.html
-	https://github.com/gschorcht/i2c-ch341-usb
-	https://github.com/gschorcht/spi-ch341-usb
-	https://github.com/andyvand/AtherosROMKit
-	http://projects.doozan.com/usb_lcd/st2205term.html
-	http://picframe.spritesserver.nl/wiki/
-	http://sourceforge.net/projects/dpf-ax/files
-	http://picframe.spritesserver.nl/wiki/index.php/DPF_with_AppoTech_AX206
-	https://github.com/dreamlayers/dpf-ax

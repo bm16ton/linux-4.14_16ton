@@ -601,7 +601,7 @@ static struct trap_array_entry trap_array[] = {
 #ifdef CONFIG_X86_MCE
 	{ machine_check,               xen_machine_check,               true },
 #endif
-	{ nmi,                         xen_xennmi,                      true },
+	{ nmi,                         xen_nmi,                         true },
 	{ overflow,                    xen_overflow,                    false },
 #ifdef CONFIG_IA32_EMULATION
 	{ entry_INT80_compat,          xen_entry_INT80_compat,          false },
@@ -811,14 +811,15 @@ static void __init xen_write_gdt_entry_boot(struct desc_struct *dt, int entry,
 	}
 }
 
-static void xen_load_sp0(unsigned long sp0)
+static void xen_load_sp0(struct tss_struct *tss,
+			 struct thread_struct *thread)
 {
 	struct multicall_space mcs;
 
 	mcs = xen_mc_entry(0);
-	MULTI_stack_switch(mcs.mc, __KERNEL_DS, sp0);
+	MULTI_stack_switch(mcs.mc, __KERNEL_DS, thread->sp0);
 	xen_mc_issue(PARAVIRT_LAZY_CPU);
-	this_cpu_write(cpu_tss_rw.x86_tss.sp0, sp0);
+	tss->x86_tss.sp0 = thread->sp0;
 }
 
 void xen_set_iopl_mask(unsigned mask)
@@ -1459,9 +1460,9 @@ static uint32_t __init xen_platform_pv(void)
 	return 0;
 }
 
-const __initconst struct hypervisor_x86 x86_hyper_xen_pv = {
+const struct hypervisor_x86 x86_hyper_xen_pv = {
 	.name                   = "Xen PV",
 	.detect                 = xen_platform_pv,
-	.type			= X86_HYPER_XEN_PV,
-	.runtime.pin_vcpu       = xen_pin_vcpu,
+	.pin_vcpu               = xen_pin_vcpu,
 };
+EXPORT_SYMBOL(x86_hyper_xen_pv);

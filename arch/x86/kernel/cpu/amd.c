@@ -804,11 +804,8 @@ static void init_amd(struct cpuinfo_x86 *c)
 	case 0x17: init_amd_zn(c); break;
 	}
 
-	/*
-	 * Enable workaround for FXSAVE leak on CPUs
-	 * without a XSaveErPtr feature
-	 */
-	if ((c->x86 >= 6) && (!cpu_has(c, X86_FEATURE_XSAVEERPTR)))
+	/* Enable workaround for FXSAVE leak */
+	if (c->x86 >= 6)
 		set_cpu_bug(c, X86_BUG_FXSAVE_LEAK);
 
 	cpu_detect_cache_sizes(c);

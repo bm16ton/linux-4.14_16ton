@@ -48,7 +48,7 @@
  */
 ENTRY(entry_SYSENTER_compat)
 	/* Interrupts are off on entry. */
-	SWAPGS
+	SWAPGS_UNSAFE_STACK
 	movq	PER_CPU_VAR(cpu_current_top_of_stack), %rsp
 
 	/*
@@ -306,11 +306,8 @@ ENTRY(entry_INT80_compat)
 	 */
 	movl	%eax, %eax
 
+	/* Construct struct pt_regs on stack (iret frame is already on stack) */
 	pushq	%rax			/* pt_regs->orig_ax */
-
-	/* switch to thread stack expects orig_ax to be pushed */
-	call	switch_to_thread_stack
-
 	pushq	%rdi			/* pt_regs->di */
 	pushq	%rsi			/* pt_regs->si */
 	pushq	%rdx			/* pt_regs->dx */
@@ -340,7 +337,8 @@ ENTRY(entry_INT80_compat)
 
 	/* Go back to user mode. */
 	TRACE_IRQS_ON
-	jmp	swapgs_restore_regs_and_return_to_usermode
+	SWAPGS
+	jmp	restore_regs_and_iret
 END(entry_INT80_compat)
 
 ENTRY(stub32_clone)
