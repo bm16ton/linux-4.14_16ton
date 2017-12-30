@@ -2955,16 +2955,15 @@ void ath9k_hw_apply_txpower(struct ath_hw *ah, struct ath9k_channel *chan,
 	u16 ctl = NO_CTL;
 
 	if (!chan)
-		return;
-
-	if (!test)
 		ctl = NO_CTL;
 
 	channel = chan->chan;
 	chan_pwr = min_t(int, channel->max_power * 2, MAX_RATE_POWER);
 	new_pwr = min_t(int, chan_pwr, reg->power_limit);
 
-	ah->eep_ops->set_txpower(ah, chan, ctl, get_antenna_gain(ah, chan), new_pwr, test); 
+	ah->eep_ops->set_txpower(ah, chan,
+				 ctl,
+				 get_antenna_gain(ah, chan), new_pwr, ctl);
 }
 
 void ath9k_hw_set_txpowerlimit(struct ath_hw *ah, u32 limit, bool test)

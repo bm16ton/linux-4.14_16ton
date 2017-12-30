@@ -950,5 +950,5 @@ e5e97a386f501f14ace3de083aea76cc  usr/include/video/edid.h
 370e3c0c7c2c9fe844842787562ee649  usr/include/video/..install.cmd
 38afb7b4536e5f3bd0ee148af65bcd25  usr/include/video/uvesafb.h
 d41d8cd98f00b204e9800998ecf8427e  usr/include/video/.install
-6cb042519f8e6a6c2fe99bc9481df1d8  usr/share/doc/linux-libc-dev/changelog.Debian.gz
+38aaee531ab8a66cca087d6e251c7c0b  usr/share/doc/linux-libc-dev/changelog.Debian.gz
 2c6cd6286401903c7f46f350c084ef15  usr/share/doc/linux-libc-dev/copyright
