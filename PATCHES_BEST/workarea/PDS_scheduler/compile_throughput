@@ -1,6 +1,0 @@
-#!/bin/bash
-cat /proc/schedstat
-~/src/sys > /dev/null
-time make -j${1}
-#cat /proc/schedstat
-~/src/sys > /dev/null

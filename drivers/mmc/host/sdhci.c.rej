@@ -8,17 +8,18 @@
  #include <linux/regulator/consumer.h>
  #include <linux/pm_runtime.h>
  #include <linux/of.h>
-@@ -3651,22 +3652,29 @@ int sdhci_setup_host(struct sdhci_host *host)
+@@ -3650,23 +3651,30 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 
  	spin_lock_init(&host->lock);
  
- 	/*
++	/*
 +	 * Maximum number of sectors in one transfer. Limited by SDMA boundary
 +	 * size (512KiB). Note some tuning modes impose a 4MiB limit, but this
 +	 * is less anyway.
 +	 */
 +	mmc->max_req_size = 524288;
 +
-+	/*
+ 	/*
  	 * Maximum number of segments. Depends on if the hardware
  	 * can do scatter/gather or not.
  	 */

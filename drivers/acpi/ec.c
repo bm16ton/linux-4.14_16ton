@@ -1566,6 +1566,7 @@ static bool acpi_ec_ecdt_get_handle(acpi_handle *phandle)
 	struct acpi_table_ecdt *ecdt_ptr;
 	acpi_status status;
 	acpi_handle handle;
+	int ret;
 
 	status = acpi_get_table(ACPI_SIG_ECDT, 1,
 				(struct acpi_table_header **)&ecdt_ptr);

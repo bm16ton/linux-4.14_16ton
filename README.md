@@ -1,7 +1,5 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
-UPDATE Dec 22 2017; Brought up to 4.14.8
-
 ISSUES: At first non of the 5ghz band was available in Master (AP) mode on the brcmfmac (especially on GPD Win
 	the only brcmfmac device i own) When I first applied my patches and the restrictions where removed from the
 	channel list, I tried an AP on 36 and it worked. I foolishly assumed I was done. I now realized even tho
@@ -28,7 +26,7 @@ FIXES:
 wifi.scan-rand-mac-address=no
 
 	at end of /etc/NetworkManager/NetworkManager.conf
-
+	
 
 
 ADDITIONS:
@@ -41,9 +39,9 @@ Im sures there more, and more is on the way
 
 in tools/16ton
 
-tools/16ton/iwleeprom
+tools/16ton/iwleeprom 
 	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writting to certain intel and
-	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and
+	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and 
 	22 on 5ghz on Intel cards and for Atheros cards it changes the eeprom reg domain to 0x6A tho ive seen multiple
     sources say 65 unlocks 5ghz a quick look at linux driver makes me think 6A will be less restrictive, if im wrong
 	edit ath9kio.c search for 0x6A and replace it with 0x65, recompile. THO FOR ATHEROS CARDS THIS IS NOT REQUIRED AT

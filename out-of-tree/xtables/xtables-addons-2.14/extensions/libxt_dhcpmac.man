@@ -1,4 +1,0 @@
-.TP
-\fB\-\-mac\fP \fIaa:bb:cc:dd:ee:ff\fP[\fB/\fP\fImask\fP]
-Matches the DHCP "Client Host" address (a MAC address) in a DHCP message.
-\fImask\fP specifies the prefix length of the initial portion to match.

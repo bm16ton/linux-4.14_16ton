@@ -6111,7 +6111,15 @@ static int brcmf_construct_chaninfo(struct brcmf_cfg80211_info *cfg,
 			chaninfo = ch.chspec;
 			err = brcmf_fil_bsscfg_int_get(ifp, "per_chan_info",
 						       &chaninfo);
-
+			if (!err) {
+				if (chaninfo & WL_CHAN_RADAR)
+					channel->flags |=
+						(IEEE80211_CHAN_RADAR |
+						 IEEE80211_CHAN_NO_IR);
+				if (chaninfo & WL_CHAN_PASSIVE)
+					channel->flags |=
+						IEEE80211_CHAN_NO_IR;
+			}
 		}
 	}
 
