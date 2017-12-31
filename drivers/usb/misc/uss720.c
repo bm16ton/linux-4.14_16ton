@@ -332,7 +332,7 @@ static int clear_epp_timeout(struct parport *pp)
 static int uss720_irq(int usbstatus, void *buffer, int len, void *dev_id)
 {
 	struct parport *pp = (struct parport *)dev_id;
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 
 	if (usbstatus != 0 || len < 4 || !buffer)
 		return 1;
@@ -360,7 +360,7 @@ static unsigned char parport_uss720_read_data(struct parport *pp)
 
 static void parport_uss720_write_control(struct parport *pp, unsigned char d)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 
 	d = (d & 0xf) | (priv->reg[1] & 0xf0);
 	if (set_1284_register(pp, 2, d, GFP_KERNEL))
@@ -370,13 +370,13 @@ static void parport_uss720_write_control(struct parport *pp, unsigned char d)
 
 static unsigned char parport_uss720_read_control(struct parport *pp)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	return priv->reg[1] & 0xf; /* Use soft copy */
 }
 
 static unsigned char parport_uss720_frob_control(struct parport *pp, unsigned char mask, unsigned char val)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	unsigned char d;
 
 	mask &= 0x0f;
@@ -399,7 +399,7 @@ static unsigned char parport_uss720_read_status(struct parport *pp)
 
 static void parport_uss720_disable_irq(struct parport *pp)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	unsigned char d;
 
 	d = priv->reg[1] & ~0x10;
@@ -410,7 +410,7 @@ static void parport_uss720_disable_irq(struct parport *pp)
 
 static void parport_uss720_enable_irq(struct parport *pp)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	unsigned char d;
 
 	d = priv->reg[1] | 0x10;
@@ -421,7 +421,7 @@ static void parport_uss720_enable_irq(struct parport *pp)
 
 static void parport_uss720_data_forward (struct parport *pp)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	unsigned char d;
 
 	d = priv->reg[1] & ~0x20;
@@ -432,7 +432,7 @@ static void parport_uss720_data_forward (struct parport *pp)
 
 static void parport_uss720_data_reverse (struct parport *pp)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	unsigned char d;
 
 	d = priv->reg[1] | 0x20;
@@ -449,7 +449,7 @@ static void parport_uss720_init_state(struct pardevice *dev, struct parport_stat
 
 static void parport_uss720_save_state(struct parport *pp, struct parport_state *s)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 
 #if 0
 	if (get_1284_register(pp, 2, NULL, GFP_ATOMIC))
@@ -472,7 +472,7 @@ static void parport_uss720_restore_state(struct parport *pp, struct parport_stat
 
 static size_t parport_uss720_epp_read_data(struct parport *pp, void *buf, size_t length, int flags)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	size_t got = 0;
 
 	if (change_mode(pp, ECR_EPP))
@@ -493,7 +493,7 @@ static size_t parport_uss720_epp_read_data(struct parport *pp, void *buf, size_t
 static size_t parport_uss720_epp_write_data(struct parport *pp, const void *buf, size_t length, int flags)
 {
 #if 0
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	size_t written = 0;
 
 	if (change_mode(pp, ECR_EPP))
@@ -531,7 +531,7 @@ static size_t parport_uss720_epp_write_data(struct parport *pp, const void *buf,
 
 static size_t parport_uss720_epp_read_addr(struct parport *pp, void *buf, size_t length, int flags)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	size_t got = 0;
 
 	if (change_mode(pp, ECR_EPP))
@@ -551,7 +551,7 @@ static size_t parport_uss720_epp_read_addr(struct parport *pp, void *buf, size_t
 
 static size_t parport_uss720_epp_write_addr(struct parport *pp, const void *buf, size_t length, int flags)
 {
-	struct parport_uss720_private *priv = pp->private_data;	
+	struct parport_uss720_private *priv = pp->private_data;
 	size_t written = 0;
 
 	if (change_mode(pp, ECR_EPP))
@@ -642,7 +642,7 @@ static size_t parport_uss720_write_compat(struct parport *pp, const void *buffer
 
 /* --------------------------------------------------------------------- */
 
-static struct parport_operations parport_uss720_ops = 
+static struct parport_operations parport_uss720_ops =
 {
 	.owner =		THIS_MODULE,
 	.write_data =		parport_uss720_write_data,
@@ -711,7 +711,7 @@ static int uss720_probe(struct usb_interface *intf,
 	}
 
 	/*
-	 * Allocate parport interface 
+	 * Allocate parport interface
 	 */
 	priv = kzalloc(sizeof(struct parport_uss720_private), GFP_KERNEL);
 	if (!priv) {
@@ -783,6 +783,7 @@ static void uss720_disconnect(struct usb_interface *intf)
 static const struct usb_device_id uss720_table[] = {
 	{ USB_DEVICE(0x047e, 0x1001) },
 	{ USB_DEVICE(0x0557, 0x2001) },
+	{ USB_DEVICE(0x05ab, 0x0002) },
 	{ USB_DEVICE(0x0729, 0x1284) },
 	{ USB_DEVICE(0x1293, 0x0002) },
 	{ USB_DEVICE(0x050d, 0x0002) },

@@ -495,7 +495,7 @@ static void ath9k_hw_init_defaults(struct ath_hw *ah)
 	ah->htc_reset_init = true;
 
 	/* ar9002 does not support TPC for the moment */
-	ah->tpc_enabled = !!AR_SREV_9300_20_OR_LATER(ah);
+	ah->tpc_enabled = false;
 
 	ah->ani_function = ATH9K_ANI_ALL;
 	if (!AR_SREV_9300_20_OR_LATER(ah))
@@ -2955,15 +2955,16 @@ void ath9k_hw_apply_txpower(struct ath_hw *ah, struct ath9k_channel *chan,
 	u16 ctl = NO_CTL;
 
 	if (!chan)
+		return;
+
+	if (!test)
 		ctl = NO_CTL;
 
 	channel = chan->chan;
 	chan_pwr = min_t(int, channel->max_power * 2, MAX_RATE_POWER);
 	new_pwr = min_t(int, chan_pwr, reg->power_limit);
 
-	ah->eep_ops->set_txpower(ah, chan,
-				 ctl,
-				 get_antenna_gain(ah, chan), new_pwr, ctl);
+	ah->eep_ops->set_txpower(ah, chan, ctl, get_antenna_gain(ah, chan), new_pwr, test);
 }
 
 void ath9k_hw_set_txpowerlimit(struct ath_hw *ah, u32 limit, bool test)
