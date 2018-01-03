@@ -1,0 +1,33 @@
+.PP
+Detects simple low-level scan attempts based upon the packet's contents.
+(This is
+different from other implementations, which also try to match the rate of new
+connections.) Note that an attempt is only discovered after it has been carried
+out, but this information can be used in conjunction with other rules to block
+the remote host's future connections. So this match module will match on the
+(probably) last packet the remote side will send to your machine.
+.TP
+\fB\-\-stealth\fR
+Match if the packet did not belong to any known TCP connection
+(Stealth/FIN/XMAS/NULL scan).
+.TP
+\fB\-\-synscan\fR
+Match if the connection was a TCP half-open discovery (SYN scan), i.e. the
+connection was torn down after the 2nd packet in the 3-way handshake.
+.TP
+\fB\-\-cnscan\fR
+Match if the connection was a TCP full open discovery (connect scan), i.e. the
+connection was torn down after completion of the 3-way handshake.
+.TP
+\fB\-\-grscan\fR
+Match if data in the connection only flew in the direction of the remote side,
+e.g. if the connection was terminated after a locally running daemon sent its
+identification. (E.g. openssh, smtp, ftpd.) This may falsely trigger on
+warranted single-direction data flows, usually bulk data transfers such as
+FTP DATA connections or IRC DCC. Grab Scan Detection should only be used on
+ports where a protocol runs that is guaranteed to do a bidirectional exchange
+of bytes.
+.PP
+NOTE: Some clients (Windows XP for example) may do what looks like a SYN scan,
+so be advised to carefully use xt_lscan in conjunction with blocking rules,
+as it may lock out your very own internal network.

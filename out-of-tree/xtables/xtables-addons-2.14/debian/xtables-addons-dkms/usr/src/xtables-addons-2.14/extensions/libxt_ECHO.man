@@ -1,0 +1,5 @@
+.PP
+The \fBECHO\fP target will send back all packets it received. It serves as an
+examples for an Xtables target.
+.PP
+ECHO takes no options.

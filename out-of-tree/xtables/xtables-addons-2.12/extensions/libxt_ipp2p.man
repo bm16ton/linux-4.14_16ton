@@ -1,0 +1,49 @@
+.PP
+This module matches certain packets in P2P flows. It is not
+designed to match all packets belonging to a P2P connection \(em
+use IPP2P together with CONNMARK for this purpose.
+.PP
+Use it together with \-p tcp or \-p udp to search these protocols
+only or without \-p switch to search packets of both protocols.
+.PP
+IPP2P provides the following options, of which one or more may be specified
+on the command line:
+.TP
+\fB\-\-edk\fP
+Matches as many eDonkey/eMule packets as possible.
+.TP
+\fB\-\-kazaa\fP
+Matches as many KaZaA packets as possible.
+.TP
+\fB\-\-gnu\fP
+Matches as many Gnutella packets as possible.
+.TP
+\fB\-\-dc\fP
+Matches as many Direct Connect packets as possible.
+.TP
+\fB\-\-bit\fP
+Matches BitTorrent packets.
+.TP
+\fB\-\-apple\fP
+Matches AppleJuice packets.
+.TP
+\fB\-\-soul\fP
+Matches some SoulSeek packets. Considered as beta, use careful!
+.TP
+\fB\-\-winmx\fP
+Matches some WinMX packets. Considered as beta, use careful!
+.TP
+\fB\-\-ares\fP
+Matches Ares and AresLite packets. Use together with \-j DROP only.
+.TP
+\fB\-\-debug\fP
+Prints some information about each hit into kernel logfile. May
+produce huge logfiles so beware!
+.PP
+Note that ipp2p may not (and often, does not) identify all packets that are
+exchanged as a result of running filesharing programs.
+.PP
+There is more information on http://ipp2p.org/ , but it has not been updated
+since September 2006, and the syntax there is different from the ipp2p.c
+provided in Xtables-addons; most importantly, the \-\-ipp2p flag was removed
+due to its ambiguity to match "all known" protocols.

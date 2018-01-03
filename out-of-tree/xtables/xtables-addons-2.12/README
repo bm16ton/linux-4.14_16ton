@@ -1,0 +1,57 @@
+Xtables-addons
+==============
+
+Xtables-addons is the proclaimed successor to patch-o-matic(-ng). It
+contains extensions that were not accepted in the main Xtables
+package.
+
+Xtables-addons is different from patch-o-matic in that you do not
+have to patch or recompile either kernel or Xtables(iptables). But
+please see the INSTALL file for the minimum requirements of this
+package.
+
+All code imported from patch-o-matic has been reviewed and all
+apparent bugs like binary stability across multiarches, missing
+sanity checks and incorrect endianess handling have been fixed,
+simplified, and sped up.
+
+
+Included in this package
+========================
+- xt_ACCOUNT 1.16, libxt_ACCOUNT 1.3
+
+
+Inclusion into a kernel tree
+============================
+
+
+
+
+External extensions
+===================
+
+The program "xa-download-more" can be used to download more
+extensions from 3rd parties into the source tree. The URLs are listed
+in the "sources" file. If the "sources" file contains an entry like
+
+	http://foobar.org/xa/
+
+xa-download-more will inspect http://foobar.org/xa/xa-index.txt for
+files to download. That file may contain
+
+	foobar.tar.bz2
+
+and xa-download-more will then retrieve and unpack
+http://foobar.org/xa/foobar.tar.bz2.
+
+Files that should be contained in the tarball are an mconfig and
+Kbuild files to control building the extension, libxt_foobar.c for
+the userspace extension and xt_foobar.c for the kernel extension.
+
+	mconfig.foobar
+	extensions/Kbuild.foobar
+	extensions/Mbuild.foobar
+	extensions/libxt_foobar.c
+	extensions/libxt_foobar.man
+	extensions/xt_foobar.c
+	extensions/xt_foobar.h

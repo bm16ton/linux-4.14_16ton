@@ -1,0 +1,62 @@
+# -*- Makefile -*-
+# MANUAL
+
+abs_top_srcdir  = /home/maddocks/kernels/PATCHES_BEST/xtables/xtables-addons-2.14
+
+prefix          = /usr
+exec_prefix     = ${prefix}
+libexecdir      = ${prefix}/lib/x86_64-linux-gnu
+xtlibdir        = /lib/xtables
+
+CC              = gcc
+CCLD            = ${CC}
+CFLAGS          = -g -O2 -fstack-protector-strong -Wformat -Werror=format-security
+LDFLAGS         = -Wl,-Bsymbolic-functions -Wl,-z,relro
+
+libxtables_CFLAGS =  
+libxtables_LIBS   = -lxtables  
+AM_DEPFLAGS     = -Wp,-MMD,$(@D)/.$(@F).d,-MT,$@
+
+AM_DEFAULT_VERBOSITY = 0
+am__v_CC_0           = @echo "  CC    " $@;
+am__v_CCLD_0         = @echo "  CCLD  " $@;
+am__v_GEN_0          = @echo "  GEN   " $@;
+am__v_SILENT_0       = @
+am__v_CC_            = ${am__v_CC_${AM_DEFAULT_VERBOSITY}}
+am__v_CCLD_          = ${am__v_CCLD_${AM_DEFAULT_VERBOSITY}}
+am__v_GEN_           = ${am__v_GEN_${AM_DEFAULT_VERBOSITY}}
+am__v_SILENT_        = ${am__v_SILENT_${AM_DEFAULT_VERBOSITY}}
+AM_V_CC              = ${am__v_CC_${V}}
+AM_V_CCLD            = ${am__v_CCLD_${V}}
+AM_V_GEN             = ${am__v_GEN_${V}}
+AM_V_silent          = ${am__v_GEN_${V}}
+
+include ${XA_TOPSRCDIR}/mconfig
+-include ${XA_TOPSRCDIR}/mconfig.*
+include ${XA_SRCDIR}/Mbuild
+-include ${XA_SRCDIR}/Mbuild.*
+
+targets := $(filter-out %/,${obj-m})
+subdirs_list := $(filter %/,${obj-m})
+
+.SECONDARY:
+
+.PHONY: all install clean
+
+all: ${targets}
+	@for i in ${subdirs_list}; do ${MAKE} -C $$i || exit $$?; done;
+
+install: ${targets}
+	@for i in ${subdirs_list}; do ${MAKE} -C $$i $@ || exit $$?; done;
+	install -dm0755 "${DESTDIR}/${xtlibdir}";
+	@for i in $^; do install -pm0755 $$i "${DESTDIR}/${xtlibdir}"; done;
+
+clean:
+	@for i in ${subdirs_list}; do ${MAKE} -C $$i $@ || exit $$?; done;
+	rm -f *.oo *.so;
+
+lib%.so: lib%.oo
+	${AM_V_CCLD}${CCLD} ${AM_LDFLAGS} -shared ${LDFLAGS} -o $@ $< ${libxtables_LIBS} ${LDLIBS};
+
+%.oo: ${XA_SRCDIR}/%.c
+	${AM_V_CC}${CC} ${AM_DEPFLAGS} ${AM_CPPFLAGS} ${AM_CFLAGS} -DPIC -fPIC ${CPPFLAGS} ${CFLAGS} -o $@ -c $<;

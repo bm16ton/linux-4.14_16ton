@@ -1,0 +1,28 @@
+ fs/read_write.c | 4 ----
++++
+ 1 file changed, 4 deletions(-)
+
+diff --git a/fs/read_write.c b/fs/read_write.c
+index 1a10ffff1619..d3ff440d7084 100644
++-- a/fs/read_write.c
+-++ b/fs/read_write.c
+@@ -454,6 +454,8 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
+ 	return ret;
+ }
+
++EXPORT_SYMBOL(vfs_read);
++
+ static ssize_t new_sync_write(struct file *filp, const char __user *buf, size_t len, loff_t *ppos)
+ {
+ 	struct iovec iov = { .iov_base = (void __user *)buf, .iov_len = len };
+@@ -552,6 +554,8 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
+ 	return ret;
+ }
+
++EXPORT_SYMBOL(vfs_write);
++
+ static inline loff_t file_pos_read(struct file *file)
+ {
+ 	return file->f_pos;
++-
+2.11.0

@@ -1,0 +1,5 @@
+.PP
+The DELUDE target will reply to a SYN packet with SYN-ACK, and to all other
+packets with an RST. This will terminate the connection much like REJECT, but
+network scanners doing TCP half-open discovery can be spoofed to make them
+belive the port is open rather than closed/filtered.

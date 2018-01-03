@@ -1,0 +1,26 @@
+.TH iptaccount 8 "v1.16" "" "v1.16"
+.SH Name
+iptaccount \(em administrative utility to access xt_ACCOUNT statistics
+.SH Syntax
+\fBiptaccount\fP [\fB\-acfhu\fP] [\fB\-l\fP \fIname\fP]
+.SH Options
+.PP
+\fB\-a\fP
+List all (accounting) table names.
+.PP
+\fB\-c\fP
+Loop every second (abort with CTRL+C).
+.PP
+\fB\-f\fP
+Flush data after display.
+.PP
+\fB\-h\fP
+Free all kernel handles. (Experts only!)
+.PP
+\fB\-l\fP \fIname\fP
+Show data in accounting table called by \fIname\fP.
+.TP
+\fB\-u\fP
+Show kernel handle usage.
+.SH "See also"
+\fBxtables-addons\fP(8)

@@ -1,0 +1,8 @@
+.PP
+This module matches packets based on grsecurity RBAC status.
+.TP
+[\fB!\fP] \fB\-\-enabled\fP
+Matches packets if grsecurity RBAC is enabled.
+.TP
+[\fB!\fP] \fB\-\-disabled\fP
+Matches packets if grsecurity RBAC is disabled.

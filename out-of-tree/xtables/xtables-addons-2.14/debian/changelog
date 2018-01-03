@@ -1,0 +1,497 @@
+xtables-addons (2.14-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream release
+    + Support for Linux 4.12, 4.13, 4.14 (Closes: #872077)
+    + Fix buffer overflow in xt_DNETMAP (Closes: #877362)
+  * Update Standards-Version and compat level.
+    + Remove explicit dependency on dh-autoreconf.
+
+ -- Dominik George <nik@naturalnet.de>  Thu, 07 Dec 2017 15:48:56 +0100
+
+xtables-addons (2.12-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * New upstream release [January 2017]
+    + support for Linux 4.9, 4.10 (Closes: #851576)
+
+ -- Ben Hutchings <ben@decadent.org.uk>  Sat, 28 Jan 2017 23:15:35 +0000
+
+xtables-addons (2.11-3) unstable; urgency=medium
+
+  * Re-build for auto-iptables transition (Closes: #845516).
+  * rules: make build reproducible (Closes: #803601).
+    Thanks, Reiner Herrmann.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Wed, 07 Dec 2016 11:18:28 +1100
+
+xtables-addons (2.11-2) unstable; urgency=medium
+
+  * Re-build with correction for iptables (>= 1.6.0-3) compatibility
+    (Closes: #834223).
+    Thanks Sven Hartge, Sam Morris, Alex Volkov.
+  * Depends:
+    = iptables-dev (>= 1.6.0-3~)
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Sun, 28 Aug 2016 18:03:28 +1000
+
+xtables-addons (2.11-1) unstable; urgency=medium
+
+  * New upstream release [May 2016].
+  * Standards-Version: 3.9.8.
+  * Vcs URLs to HTTPS.
+  * Updated gbp.conf.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Mon, 06 Jun 2016 00:49:16 +1000
+
+xtables-addons (2.10-1) unstable; urgency=medium
+
+  * New upstream release [November 2015].
+    + support for Linux 4.4.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Tue, 24 Nov 2015 10:15:05 +1100
+
+xtables-addons (2.9-1) unstable; urgency=medium
+
+  * New upstream release [October 2015].
+    + support for Linux 4.3.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Sat, 17 Oct 2015 18:38:23 +1100
+
+xtables-addons (2.8-1) unstable; urgency=low
+
+  * New upstream release [August 2015].
+    + support for Linux 4.2. Thanks, Tim Gardner.
+    + enable xt_ECHO.
+  * Added "debian/gbp.conf".
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Mon, 24 Aug 2015 07:43:20 +1000
+
+xtables-addons (2.7-2) unstable; urgency=medium
+
+  * DKMS: Disable "xt_ECHO" on Linux-3.x (Closes: #792154).
+    Upstream don't build "xt_ECHO" on kernels v4+ since 2.7.
+  * Predictable order of modules in DKMS configuration ("LC_ALL=C sort").
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Tue, 14 Jul 2015 16:38:16 +1000
+
+xtables-addons (2.7-1) unstable; urgency=medium
+
+  * New upstream version [July 2015].
+    + compatible with kernels up to 4.1 (Closes: #792154).
+  * xtables-addons-source/module-assistant: fixed FTBFS (Closes: #791702).
+  * rules: "echo" replaced with "printf" (Closes: #785561).
+  * rules: use last changelog date for timestamps in tar file and
+    also sort files to get a reproducible order (Closes: #776879).
+    Thanks, Reiner Herrmann.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Tue, 14 Jul 2015 03:24:26 +1000
+
+xtables-addons (2.6-1) unstable; urgency=medium
+
+  * New upstream version [September 2014].
+  * Standards-Version: 3.9.6.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Sat, 04 Oct 2014 00:07:46 +1000
+
+xtables-addons (2.5-1) unstable; urgency=low
+
+  * New upstream version [April 2014].
+  * Install `iptaccount` to "/usr/sbin" instead of "/sbin".
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Wed, 23 Apr 2014 16:47:32 +1000
+
+xtables-addons (2.4-1) unstable; urgency=low
+
+  * New upstream version [January 2014].
+  * Dropped no longer needed "skip-depmod.patch".
+  * Added "unzip, wget" to Recommends to satisfy `xt_geoip_dl`
+    (Closes: #714654).
+  * Fixed FTBFS in m-a/xtables-addons-source (Closes: #730074).
+  * Standards to 3.9.5.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Mon, 10 Feb 2014 13:05:36 +1100
+
+xtables-addons (2.3-1) unstable; urgency=low
+
+  * New upstream version [June 2013]
+    + compatible with kernels 3.9+ (Closes: #711431).
+  * Patches removed (applied-upstream):
+    - bashism_xt_geoip_dl.patch
+    - libxt_quota2.patch
+    - man.patch
+    - undouble_man.patch
+  * Disabled "automake-1.11.2.patch" that was needed as workaround for
+    temporary regression in automake.
+  * Better clean-up after interrupted build attempt.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Wed, 19 Jun 2013 10:55:05 +1000
+
+xtables-addons (2.2-1) unstable; urgency=low
+
+  * New upstream version [March 2013].
+    + compatible with kernels 3.7+ (Closes: #710722).
+  * Standards to version 3.9.4.
+  * Dropped unknown package "linux-headers-generic" from Recommends.
+  * Removed unnecessary versioned (Build-)Depends.
+  * Updated DKMS rules to build modules in DKMS build directory and not
+    to leave un-owned files behind (Closes: #710725).
+  * New patches:
+    + to fix invalid quota2 record on iptables-save
+      (Closes: #710379), thanks to Denis Ustimenko.
+    + to avoid duplication in man pages.
+    + to lintianise man pages and correct spelling.
+  * "bashism_xt_geoip_dl.patch" is renamed and refreshed;
+    DEP-3 headers added.
+  * Updated my email address; bumped copyright years.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Sun, 02 Jun 2013 18:16:23 +1000
+
+xtables-addons (1.47.1-1) unstable; urgency=low
+
+  * Imported Upstream version 1.47.1
+  * Add patch to fix bashism in xt_geoip_dl script (Closes: #690613)
+  * Rebuild with dependency on libxtables9 (Closes: #692347)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 10 Nov 2012 15:09:58 +0100
+
+xtables-addons (1.46-1) unstable; urgency=low
+
+  * New upstream release
+  * Improved get-orig-source so it can function disregarding of current
+    working directory.
+  * Debian source compression to xz.
+  * Copyright audit & update.
+
+ -- Dmitry Smirnov <onlyjob@member.fsf.org>  Wed, 19 Sep 2012 19:11:47 +1000
+
+xtables-addons (1.42-2) unstable; urgency=low
+
+  * fix 'clean' target for second kernel-headerless build
+    (Closes: #671564 I:"Fails to build twice in a row").
+  * sort kernel modules in DKMS config.
+
+ -- Dmitry Smirnov <onlyjob@member.fsf.org>  Sun, 06 May 2012 11:43:41 +1000
+
+xtables-addons (1.42-1) unstable; urgency=low
+
+  * New upstream release
+  * removed dependency on libmnl-dev (no longer needed)
+
+ -- Dmitry Smirnov <onlyjob@member.fsf.org>  Tue, 10 Apr 2012 20:14:41 +1000
+
+xtables-addons (1.41-2) unstable; urgency=low
+
+  * standards to current 3.9.3
+  * install library to triplet location
+  * correct installation of all modules, including ACCOUNT
+    (really Closes: #653022 "Upgrading 1.37 => 1.40 breaks accounting")
+
+ -- Dmitry Smirnov <onlyjob@member.fsf.org>  Mon, 27 Feb 2012 02:12:13 +1100
+
+xtables-addons (1.41-1) unstable; urgency=low
+
+  * No longer provide ipset (ipset is separated into 'ipset' package)
+  * New Upstream Release
+    (Closes: #656510 "fails to compile with Linux 3.2")
+    (Closes: #653022 "Upgrading 1.37 => 1.40 breaks accounting")
+    (Closes: #626018 "Module pknock not working, bug in source")
+  * debhelper and compat to version 9
+  * added patch to fix FTBFS with automake 1.11.2
+
+ -- Dmitry Smirnov <onlyjob@member.fsf.org>  Sat, 04 Feb 2012 14:46:01 +1100
+
+xtables-addons (1.40-1) unstable; urgency=low
+
+  [ Pierre Chifflier ]
+  * Add patch to avoid calling depmod during build
+  * Add VCS links
+  * Change license for packaging files to GPL-2+ (with agreement of all
+    authors).
+  * Add Dmitry Smirnov as co-maintainer
+    - Merge all changes
+  * Imported Upstream version 1.40 (2011-11-30)
+    Fixes:
+    - build: the code actually requires at least iptables 1.4.5
+      (would yield a compile error otherwise), make sure configure
+      checks for it; update INSTALL
+    - xt_ECHO: fix kernel warning about RTAX_HOPLIMIT being used
+    - xt_ipv4options: fix an infinite loop
+    Changes:
+    - xt_ECHO: now calculates UDP checksum
+    - Linux kernel versions below 2.6.32 are no longer officially
+      supported, and will not be part of compilation testing.
+    - update to ipset 6.10
+    Enhancements:
+    - xt_ECHO: IPv6 support
+
+  [Dmitry Smirnov] <onlyjob@member.fsf.org>
+  * Major repackaging (Closes: #638061)
+    * Obsolete ipset_v4 replaced with new ipset_v6 (Closes: #648083)
+    * debian/copyright updated for DEP5 compatibility
+    * debian/control updated
+      - Standards version update
+      - Depends update
+      - Build-depends tightening
+    * debian/watch fixed
+    * debian/rules rewrite
+      - get-orig-source target added
+      - build-time cleanup (make clean) is fixed
+      - second build do not fail
+      - offload most tasks to debhelper (with minimum overrides)
+      - standalone debian/rules for xtables-addons-source
+      - using CFLAGS/Hardening if provided by DPKG
+      - dynamically prepare DKMS config during build
+      - configure for Kbuild only if headers available
+    * lintianization
+      - override for package-name-doesnt-match-sonames
+    * DKMS package cleanup
+      - broken post-init script removed
+      - only clean source is packaged
+      - improved configuration
+    * source package cleanup
+      - module-assistant rules use debhelper more
+      - using CFLAGS if provided by DPKG
+    * lintian override
+    * DKMS config sanitation (all argument in double quotes)
+    * patch to avoid build-time depmod invocation
+  * Imported Upstream version 1.39 (2011-09-21)
+    - libxt_ACCOUNT: fix compilation after missing libxtables_CFLAGS
+    - build: fix compilation after missing libxtables_CFLAGS in submodules
+    - build: add missing linux/version.h includes where needed
+    - Remove unsupported ipset 4.x from the Xtables-addons distribution
+    - ipset: move ipset_errcode from src to library to avoid undefined reference
+    - update to ipset 6.9.1
+    - xt_CHECKSUM: abort build when the feature is already provided by mainline
+    - xt_SYSRQ: fix UDPLITE header lookup in IPv6
+    - xt_TARPIT: fix kernel warning about RTAX_HOPLIMIT being used
+    - xt_TEE: abort build when the feature is already provided by mainline
+    - xt_ipp2p: support UDPLITE
+    - xt_pknock: support UDPLITE
+    - xt_psd: restore functionality with UDP
+    - xt_psd: support UDPLITE
+    - support for Linux 3.1
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 05 Dec 2011 22:10:25 +0100
+
+xtables-addons (1.37-1) unstable; urgency=low
+
+  * Imported Upstream version 1.37
+    This will trigger a rebuild and fix version on iptables libs
+    (Closes: #636905)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sun, 07 Aug 2011 20:48:13 +0200
+
+xtables-addons (1.35-1) unstable; urgency=low
+
+  * Imported Upstream version 1.35
+  * Update version numbers for DKMS package (Closes: #620662)
+  * Bump Standards Version to 3.9.2
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 09 May 2011 21:42:42 +0200
+
+xtables-addons (1.33-1) unstable; urgency=low
+
+  * Imported Upstream version 1.33
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 28 Mar 2011 22:34:22 +0200
+
+xtables-addons (1.32-2) unstable; urgency=low
+
+  * Switch to source format 3.0 (quilt)
+  * Add support for DKMS, thanks to Matthew Harrell for the patch
+    (Closes: #568635)
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 14 Feb 2011 16:02:41 +0100
+
+xtables-addons (1.32-1) unstable; urgency=low
+
+  * Imported Upstream version 1.32 (Closes: #593521)
+    - Build on recent kernels (Closes: #590140)
+  * Add temporary hack to fix configure with --without-kbuild flag
+  * Fix clean target
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 13 Jan 2011 14:21:34 +0100
+
+xtables-addons (1.26-2) unstable; urgency=low
+
+  * Do not build the TEE target (Closes: #592237)
+  * Fix build not to use kernel headers when building source (Closes: #581779)
+  * Bump standards version to 3.9.1
+
+ -- Pierre Chifflier <pollux@debian.org>  Wed, 11 Aug 2010 16:41:05 +0200
+
+xtables-addons (1.26-1) unstable; urgency=low
+
+  * Imported Upstream version 1.26
+  * Remove binary (compiled) objects from source tarball
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 08 May 2010 11:51:31 +0200
+
+xtables-addons (1.23-1) unstable; urgency=low
+
+  * Imported Upstream version 1.23
+  * Bump standards version to 3.8.4
+  * Set generated module section to kernel (Closes: #572981)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 13 Mar 2010 13:25:50 +0100
+
+xtables-addons (1.22-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Pierre Chifflier <pollux@debian.org>  Fri, 29 Jan 2010 22:36:45 +0100
+
+xtables-addons (1.21-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Pierre Chifflier <pollux@debian.org>  Fri, 18 Dec 2009 13:53:37 +0100
+
+xtables-addons (1.19-3) unstable; urgency=low
+
+  * Create shlib file
+  * Add call to ldconfig in postinst (Closes: #553130)
+  * Remove build dependency on quilt
+  * Install manpage for ipset
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 29 Oct 2009 16:50:44 +0100
+
+xtables-addons (1.19-2) unstable; urgency=medium
+
+  * Remove modules.* files if existing (Closes: #552301)
+  * Severity medium, grave bug
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 26 Oct 2009 23:11:16 +0100
+
+xtables-addons (1.19-1) unstable; urgency=low
+
+  * New upstream release
+  * Provides a better description for the packages (Closes: #548409)
+  * Remove 10-uncouple-userspace-from-kernel-build.patch, upstream use a
+    different build system allowing to build the .so files only
+  * Tweak build system to become more kbuild-friendly (Closes: #530799)
+    The following command now works:
+    make -C /lib/modules/$(uname -r)/build M=/usr/src/modules/xtables-addons
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 19 Oct 2009 23:04:42 +0200
+
+xtables-addons (1.18-1) unstable; urgency=low
+
+  * New Upstream Version
+    This version has support for 2.6.31 (Closes: #545542)
+  * Bump standards version (no changes)
+  * Depend on quilt (Closes: #533653)
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 10 Sep 2009 21:42:05 +0200
+
+xtables-addons (1.17-1) unstable; urgency=low
+
+  * New Upstream Version
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 18 Jun 2009 16:08:45 +0200
+
+xtables-addons (1.16-1) unstable; urgency=low
+
+  * New Upstream Version
+
+ -- Pierre Chifflier <pollux@debian.org>  Sun, 07 Jun 2009 22:08:15 +0200
+
+xtables-addons (1.15-3) unstable; urgency=medium
+
+  * Make xtables-addons-common conflict with ipset (Closes: #528611)
+  * Urgency medium, serious bug
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 14 May 2009 11:15:40 +0200
+
+xtables-addons (1.15-2) unstable; urgency=low
+
+  * Add pkg-config to xtables-addons-source dependencies (Closes: #528169)
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 11 May 2009 17:37:49 +0200
+
+xtables-addons (1.15-1) unstable; urgency=low
+
+  * New Upstream Version (Closes: #527254):
+    This release adds the RAWNAT extension and fixes
+    subtle leftover bugs in condition, fuzzy, and ipp2p.
+  * Add build-dep on quilt, and patches (Closes: #517698):
+    - 10-uncouple-userspace-from-kernel-build.patch
+  * Re-introduce xtables-addons-common
+  * Thanks to John Wright for the original patches, merged with modifications
+
+ -- Pierre Chifflier <pollux@debian.org>  Wed, 06 May 2009 23:08:35 +0200
+
+xtables-addons (1.14-2) unstable; urgency=low
+
+  * Add dependency on pkg-config for the source module (Closes: #525088)
+  * Allow building against kernels different than the running one
+    (Closes: #525089, #517699)
+    Thanks to John Wright for the patch.
+
+ -- Pierre Chifflier <pollux@debian.org>  Wed, 22 Apr 2009 09:17:35 +0200
+
+xtables-addons (1.14-1) unstable; urgency=low
+
+  * New Upstream Version
+  * Bump standards version (no changes)
+  * Set dependency on iptables-dev >= 1.4.3
+
+ -- Pierre Chifflier <pollux@debian.org>  Thu, 02 Apr 2009 15:34:21 +0200
+
+xtables-addons (1.12-1) unstable; urgency=low
+
+  * New Upstream Version
+  * Remove generated map files (Closes: #517699)
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 09 Mar 2009 17:56:57 +0100
+
+xtables-addons (1.10-1) unstable; urgency=low
+
+  * New Upstream Version
+  * Upload to unstable
+  * Packaging has been rewritten (Closes: #511591)
+  * Add watch file
+  * Add postinst file to generated module to call depmod (Closes: #513492)
+
+ -- Pierre Chifflier <pollux@debian.org>  Wed, 25 Feb 2009 12:16:04 +0100
+
+xtables-addons (1.8-1) experimental; urgency=low
+
+  * New upstream release:
+    Some crashes with ipp2p have been fixed, and the TEE module
+    gained IPv6 capability.
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 20 Jan 2009 09:43:51 +0100
+
+xtables-addons (1.7-2) experimental; urgency=low
+
+  * Remove generated modules.map files from binary module.
+
+ -- Pierre Chifflier <pollux@debian.org>  Sat, 10 Jan 2009 17:42:43 +0100
+
+xtables-addons (1.7-1) experimental; urgency=low
+
+  * Re-write package:
+    - remove xtables-addons-common package
+    - put complete modules and libs sources in -source package
+  * New upstream release:
+    - update ipset version
+    - fix build with the latest 2.6.28(-rc) kernel
+  * Add missing dependency on iptables-dev (Closes: #504563)
+
+ -- Pierre Chifflier <pollux@debian.org>  Tue, 06 Jan 2009 11:04:05 +0100
+
+xtables-addons (1.5.7-2) unstable; urgency=low
+
+  * Fix FTBFS: add headers for all linux versions, and build
+    for the installed headers version
+
+ -- Pierre Chifflier <pollux@debian.org>  Mon, 27 Oct 2008 22:31:20 +0100
+
+xtables-addons (1.5.7-1) unstable; urgency=low
+
+  * Initial release (Closes: #502402)
+
+ -- Pierre Chifflier <pollux@debian.org>  Sun, 19 Oct 2008 16:11:52 +0200
+

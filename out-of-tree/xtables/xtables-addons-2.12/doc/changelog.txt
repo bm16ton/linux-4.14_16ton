@@ -1,0 +1,113 @@
+
+HEAD
+====
+
+
+v2.12 (2017-01-11)
+==================
+Enhancements:
+- support for Linux up to 4.10
+
+
+v2.11 (2016-05-20)
+==================
+Enhancements:
+- support for Linux 4.5, 4.6
+- xt_ECHO: tentatively support responding to fragments
+
+
+v2.10 (2015-11-20)
+==================
+Enhancements:
+- Support for Linux 4.4
+Fixes:
+- xt_ACCOUNT: call free_page with the right amount of pages
+
+
+v2.9 (2015-10-12)
+=================
+Enhancements:
+- Support for Linux 4.3
+
+
+v2.8 (2015-08-19)
+=================
+Enhancements:
+- Support for Linux 4.2
+- Enable xt_ECHO for Linux 4.0+
+
+
+v2.7 (2015-07-06)
+=================
+Enhancements:
+- Support for Linux up to 4.1
+
+
+v2.6 (2014-09-29)
+=================
+Enhancements:
+- Support for Linux up to 3.17
+Fixes:
+- xt_pknock: UDP SPA mode erroneously returned an error saying
+  crypto was unavailable
+
+
+v2.5 (2014-04-18)
+=================
+Enhancements:
+- Support for Linux up to 3.15
+- xt_quota2: introduce support for network namespaces
+
+
+v2.4 (2014-01-09)
+=================
+Enhancements:
+- Support for Linux up to 3.13
+Changes:
+- remove unmaintained RAWSNAT/RAWDNAT code
+- remove unused parts of compat_xtables that served Linux <3.7
+Fixes:
+- xt_quota2: --no-change should not alter quota to zero ever
+- xt_quota2: --packet should not be set to zero based on skb->len
+
+
+v2.3 (2013-06-18)
+=================
+Enhancements:
+- Support for Linux 3.10
+Fixes:
+- xt_DNETMAP, xt_condition, xt_quota2: resolve compile error when
+  CONFIG_UIDGID_STRICT_TYPE_CHECKS=y
+- xt_RAWNAT: ensure correct operation in the presence of IPv4 options
+- xt_geoip: do not throw a warnings when country database is size 0
+- xt_quota2: print "!" at the correct position during iptables-save
+Changes:
+- Make print (iptables -L) output the same as save (-S)
+
+
+v2.2 (2013-03-31)
+=================
+Enhancements:
+- Support for Linux 3.9
+- iptaccount: fix entire program being erroneously optimized away on PPC
+
+
+v2.1 (2012-11-27)
+=================
+Fixes:
+- DNETMAP: fix compile error with Linux 3.7
+Enhancements:
+- Support for Linux 3.8
+
+
+v2.0 (2012-11-12)
+=================
+Changes:
+- remove support for Linux 2.6.17–3.6
+- remove xt_TEE (this is available upstream since 2.6.35)
+- remove xt_CHECKSUM (this is available upstream since 2.6.36)
+Enhancements:
+- Support for Linux 3.7
+
+If you want to use Xtables-addons with kernels older than 3.7,
+use the addons 1.x series (maintained but without new features).

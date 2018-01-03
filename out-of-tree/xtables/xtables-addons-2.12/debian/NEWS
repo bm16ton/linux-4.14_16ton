@@ -1,0 +1,5 @@
+xtables-addons (2.4-1) unstable; urgency=low
+
+  RAWNAT, STEAL, SYSRQ and TARPIT modules are no longer provided.
+
+ -- Dmitry Smirnov <onlyjob@debian.org>  Sun, 12 Jan 2014 12:00:26 +1100

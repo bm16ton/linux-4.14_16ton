@@ -1,0 +1,3 @@
+# -*- Makefile -*-
+
+obj-${build_ACCOUNT}     += libxt_ACCOUNT.so

@@ -1,0 +1,23 @@
+.PP
+Match a packet by its source or destination country.
+.TP
+[\fB!\fP] \fB\-\-src\-cc\fP, \fB\-\-source\-country\fP \fIcountry\fP[\fB,\fP\fIcountry\fP\fB...\fP]
+Match packet coming from (one of) the specified country(ies)
+.TP
+[\fB!\fP] \fB\-\-dst\-cc\fP, \fB\-\-destination\-country\fP \fIcountry\fP[\fB,\fP\fIcountry\fP\fB...\fP]
+Match packet going to (one of) the specified country(ies)
+.TP
+NOTE:
+The country is inputed by its ISO-3166 code.
+.PP
+The extra files you will need is the binary database files. They are generated
+from a country-subnet database with the geoip_build_db.pl tool that is shipped
+with the source package, and which should be available in compiled packages in
+/usr/lib(exec)/xtables-addons/. The first command retrieves CSV files from
+MaxMind, while the other two build packed bisectable range files:
+.PP
+mkdir \-p /usr/share/xt_geoip; cd /tmp; $path/to/xt_geoip_dl;
+.PP
+$path/to/xt_geoip_build \-D /usr/share/xt_geoip GeoIP*.csv;
+.PP
+The shared library is hardcoded to look in these paths, so use them.
