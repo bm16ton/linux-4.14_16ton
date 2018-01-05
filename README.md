@@ -10,6 +10,10 @@ UPDATE Jan 4th 2018; added two more pairs of dev/prod ids to uss720 (belkin F5UO
 	doesnt segfault and the host machine can see it, havent gotten beyind that yet.
 	The script in tools/16ton usb-mtp-setup run as root then start mtp-server as root
 
+	In tools/16ton/parport is program called pport wich allows you to use parport and serial
+	ports as GPIO. Even works with usb to parallel with uss720 chipsets. Ill add schematic sometime
+	to show how to wire transistors and relays to controll bigger things.
+
 UPDATE Dec 27 2017; brought up to 4.14.9
 	nvidia 384 doesnt compile against 4.14.9, patches to fix this in CURRENTLY_APPLIED_PATCHES
 	directory out-of-tree now has the following out of tree kernel modules (I believe they all have dkms support)
