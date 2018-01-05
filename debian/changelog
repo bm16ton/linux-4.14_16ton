@@ -1,5 +1,5 @@
-linux-4.14.10-16ton-no-404 (4.14.10-16ton-no-404-17) xenial; urgency=low
+linux-4.14.10-16ton-gpd-win-gaming-conf (4.14.10-16ton-gpd-win-gaming-conf-18) xenial; urgency=low
 
   * Custom built Linux kernel.
 
- -- Anonymous <root@maddocks-Q552UB>  Thu, 04 Jan 2018 17:33:11 -0500
+ -- Anonymous <root@maddocks-Q552UB>  Fri, 05 Jan 2018 11:46:12 -0500

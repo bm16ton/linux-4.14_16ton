@@ -330,7 +330,7 @@ public:
                                      MTP_STORAGE_FIXED_RAM, false);
 */
         mtp_database->addStoragePath(std::string(userdata->pw_dir) + "/",
-                                     gettext("root"),
+                                     gettext("sdcard"),
                                      MTP_STORAGE_FIXED_RAM, false);
         home_storage_added = false;
 

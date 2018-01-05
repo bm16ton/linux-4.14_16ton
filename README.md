@@ -1,5 +1,13 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
+UPDATE: Jan 5th 2018: new usb-acm-mtp-setup script in tools/16ton/mtp_adb this should work on OTG ports.
+	That said thanks to the work of HansGeode we have automatic port host/client switching, if you dont
+	may need to adjust accordingly.
+	MTP ttyACM and Mass storage WORK! just compile the required modules in. Use config-newist_use_this
+	"cp config-newist_use_this .config"  then compile and install "make deb-pkg" sudo dpkg -i ../*.deb"
+	"sudo cp tools/16ton/mtp_adb/usb-acm-mtp-setup /usr/local/sbin"      reboot
+    "sudo usb-acm-mtp-setup"  then plug usb into PC.
+
 UPDATE Jan 4th 2018; added two more pairs of dev/prod ids to uss720 (belkin F5UOO2 and D-Link DSB-P36)
 	Added Android usb gadget/configfs/function  USB_F_FS USB_F_MTP USB_F_PTP USB_CONFIGFS_UEVENT
 	also function_accesory but its currently in a dependency cycle and i havent looked at it.

@@ -4,7 +4,7 @@ build:
 	$(MAKE)
 
 binary-arch:
-	$(MAKE) KDEB_SOURCENAME=linux-4.14.10-16ton-no-404 KDEB_PKGVERSION=4.14.10-16ton-no-404-17 bindeb-pkg
+	$(MAKE) KDEB_SOURCENAME=linux-4.14.10-16ton-gpd-win-gaming-conf KDEB_PKGVERSION=4.14.10-16ton-gpd-win-gaming-conf-18 bindeb-pkg
 
 clean:
 	rm -rf debian/*tmp debian/files

@@ -30,6 +30,7 @@
 #include <linux/file.h>
 #include <linux/device.h>
 #include <linux/miscdevice.h>
+#include <linux/fs.h>
 
 #include <linux/usb.h>
 #include <linux/usb_usual.h>
