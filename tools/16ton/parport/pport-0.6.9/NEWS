@@ -1,0 +1,8 @@
+12-02-2004	I have implemented a simple AES encryption of the
+		shared memory segment. This feature is optional and
+		even quite experimental for now. I have done around
+		200 tests with this feature and it worked flawlessly.
+		I can't predict how it will work on other machines but
+		I'm happy if I get some feedback. I have also added
+		a question in the FAQ file concerning a "weird" bug I
+		experienced ONCE in those tests.

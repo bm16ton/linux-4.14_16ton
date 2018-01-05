@@ -1,0 +1,6 @@
+docdir = $(prefix)/doc
+pkgdocdir = $(docdir)/@PACKAGE@
+
+pkgdoc_DATA = Franky-HOWTO README
+
+EXTRA_DIST = $(pkgdoc_DATA)

@@ -1,0 +1,257 @@
+pport 0.6.9
+  -Charles Sullivan <cwsulliv01@triad.rr.com> signaled:
+  
+  I notice pport is using function ioperm().  My interpretation of the
+  man page for that function is that it's only valid for ports up to
+  0x3FF, so perhaps that's the problem.
+
+  -Changed ioperm() calls to iopl(). 
+
+pport 0.6.8
+  -Inserted raw data sending.
+  -configure.in requirements.
+  -Updated documentation.
+
+pport 0.6.7
+	-Fixed old problem from Ronny Westin.
+	-Removed short option man page.
+	-Eliminated useless code.
+	-Added reconfigure script.
+
+pport 0.6.6
+	-Fixed syslog checking in pportd. The daemon will now correctly
+	 check for the syslog option.
+	-Corrected manpage file to section 1.
+	-Simplified and enhanced contextual help.
+	-Removed port selection: Done automatically.
+
+pport 0.6.5
+	-Per Ronny Westin - AKA Vaxx <vaxx@home.se> signaled:
+	
+	"Hey
+	I think pport would be a handy proggie for me (pport-0.6.4) 
+	but it dont compile at all :( i have Linux Slackware 8.1 on 
+	an AMD 333 Mhz. whats wrong? here follows the output from Make: "
+	[...]
+
+		-Conditionals inserted for library requirements popt and
+		 pthread.
+	
+	-Developement fusion with serial port controlling code: Serial port
+	 control is now availible.
+	-Generalised functions.
+	-Enhanced help system.
+	-Updated documentation: man pages and howto.
+
+pport 0.6.4
+	-Generalized the external status files (input/output) and moved
+	 to /var/log/pport.
+	-Wiped SSL support.
+	-Cleaned up a lot of the code.
+	-Some other minor changes to the operational mode.
+
+pport 0.6.3
+	-Daemon resolution option.
+
+	Cleanup:
+		-Tuned variables.
+		-Stability enhancements.
+		-Switched to errno reporting.
+		-Removed futile functions.
+		-Enhanced statements.
+		-Switched to man1.
+
+	Update not mandatory. Program has been tweaked and stretched.
+	Any bugs and program pitfalls remaining or created will be
+	reported.
+
+pport 0.6.2
+	-Per Andersson (artifex@pp.sbbs.se) signaled:
+		bugs:
+			-compilation fails if aes.h not present.
+			-variable declarations after executable statements.
+		features:
+			-hooks for deactivated inputs.
+			-a way to read the inputs any time from other
+			programs.
+
+	All mentioned bugs herein were fixed and the features
+	were implemented.
+	
+	-Fixed impossibility to start up daemon correctly.
+	-Additional parsing checking was added.
+	-Descriptive file-lock added on the status file.
+	-Modifications to the autoconf/automake system.
+	-Continued work on reviewing the pport functions.
+	-Swapped to lowercase package name (for porting to distros).
+
+	NOTE: configuration file (pportd.conf) syntax-change, users
+	are asked to update correspondingly.
+
+pport 0.6.1
+	-Justin Pryzby (justinpryzby@users..souceforge.net) signaled:
+		-null pointers.
+		-segvs on _set().
+		-segvs on _restore().
+		-bogus delay check.
+	 All bugs have apparently been fixed.
+	
+	-Fixed unaccessible functionality in toggle mechanism.
+	-Added sanity check on strobe interval.
+	-Cleaned up help system and eliminated useless entries.
+
+pport 0.6
+	-Changed command-line parsing scheme. PPort now depends on popt for
+	 command-line parsing. Should fix numerous bugs.
+	-Implemented automatic backward pin-strobing and re-wrote the
+	 strobing function from scratch.
+	-Re-wrote entire "delay" mechanism and eliminated useless
+	 millisecond interval. 
+	-Reorganised and changed some code completely allowing a lot more
+	 code flexibility for new implementations.
+	-Changed some command line options for better accessibility and
+	 grouped them together into a better organisation.
+
+pport 0.6d
+	-Implemented independant pin sensing (check howto for details).
+	-Renamed some variables and extended the use of globvar.h.
+	-Removed desklet from main program.
+	-Fixed autoconf.
+	-Fixed HOWTO typo.
+
+pport 0.6c
+	-Replaced pin toggle mechanism.
+	-Replaced some check variables with enums.
+	-Reduced number of variables in client.
+	-Fixed daemon exit on syslog messaging.
+	-Fixed error printing on wrong permissions for daemon.
+	-Switched to pthreads.
+	-Updated the Franky-HOWTO.
+
+pport 0.6b
+	-Added syslog support for pportd.
+	-Added rehash on SIGHUP and clean exit on SIGTERM.
+	-Added recalibration option for pportd.
+	-Added some free() to pport.
+	-Added nanosleep() to pportd.
+	-Broke down source into several files.
+	-Corrected manpage typos.
+	-Corrected package description in files.
+
+pport 0.6a
+	-Implemented pin-reading daemon.
+	-Updated and created documentation.
+
+---------------------( pport 0.5 )------------------------------
+
+pport 0.5n
+	-Fixed bug causing pport to install improperly.
+	-Fixed bug causing segmentations faults on pre/post delay.
+	-Fixed bug from improper filehandling.
+	-Fixed bug limiting delay function.
+	-Fixed ssl header inclusion problem.
+	-Split sources. (Like turning the shuttle to land, for further
+	 developement notably input pin reading).
+	-Changed to better autoconf/automake method.
+pport 0.5m
+	-Added parity pin strobing.
+	-Updated the FRANKY-HOWTO.
+	-Executed several stability tests.
+pport 0.5l
+	-Added backward pin stobing.
+	-Fixed bug to exclude the aes.h header.
+	-Merged two flags for AES testing.
+	-Disabled the "default" encryption key.
+	-Updated the documentation.
+pport 0.5k
+	-Added AES encryption as an optional feature.
+	-Added selecting the hex address at configure time.
+	-Added selecting the data file at configure time.
+	-Added stripping of the binary (takes less space).
+	-Fixed getting the prime pin numbers (9 was excluded).
+	-Updated documentation.
+pport 0.5j
+	-Added millisecond delay using 'n'.
+	-Changed forking procedure (made program wait in
+	 special conditions only).
+	-Changed to nanosleep() completely.
+	-Fixed overlapping pins problem concerning the 'o' flag.
+	-Updated documentation and manpage.
+	-Inversed ChangeLog :)
+pport 0.5i
+	-Rewrote sort algorithm entirely.
+	-Added strobe toggle (toggle sweep).
+	-Updated the documentation.
+	-Fixed very serious bug on sort algorithm.
+	-Changed forking procedure (made program wait).
+	-Changed pin restoring procedure.
+pport 0.5h
+	-Added strobe function (pin sweep).
+	-Changed spins to set.
+	-Fixed the status output.
+	-Changed status report to a more concludent output.	
+	-Now availible as rpm too.
+pport 0.5g
+	-Added even/odd pin setting and toggling.
+	-Added random pin toggling.
+	-Added example section to manpage.
+	-Fixed version output again.
+pport 0.5f
+	-Inversed stray getmem() call with send() in the program.
+	-Merged set all, set none  and individual set into one function, now
+	 availible with the 's' flag followed by pin number or all or none.
+	-Added '-t all' option to toggle all pins.
+	-Added long options to manpage.
+	-Added FAQ.
+	-Fixed version output.
+pport 0.5e
+	-Changed pin checker function into conditional statement.
+	-Eliminated some numeric constants.
+	-Changed 's' switch into 'd' for delay.
+	-Mofified command line help.
+	-Added autoconf/automake compile system :)
+	-Fixed double entries in the data file.
+	-Removed redundant "toggle" and "saved" from help.h
+	-Added status report by running the program with no arguments.
+pport 0.5d
+	-Fixed the README.
+	-Fixed bizzare (and that's the right word) time behaviour.
+	-Changed delay parsing so that one can use '-s' as postfix.
+	-Modified spurify() accordingly.
+	-A new ideea for the howto.
+	-Small documentation cleanups.
+pport 0.5c
+	-Bugfix release.
+	-Fixed bug on toggling pin 2.
+	-Eliminated unused code.
+	-Simplified shm handling.
+pport 0.5b
+	-Added gdesklet thanks to Martin Grimme (martin@pycage.de).
+		For more information:
+		http://gdesklets.gnomedesktop.org/
+	-Fixed the version report.
+	-Fixed the damn segmentation fault.
+pport 0.5a
+	-Entered final beta versions till 0.5
+	-Added man page.
+	-Changed memory access mode.
+	-Cleaned up the code.
+pport 0.3
+	-Added '-t' flag. Stands for toggle.
+	-Added feature to make pport remember pins state.
+	-Added sort algorithm to organise pins.
+	-Added 'day' delay.
+	-Changed pin handling.
+	-Changed new file for helper functions.
+	-Changed all constants into defines in header.
+	-Changed to no output from the main program.
+pport 0.2
+	-Cut the cr@p with C++. I hate C++...
+	-Cleaned up the code.
+	-Better help. Comes with a handler now.
+	-Eliminated individual port, can acheive the same with '-p'.
+	-Added feature to turn several pins on, on the fly.
+	-Added long options (-help, -all).
+	-Got ready for web-interface 8-)
+pport 0.1
+	-Initial announcement.

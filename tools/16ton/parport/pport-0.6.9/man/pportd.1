@@ -1,0 +1,92 @@
+.\" Copyright 2004 Corcalciuc V. Horia (rain@sevenrains.ro)
+.\" May be distributed under the GNU General Public License
+.TH PPORT 1 "12 March 2004"
+.SH NAME
+pport \- set/toggle parallel port pins on and off
+.SH SYNOPSIS
+.nf
+.BR "pportd [ OPTIONS ]"
+.fi
+.SH DESCRIPTION
+.B pportd 
+is the counterpart of the pport program. It reads the input pins of
+the parallel port and executes commands based on a configuration file called
+.B pportd.conf
+that is meant to reside in the sysconfdir of the system.
+
+.B pportd
+will read a configuration file, calibrate your parallel port to its internal
+functions and then depending on your flags, will fork into the background or
+stay in the foreground, being either verbose or silent, executing commands.
+
+.B pportd
+will read the input pins of the parallel port also called the status port
+and after a relaxation period will execute a configurable command. The PC 
+parallel port is a 25 pin D-shaped female connector in the back of the 
+computer. It is conventionally used to connect a printer to the computer, 
+but also other types of hardware available for this port. Not all 25 pins 
+are always needed. 
+.B pportd
+reads the status pins of the parallel port. Notably pins 10, 11, 12, 13 and
+15. Some pins are also simple grounding pins, which you will probably need, 
+in order to ground your circuit. Here is a scheme of the parallel port:
+
+.nf
+
+    SLCT|PPR|BSY|ACK|                 
+   _____|___|___|___|________________________________________        
+ *      |   |   |   |                                         *       
+ *     13  12  11  10   9   8   7   6   5   4   3   2   1     *       
+  *                                                          *        
+   *     25  24  23  22  21  20  19  18  17  16  15  14     *         
+    *____|___|___|___|___|___|___|___|____|_______|________*          
+         |   |   |   |   |   |   |   |    |       +-+                   
+          +---+---+---+---+---+---+---+----+-----+  |                  
+                                                 |  +_ERROR_                  
+                                                ---                   
+                                               ////                   
+
+.fi
+
+.B pportd
+uses ACK (Acknowledge), BSY (Busy), PPR (Paper Empty), SLCT (Select) and
+ERROR (Error). Pins 17 through 25 are the ground pins of the parallel port.
+
+.SH OPTIONS
+.TP
+.B \-h | --help
+Causes
+.B pportd
+to pint out a quick help reference.
+.TP
+.B \-f | --foreground
+Hinders
+.B pportd
+from forking into the background.
+.TP
+.B \-y | --nosyslog
+Prevents
+.B pportd
+to print to the syslog.
+.TP
+.B \-r | --resolution
+will check the hardware status at the number of milliseconds specified.
+Otherwise
+.B pportd
+defaults to 1ms.
+.TP
+.B pportd
+with no arguments launches the daemon into the background.
+
+.SH HISTORY
+This program is an extension of the  uttermost practical Coffee-HOWTO
+originally written by Fotis Georgatos, < gef@hellug.gr> and Annie Pinder, <
+ajp@leguin.org.uk>. It tries to provide a standard for collecting the
+status pins of the parallel port quickly and simply. The "custom" howto
+provided, notably Franky-HOWTO, contains various hardware applications
+that can be used. It provides an updated set of ideas that could help you
+realize the functionality you seek.
+.SH AUTHORS
+.nf
+Written by Corcalciuc V. Horia (rain@sevenrains.ro)
+.fi

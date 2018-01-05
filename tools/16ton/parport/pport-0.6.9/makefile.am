@@ -1,0 +1,3 @@
+SUBDIRS = man src 
+DIST_SUBDIRS = $(SUBDIRS)
+EXTRA_DIST = include doc samples regen.sh

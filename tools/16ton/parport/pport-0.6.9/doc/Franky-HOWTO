@@ -1,0 +1,394 @@
+pport v0.1 This is the first release of the pport package. At the moment
+it only contains the source code for the software part of the controller.
+It should come in handy once the hardware circuitry is released.
+
+For the time being, or for those that already have the board attached to
+the parallel port the following should make the program compile.
+
+As usual, as root type:
+
+make && make install
+
+Then the program should be placed in /usr/sbin.
+As root one can type:
+
+pport --help
+
+in order to obtain help.
+
+The following scheme is taken as an excerpt from the Coffee-Machine how-to
+and enhanced with Tomi Engdahl's scheme. The two relays together with the
+optoisolator (optional) and the zener diode should provide an excellent
+way to protect the parallel port from damage.
+
+                                                V+  (12V)
+                                                 |
+                                    +------------+-----+------+
+                                    |                  |      |
+Parallel                            |                  |      |
+Port                                |          D1     ---     |
+                                    |         1N4001  / \    1st relay coil
+ data     R1     1 ----------- 5    |                /---\    |   |   |
+pin(n)----1k------| Opto-     |-----+                  |      |   |   |   220V
+                  | Isolator  |                  +-----+------+   |   | or 110V
+ GND -----+-------|           |-+                |            |   |   |    |
+          |      2 ----------- 4|                |            |   |   |    |
+          |        CNY 17 or    |   R2        | /             |   |   |    |
+         ---       4N25         |   4.7K    B |/  C T1        |  2nd relay coil
+         |/  DZ                 +--\/\/\/\/---|     BC547A    |       |    |
+         |                      |             |\  E           |      apparatus
+         ---                    |             | V          | /
+          |                     /               |        B |/C  T2
+          |                     \  R3           +----------|    power
+         ---                    / 10 kohm                  |\E  transistor
+          -         fig.1       \                          | v
+         GND                    |                            |
+                                +----------------------------+
+                                                             |
+                                                external circuit ground
+
+The parallel port mainly used to connect printers and similar devices
+looks something like this:
+                                  9 8 7 6 5 4 3 2
+			-----------------------------
+			\ o o o o o o o o o o o o o /
+			 \ o o o o o o o o o o o o /
+                          ------------------------
+			  25 23 21 19                  fig. 2
+			   24 22 20 18
+
+Where pins 2-9 are the data pins (corresponding to lport -n {2,3,4,5,6,7
+8,9}) and the pins 18-25 are ground pins. 
+
+Good luck and happy controlling!
+Comments and suggestions to rain@sevenrains.ro
+
+Rain
+
+pport 0.2 As promised I want to add some more documentation or
+implementations regarding the hardware part of the project. I will present a
+possibility to control several appliances using less pins. This is necessary
+if you wish for example to control more than 8 devices in total. Obviously,
+there are not enough pins to support a great number of devices. Thus, we
+introduce the demultiplexer. What is a demultiplexer? A demultiplexer is a
+small chip powered by an input voltage that on the basis of some binary
+addresses, selects different pins so your input voltage can pass through the
+selected pin. Let's take a simple example of a 1:4 demultiplexer:
+
+	------------          + (+12V)
+    p1  |          | o1       |                                + +
+      --+          +--        +    _______            _        | |
+    p2  |          | o2       \   |       |----------/ \       | |
+      --+          +----------/---|  BC   |         | R |------+ |
+        |          | o3       +   |_______|---+      \_/         /
+        |   1:4    +--        |       |       |        |         /
+        |  DEMUX   | o4       |       |       |        \________/
+        |          +--        +-------+     \---/ 
+     +--+          |                         \ /
+     |  |__________|                        -----
+     |                                        |
+     |                                        |
+     |                                       ---
+     + (+12V)                                ///
+
+Ok. Let's explain this now... So what does this DEMUX actually do? It's
+really simple once you get the hang of it. Take the natural binary code on
+two bits. There are four combinations of 0 and 1:
+
+	     |	p1 | p2 |  DMUX Select  |
+	     +-----+----+---------------+
+             |  0  | 0  | 0,0 -> o1     |
+             |  0  | 1  | 0,1 -> o2     |
+             |  1  | 0  | 1,0 -> o3     |
+             |  1  | 1  | 1,1 -> o4     |
+             +-----+----+---------------+
+
+So basically, what the DMUX does, is to select an output pin according to
+what address is at its input. Suppose we set pin 1 (p1) to 0 and pin 2 (p2)
+to high, then the DMUX "builds a connection" between the +12V and o2,
+powering up the rest of the circuit. In two words: A DMUX is a binary
+switch.
+
+So what comes after the DMUX? Well we need some "device" that will alter
+it's state every time we supply it a signal. Furthermore, if we remove the
+power at it's input, it should still remain in that state until it receives
+an impulse. This device is called a bistable latch or a flip-flop. The graph
+below shows how it alters its state using the clock (input feed):
+
+              | (V)
+              |
+              |
+       (+12V) |__    ____     ____     ____
+              |  |  |    |   |    |   |    |
+              |  |  |    |   |    |   |    |
+              |  |  |    |   |    |   |    |                (t)
+         -----+--+--+----+---+----+---+----+------------------>
+              |
+              |
+              |_____           _______
+              |     |         |       |
+              |     |         |       |                     (t)
+          ----+-----+---------+-------+----------------------->
+
+So as you can see... When the latch gets an impulse it changes it's state
+and keeps that state until it receives another impulse, and when it does, it
+shifts its state. Thus in our circuit, I've set a led which will light when
+the latch is "off" and the voltage drains to the ground through the light
+emitting diode.
+
+Using this technique you can... control an infinite number of devices. Think
+about it... We haven't discussed the case when you add another DEMUX to the
+output of our DEMUX. In any case, the possibilities are infinite.
+
+To use this circuit with our small program, you'd have to know which pins to
+set to high and which to low (can be done using the -p switch). To eliminate
+this inconvenience I will add in the close future (couple of days, maybe
+weeks) a web interface. That should shift this project to 1.0.
+
+As usual, comments and suggestions to rain@sevenrains.ro :-)
+Rain
+
+pport 0.5d Another schematic came across my mind while inspecting my own
+setup. It is fairly possible to wire a multiple power supply so that each
+socked can be controlled by your pins. This way of course you will get rid
+of having to wire each appliance manually. The device can be switched on
+and powered only when the corresponding pin is set. This is our common
+multiple power supply:
+          ___________________________________ _ _ _ _ _
+         /   __     __     __     __                   \               
+        |   /  \   /  \   /  \   /  \                   |               
+        |  |  O | |  O | |  O | |  O |                  -----              
+        |  |  O | |  O | |  O | |  O | etc...           ----- extender cable                     
+        |   \__/   \__/   \__/   \__/                   |                     
+         \___________________________________ _ _ _ _ _/
+
+Now the schematic of such a thing is quite simple:
+                                                           +----(phase)
+         _________________________________________________/
+          O     O     O     O     O     O etc..
+           ----------------------------------------------------+
+         _O_____O_____O_____O_____O_____O____________________  |  ___
+                                                             \_|_/   \
+                                                               |      +-(null)
+                                                             --+--
+                                                             /////
+
+The above is your standard radishack socket extender. When you get yourself
+such a thing for this project try to search for simplicity. We don't need
+phase regulators and other great stuff. Just a simple plug extender that you
+can pull apart easily using some screws. The schematic you'll see inside is
+something like the above: 3 wires, 2 for the actual plug (the phase and the
+null) and 1 for grounding. It is not important in our schematic to know which
+one is phase and null, in fact they invert 50 times/second. Now lets focus
+on 1 plug from your extender:
+          _______
+         /   __  _____                              +-----> leave as it is
+        |   /  \/     \                            /        wired.
+        |  |  O |__    +--------------------------/
+        |  |  O |  \_____        +----------------> relay. <---> leave as it
+        |   \__/ \____   +-------|----+                         it is wired.
+                      \        +-+    |
+                       +------/     --+--
+                                     /// leave to gnd as it is wired.
+
+So what do we do? Baseline: we take one of the wires that lead to the
+"hole", either the phase or the null and cut it. Then the two end we solder
+them on the relay making a switch. So when you activate the relay with you
+computer it'll make the connection and the circuit will be closed so power
+will flow through the relay, activating your device. In order to realise
+this project at its full extent, you'll need a 8-plug extender and 8 of
+those small devices we built up there in the document. With some careful
+soldering and carefulness you can integrate the devices and the relays into
+the socket extender itself and have only two wires coming out of it: The
+normal plug and a parallel port cord to control your relays inside.
+
+Comments and suggestions: 
+rain@sevenrains.ro
+Rain
+
+pport 0.5m I recently got an email from somebody interested in the input
+pins of the parallel port:
+
+Hi Rain,
+
+I have just discovered your pport, it is simple and effective.  I could
+use this but would like to know if you have any plans on reading the
+state of the parallel port. For example, trigger if an external device
+sends a signal through the port. I dont know how complex this is or even
+if it relates to your pport.
+
+
+Best regards,
+
+Stuart.
+
+So I thought up a circuitry and a reason to not implement the reading of the
+input pins just yet. A cut-down version of my answer follows:
+
+I have thought of implementing, reading the parallel port input,
+yet at the moment I find this future feature quite unusable. First because
+reading the input pins is quite application specific and I can't provide
+a "general" interface for it. Say I would like to gather "data" from the
+parallel port: in that case, one would rather prefer a "special" program
+designed for such a thing. PPort provides quite a good status report on
+its pins: running pport with no arguments gives the pins that are
+"waiting" to be turned on and the pins that are already turned on. Using
+this, one can simply bash/perl/whatever-script the output and take
+decisions.
+        Your remark is very pertinent indeed: How would one let pport
+activate a pin, if there is a signal on an input pin? This can be simply
+solved with electronics and you don't need to go through your computer:
+
+        You use a simple 5V AND gate:
+                                 _
+                                |  \
+        pin x          >--------|   \
+        permanently             |    |--------------------> device to be
+        set to            +-----|   /                           activated.
+        on.               |     |_ /
+                          |
+                          |
+                          +--------------< input signal from external
+                                                        device.
+
+        The idea:      1.) you use pport, and set pin 2 ( 2 as an example)
+                            to on and connect pin 2 to one of the inputs
+                            of the AND gate.
+                        2.) you connect your external signal (the one that
+                            you mentioned should come in on the input pins
+                            of the parallel port) to the other input of
+                           the AND gate.
+                        3.) you connect the TOTAL output of the AND gate
+                            to the device that you want to control.
+
+        The AND gate:
+
+        sig1 | sig2 | output
+         0      0       0          This table shows how it works.
+         0      1       0           -the AND gate practically multiplies the
+         1      0       0            signals and gives OUT a signal ONLY IF
+         1      1       1            both its inputs are set to high.
+
+        Hopefully this helps :)
+
+        Another, minor, yet probably not so minor thing that keeps me from
+implementing it, is that, well, with the input of current in your computer
+you REALLY CAN damage something in case there is a glitch somewhere. pport
+doesn't take any parallel port feedback (the only feedback it has is
+software implemented) and only resumes to sending data. One must be really
+dumb to destroy one's computer with data output. The circuitry (taken from
+the coffee-machine howto and inspired from other sites) separates the
+external voltage from the parallel port voltage completely. If you use the
+optoisolator, then on my responsability, you can put 220V through your
+dongle for fireworks without damaging your computer.
+
+pport 0.6a PPort now completes itself through these series by having a
+daemon implemented in the package in order to read the parallel port status
+pins. The binary is called pportd which will be generated by compiling the
+package and installs itself by default in your prefix.
+	pportd uses a configuration file in order to give you the ability to
+specify what actions should take place in case of a status pin being set to
+low. This file resides in your ${prefix}/etc directory and has quite a
+simple syntax that enables you to specify both the input pin and the action
+to take. It also contains some examples and a description of all required
+parameters.
+	This is how pportd works: It reads the configuration file,
+calibrates your parallel port and goes in daemon mode. Then at an interval
+of a couple of milliseconds it checks to see if any of the status pins are
+set to low. If there are, it executes your command once and waits for it to
+be released.
+	The calibration is self-explanatory. Generally, you should unplug
+all your hardware from the parallel port and then run the daemon for the
+first time. This will make the daemon calibrate your pins. What you have to
+do, is simply set each pin to the ground. That is, make a contact between
+the pin it asks for and a metal surface that is grounded. This can of course
+be the D metal of the parallel port itself. I did this using a small cable.
+	If there are errors, pportd will ask you to run the binary again and
+it will try to recalibrate the port. It is essential that you don't get
+double entries, meaning two pins returning the same value, or else pportd
+will not be able to distinguish between the different signals.
+
+Comments and suggestions:
+rain@sevenrains.ro
+Rain
+
+pport 0.6c The PPort daemon, pportd, can be used to monitor the state of the
+status pins. Using these 5 pins one can hook-up almost any device to the
+parallel port and have it execute an arbitrary command when the state of one
+of those pins is modified. In order to do this PPort requires you to have
+your parallel port set to ECP or SPP and run through a calibration process.
+On some systems setting the pin to the ground will make the parallel port
+alter its state, however, the official method is by supplying a voltage to
+those pins as presented here:
+
+                               +5V
+                                |
+                +---------------+---------------+
+                |       |       |       |       |
+                /       /       /       /       /
+                \       \       \       \       \
+             3K /    3K /    3K /    3K /    3K /
+                \       \       \       \       \
+ p11   330      |        |       |       |       |          Key
+   +-/\/\/\--------------------------------------+     p11-p15 - status pins
+ p12   330      |        |       |       |       |     p25 - ground pin or
+   +-/\/\/\------------------------------+       |           other ground.
+ p13   330      |        |       |       |       |     K1-K5 - switches
+   +-/\/\/\----------------------+       |       |
+ p14   330      |        |       |       |       |
+   +-/\/\/\--------------+       |       |       |
+ p15   330      |        |       |       |       |
+   +-/\/\/\-----+        |       |       |       |
+                |        |       |       |       |
+                 / K1     / K2    / K3    / K4    / K5
+      pin25     |        |       |       |       |
+         +------+--------+-------+-------+-------+
+      or ground                  |
+                                ---
+                                 -
+
+	The above figure represents an excerpt from the net. This is the
+default interface. The voltage and the resistors could be left out in some
+cases, and just setting the pins to the ground should alter the state of the
+parallel port. Thus one would obtain something like:
+
+       pin11                      /
+         +-----------------------+   +----------+
+       pin12                      /             |
+         +-----------------------+   +----------+
+       etc                         .            |
+                                   .            +
+                                   .           --- ground
+                                                -
+
+	For the switches, I used and recomend: BURGESS (or similar) V4T7YR1
+and the corresponding schmatic for this switch is:
+
+             ||          This switch, when pressed once, makes a connection
+            ----         between 1 and 2 and then breaks the connection again
+          o--  --o       and resumes its state. I think they may be called
+          1      2       toggle switches. What happens is, the connection is
+                         made just once between 1 and 2 and it's not
+permanent. That is, the switch only makes the connection for the period it
+is pressed.
+
+pport 0.6d The new implementation recently introduced, removes the
+dependency on the toggle switches. This means that one can use normal
+switches to toggle the state of the input pins. However, the toggle switches
+are still recomended and proove to be optimal to the usage of the pportd
+daemon. Basically what has changed, is that the daemon won't remain in a
+blocked state once a switch is activated. That means, if you have for
+example pin 15 activated, you can activate a new pin, say 10, and the daemon
+will successfully recognise the you new pin (10). This independence might
+proove usefull to anybody using the daemon to control the status of a
+considerable number of devices, since these will not block the daemon
+waiting for the activated device to toggle the switch to an off state.
+
+pport 0.6.5 This new release adds serial rs232 port support. It is just the
+beginning of much more to come. The serial port is probably one of the
+"weakest" when we seek control. It has just two usable lines documented in
+the manpage. Nevertheless, it is very usefull. One of the uses I can think
+up now is mainly to power an external circuit using the serial port since it
+provides considerable power and to use the parallel port just to "control"
+events through minor singnals. The serial port is in this aspect superior to
+the parallel port.

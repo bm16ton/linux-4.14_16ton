@@ -1,0 +1,7 @@
+bin_PROGRAMS   = pport pportd   
+pport_SOURCES  = pport.c ppout.c share.c
+pport_LDFLAGS  = @LDFLAGS@
+pportd_SOURCES = pportd.c ppin.c share.c
+pportd_LDFLAGS = @LDFLAGS@
+AM_MAKEFLAGS = -I$(top_builddir)/include
+INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/include -I$(top_srcdir)../include -I$(top_srcdir)../../include

@@ -1,0 +1,77 @@
+PPort pport (console application)
+
+	PPort is a simple yet handy program and its documented counterpart
+for accessing the output pins of a parallel port. Using this bundle, one can
+successfully control any household appliance or electronic device with
+minimal hassle and practically no changes.
+
+	To compile the program use the generic:
+
+	./configure && make && make install
+
+which should check if the program is compatible with your machine, compile
+the program and install it. Of course the installation directory is settable
+by supplying flags to the configure script.
+
+Currently the configure script accepts some parameters amongst the
+traditional autoconf parameters which may be essential to make PPort work
+better than using the default values:
+
+	./configure --with-parport=0x432
+
+This parameter will make PPort use the parallel port found at the hex
+address 0x432 (an example fictive value) which is generally available 
+in the BIOS. This is somewhat essential to running PPort successfully, 
+since that will be the port that PPort will try to access. By default, 
+if this option is not specified, PPort assumes that your parallel port 
+is found at the address 0x378.
+
+	./configure --with-dfile=/tmp/mydatafile
+
+This parameter will make PPort use the file specified in the path above as
+its data file. This is useful for pin restoration and various other tracker
+elements. By default, if this option is not specified, PPort will use the
+"old" data file /tmp/.pport.data.
+
+	./configre --with-secrecy=Whateveryoumaylike
+
+Ma by useful for somewhat paranoid people, this EXPERIMENTAL feature
+introduced from version 0.5k will attempt to encrypt the shared memory
+segment that PPort uses. Thus, a common user on your system, won't be able
+to guess what devices you are currently powering unless he/she has the
+decryption key, which is specified with this option. In this example 
+"Whateveryoumaylike" is the current key and in order to set your own just 
+substitute it with whatever you may like.
+
+	./configure --with-cfgfile=/etc/pportd.conf
+
+Using this configure option one can specify the path to the configuration
+file of the pportd daemon other than the default.
+
+
+PPort gDesklet (graphical python-gtk interface)
+
+	Iff you wish to use the desklet provided under the desklet/ directory, 
+you'll need to install gdesklets which you can obtain from:
+ 
+		http://gdesklets.gnomedesktop.org/ 
+
+and its requirements. Then you'll need sudo, and you'll have to add a line
+to /etc/sudoers which will be something like this:
+
+	user	ALL=NOPASSWD:pport -t 2
+	user    ALL=NOPASSWD:pport -t 3
+	user    ALL=NOPASSWD:pport -t 4
+	user    ALL=NOPASSWD:pport -t 5
+	user    ALL=NOPASSWD:pport -t 6
+	user    ALL=NOPASSWD:pport -t 7
+	user    ALL=NOPASSWD:pport -t 8
+	user	ALL=NOPASSWD:pport -t 9
+
+where you replace "user" by the user you want to be able to run pport.
+This step is vital since pport requires root priviledges. Then install
+the desklet (read the "README" in desklet/) and you should be set to
+go. :)
+
+
+

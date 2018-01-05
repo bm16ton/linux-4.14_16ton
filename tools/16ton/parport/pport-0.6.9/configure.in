@@ -1,0 +1,158 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_INIT(pport, 0.6.8, rain@sevenrains.ro)
+AM_INIT_AUTOMAKE(pport, 0.6.9)
+AM_CONFIG_HEADER(config.h)
+
+# More automake stuff
+
+AM_MAINTAINER_MODE
+
+# Checks for programs.
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+
+# Find the actual value for $prefix that we'll end up with
+
+REAL_PREFIX=
+if test "x$prefix" = "xNONE"; then
+  REAL_PREFIX=$ac_default_prefix   
+else
+  REAL_PREFIX=$prefix
+fi
+old_prefix=$prefix
+prefix=$REAL_PREFIX
+
+# Set some default settings.
+
+__PPDIR__="/var/log/pport"
+sysconfdir="/etc"
+
+# Checks for compilation flags.
+
+AC_ARG_WITH(parport, [  --with-parport=[[hex]]
+                               select the parallel port address 
+                               [[default=0x378]]])
+if test "x$with_parport" != "x" ; then
+	AC_DEFINE_UNQUOTED(PBASE, $with_parport, [Parallel port address])
+else
+	AC_DEFINE_UNQUOTED(PBASE, 0x378, [Parallel port address])
+fi
+
+AC_ARG_WITH(serial, [  --with-serial=[[hex]]
+                               select the serial port address 
+                               [[default=0x02f8]]])
+if test "x$with_serial" != "x" ; then
+	AC_DEFINE_UNQUOTED(SBASE, $with_serial, [Serial port address])
+else
+	AC_DEFINE_UNQUOTED(SBASE, 0x02f8, [Serial port address])
+fi
+
+AC_ARG_WITH(data_dir, [  --with-data-dir=[[PATH]]
+                               the directory where pport will
+                               hold the input and output status files. 
+                               [[default=/var/log/pport]]])
+if test "x$with_data_dir" != "x"; then
+	AC_DEFINE_UNQUOTED(__PPDIR__, "$with_data_dir", [pport status directory])
+else
+	AC_DEFINE_UNQUOTED(__PPDIR__, "$__PPDIR__", [pport status directory])
+fi
+
+AC_ARG_WITH(output_file, [  --with-output-file=[[PATH]]
+                               the data file pport will use
+			       for pin status referrence. 
+                               [[default=/var/log/pport/output]]])
+if test "x$with_output_file" != "x"; then
+	AC_DEFINE_UNQUOTED(OUTPUT, "$with_output_file", [Pin output status file])
+else
+	AC_DEFINE_UNQUOTED(OUTPUT, "$__PPDIR__/output", [Pin output status file])
+fi
+
+AC_ARG_WITH(input_file, [  --with-input-file=[[PATH]]
+                               the data file pport will use
+			       for pin status referrence. 
+                               [[default=/var/log/pport/input]]])
+if test "x$with_input_file" != "x"; then
+	AC_DEFINE_UNQUOTED(INPUT, "$with_input_file", [Pin output status file])
+else
+	AC_DEFINE_UNQUOTED(INPUT, "$__PPDIR__/input", [Pin output status file])
+fi
+
+AC_ARG_WITH(conf_file, [  --with-conf-file=[[PATH]]
+                               the file from which the 
+			       pportd daemon will read. 
+                               [default=/etc/pportd.conf]])
+if test "x$with_conf_file" != "x"; then
+	AC_DEFINE_UNQUOTED(CFGFILE, "$with_conf_file", [Daemon data file])
+else
+	SYSCONF_TMP="$sysconfdir/pportd.conf"
+	EXP_SYSCONF=`eval echo $SYSCONF_TMP`
+	AC_SUBST(EXP_SYSCONF)
+	AC_DEFINE_UNQUOTED(CFGFILE, "$EXP_SYSCONF", [Daemon data file])
+fi
+
+AC_MSG_CHECKING(whether to enable debugging)
+debug_default="no"
+AC_ARG_ENABLE(debug, [  --enable-debug=[no/yes]	  turn on debugging [default=no]],,
+enable_debug=$debug_default)
+if test "x$enable_debug" = "xyes"; then
+	AC_DEFINE([DEBUG], [], [Debugging])
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+
+# Checks for libraries.
+AC_CHECK_LIB([pthread], [pthread_create], [], [
+	echo -e "POSIX Threads are needed for this program to operate"
+	echo -e "correctly. Please check if your OS has the pthreads"
+	echo -e "library installed or at least emulated for compatibility."
+	exit 1
+	])
+AC_CHECK_LIB([popt], [poptGetContext], [], [
+	echo -e "The popt library used for parsing command line options"
+	echo -e "is required in order for this program to operate correctly."
+	echo -e "Please check out[1] and download[2] from the following sites:"
+	echo -e "\n"
+	echo -e "\t[1] http://freshmeat.net/projects/popt/"
+	echo -e "\t[2] ftp://ftp.rpm.org/pub/rpm/dist/rpm-4.1.x/"
+	exit 1
+	])
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h syslog.h unistd.h], , ,
+[#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_VOLATILE
+
+# Checks for library functions.
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS([isascii memset mkdir strchr strerror strstr], [], [
+	echo -e "Some essential functions could not be found!"
+	echo -e "Please check if your build environment is ok"
+	exit 1
+	])
+
+AC_CONFIG_FILES([
+makefile
+src/makefile
+man/makefile])
+AC_OUTPUT

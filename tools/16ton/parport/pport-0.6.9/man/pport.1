@@ -1,0 +1,181 @@
+.\" Copyright 2004 Corcalciuc V. Horia (rain@sevenrains.ro)
+.\" May be distributed under the GNU General Public License
+.TH PPORT 1 "20 January 2004"
+.SH NAME
+pport \- manipulate computer port pins
+.SH SYNOPSIS
+.nf
+.BR "pport <" flippers "> [" modifiers "]" 
+.BR "pport <" extensions ">"
+.BR "pport <" information ">"
+.fi
+.SH DESCRIPTION
+The program 
+.B pport 
+is a simple yet handy program and its documented counterpart for
+accessing the output pins of multiple ports. Using this bundle, one can
+successfully control any household appliance or electronic device with
+minimal hassle and practically no changes. 
+.B pport
+will alter the state (toggle or set) of the data pins specified by the
+user, of the parallel port or other supported ports using 
+.B flippers 
+to toggle or set, 
+.B modifiers 
+to alter the methods and provides 
+.B information 
+all availible from the contextual 
+.B \--help 
+or 
+.B \-h 
+options directly from the command line.
+
+Conceived to change between the low or high state of the data pins 
+of the parallel port, development extended its use to other
+common PC ports:
+
+The i386 parallel port is a 25 pin D-shaped female connector 
+in the back of the computer, conventionally used to connect a printer.
+Not all 25 pins are always needed. Thus it can alter the state of eight of 
+those pins called data pins: 2, 3 4, 5, 6, 7 and 8. The rest are simple 
+grounding pins as seen in the illustration below.
+Here is a scheme of the parallel port:
+
+.nf
+                                 *-data pins D0 to D7
+
+                        |D7 |D6 |D5 |D4 |D3 |D2 |D1 |D0    <---+          
+   _____________________|___|___|___|___|___|___|___|______    | count     
+  *                     |   |   |   |   |   |   |   |       *  |     
+  *    13  12  11  10   9   8   7   6   5   4   3   2  1    *  |     
+  *                                                         *        
+   *     25  24  23  22  21  20  19  18  17  16  15  14    *         
+    *____|___|___|___|___|___|___|___|____|_______________*          
+         |   |   |   |   |   |   |   |    |                          
+          +---+---+---+---+---+---+---+----+-----+                    
+                           *                     |
+                           |                     |
+                 groudning pins 17 to 25        ---                   
+                                               ////                   
+
+.fi
+
+The data pins are D0 through D7. Pins 17 through 25 are the grounding pins.
+
+The program also has support for the serial rs232 port. Although the IO
+is different from that of the parallel port, the serial connector rs232 
+can prove useful in many situations since it offers a serious amount 
+of power (a voltage of +-12V or in some cases +-5V  and short circuit 
+current flow of 7-10mA) depending on the circuit types used in the PC 
+circuitry. This is all at the cost of signal lines. The parallel port has 
+eight data pins as we have seen above whereas the serial port has only 
+three: TD(Transmit Data), DTS(Data Terminal Ready), RTS(Request to Send).
+However, only the last two are usable since TD is logic true(-12V) when 
+no data is sent:
+
+.nf                           
+
+   9 pin rs232           +-DTR       In order to avoid
+         _______________|_______    confusion with the
+        *                |       *  other parallel port        
+        *    1   2   3   4   5   *  we only mention that    
+         *     6   7   8   9    *   the 25-pin version of                 
+          *________|___________*    the serial port has:    
+                   |                    DTR = pin 20
+                   +_RTS_               RTS = pin 7
+
+.fi
+
+Based on the equivalence of both parallel port versions, 
+.B pport
+accepts both standards transparently, either 9 pin or 25 pin serial rs232 
+connector.
+
+.SH OPTIONS
+.TP
+.B \-p, \--port <serial>
+With this option one can select an alternative port.
+.TP
+.B \-s, \--set <pin1,pin2...|all|none|even|odd|random|dtr,rts>
+Causes
+.B pport
+to set one, some, or all pins to high. Or to set all low with "none". dtr and
+rts are available only in combination with the serial port. One can also use
+all and none with the serial port option in order to set both RTS and DTR
+lines to high respectively low.
+.TP
+.B \-t, \--toggle  <pin1,pin2...|all|even|odd|random>
+Causes
+.B pport
+to toggle the state of the specified pins.
+.TP
+.B \-w, \--wait  <Nd|Nh|Nm|Ns>
+Where n is a number, causes
+.B pport
+to wait a specific time before altering the state of the specified pins, 
+where n is a number, and d stands for days, h for hours, m for minutes and s
+for seconds.
+.TP
+.B \-r, \--restore
+Causes
+.B pport
+to restore the previous state of the pins stored in the data file.
+.TP
+.B \--status
+Makes
+.B pport
+give a status report on the parallel port.
+.TP
+.B \--debug
+Will turn on debugging for the following command.
+.TP
+.B \--raw
+Will send raw data through the parallel port.
+.SH EXAMPLES
+Here are a few examples for using this program:
+.TP
+pport -s all -w 10m
+Will set all the pins to high after a 10 minutes delay.
+.TP
+pport -s random -w 5s
+Will set some random pins to high after a 5 seconds delay.
+.TP
+pport -r
+Will restore the previous pin states. This can be useful if you want
+to include pport in your startup scripts so it can restore your device
+status on system startup.
+.TP
+pport -t 2,4,7 -w 10s
+Will toggle pins 2, 4 and 7 into their complementary state after 10
+seconds.
+.TP
+pport -p serial -s rts
+Will set the rts line of the rs232 port to the high state.
+.TP
+pport -p serial -s rts,dtr
+Will set both lines of the rs232 port to the high state.
+.TP
+pport -p serial -s none
+Will set both lines of the rs232 port to the low state.
+.TP
+pport --raw "Hello world"
+Will send data through the parallel port.
+.SH NOTES
+1. The
+.B pport
+utility, must be able to access the ports in the first place.
+Failure to do so will result in an error. Thus
+.B pport
+must have superuser priviledges at runtime.
+.SH HISTORY
+This package is the uttermost practical embodiment of the Coffee-HOWTO
+originally written by Fotis Georgatos, <gef@hellug.gr> and Annie Pinder, <
+ajp@leguin.org.uk>. It tries to provide a standard for controlling
+computer ports quickly aiming at the same time to be simple. The "custom" howto
+provided, notably FRANKY-HOWTO, contains various hardware applications
+that can be used. It provides an updated set of ideas that could maybe
+realize the functionality you seek.
+.SH AUTHORS
+.nf
+Written by Corcalciuc V. Horia (rain@sevenrains.ro)
+.fi
