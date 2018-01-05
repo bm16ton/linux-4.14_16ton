@@ -1,16 +1,23 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
-ISSUES: At first non of the 5ghz band was available in Master (AP) mode on the brcmfmac (especially on GPD Win
-	the only brcmfmac device i own) When I first applied my patches and the restrictions where removed from the
-	channel list, I tried an AP on 36 and it worked. I foolishly assumed I was done. I now realized even tho
-	hostapd starts and runs without errors on channels above 36 a stupidly quick test today showed those channels
-	are not in fact working. I will investigate this further. I quickly tried channels above 140. Which should
-	be outside the fake X2 regulatory domains restricitons and it still didnt "seem" to work.
+UPDATE Jan 4th 2018; added two more pairs of dev/prod ids to uss720 (belkin F5UOO2 and D-Link DSB-P36)
+	Added Android usb gadget/configfs/function  USB_F_FS USB_F_MTP USB_F_PTP USB_CONFIGFS_UEVENT
+	also function_accesory but its currently in a dependency cycle and i havent looked at it.
+	So far only mtp is tested (on gpd-win but should work with other otg devices) and works good
+	as far as i can tell. in tools/16ton you will find a heavily patched mtp-server which is hard coded
+	to share /root and no longer has the android/unity dependencys.
+	Ubuntu's repo version of adbd would segfault (same as mtp-server) and a diff one is on tools, it
+	doesnt segfault and the host machine can see it, havent gotten beyind that yet.
+	The script in tools/16ton usb-mtp-setup run as root then start mtp-server as root
 
-ISSUES: Currently the Krack patches i applied to 2.3 keep the middle band from correctly working in AP mode and
-	all kinds on notworking in Managed mode. Currently working on applying my patches to 2.4
-UPDATE: Theres the 2.4 source and my patches in tools/16ton now. Only did a quick test channel 36 worked fine
-	on GPD Win ill test it against my atheros patches later.
+UPDATE Dec 27 2017; brought up to 4.14.9
+	nvidia 384 doesnt compile against 4.14.9, patches to fix this in CURRENTLY_APPLIED_PATCHES
+	directory out-of-tree now has the following out of tree kernel modules (I believe they all have dkms support)
+			i2c-ch341-usb    kernel i2c driver for ch341a
+			spi-ch341-usb	 kernel spi driver for ch341a
+			xtables-addons   iptables addons
+
+UPDATE Dec 22 2017; Brought up to 4.14.8
 
 NEW:
 	Removed NO-IR from middle band
@@ -26,7 +33,7 @@ FIXES:
 wifi.scan-rand-mac-address=no
 
 	at end of /etc/NetworkManager/NetworkManager.conf
-	
+
 
 
 ADDITIONS:
@@ -39,9 +46,9 @@ Im sures there more, and more is on the way
 
 in tools/16ton
 
-tools/16ton/iwleeprom 
+tools/16ton/iwleeprom
 	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writting to certain intel and
-	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and 
+	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and
 	22 on 5ghz on Intel cards and for Atheros cards it changes the eeprom reg domain to 0x6A tho ive seen multiple
     sources say 65 unlocks 5ghz a quick look at linux driver makes me think 6A will be less restrictive, if im wrong
 	edit ath9kio.c search for 0x6A and replace it with 0x65, recompile. THO FOR ATHEROS CARDS THIS IS NOT REQUIRED AT

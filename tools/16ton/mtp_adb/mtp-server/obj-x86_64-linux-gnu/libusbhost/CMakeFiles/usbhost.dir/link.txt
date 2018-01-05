@@ -1,0 +1,2 @@
+/usr/bin/ar qc libusbhost.a  CMakeFiles/usbhost.dir/src/usbhost.c.o
+/usr/bin/ranlib libusbhost.a

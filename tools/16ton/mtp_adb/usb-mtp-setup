@@ -1,0 +1,35 @@
+#!/bin/bash
+modprobe usb_f_fs
+modprobe usb_f_mtp
+modprobe usb_f_ptp
+mkdir /sys/kernel/config/usb_gadget/g1
+cd /sys/kernel/config/usb_gadget/g1
+
+#Set default Vendor and Product IDs for now
+echo 0x18d1 > idVendor
+echo 0x4E26 > idProduct
+
+#Create English strings and add random deviceID
+mkdir strings/0x409
+echo 0123459876 > strings/0x409/serialnumber
+
+#Update following if you want to
+echo "Test" > strings/0x409/manufacturer
+echo "Test" > strings/0x409/product
+
+#Create gadget configuration
+mkdir configs/c.1
+mkdir configs/c.1/strings/0x409
+echo "Conf 1" > configs/c.1/strings/0x409/configuration
+echo 120 > configs/c.1/MaxPower
+
+#    Make sure we create MTP function and add (symlink) it in gadget configuration only when the Android boot is complete. You can check that by checking the status of sys.boot_completed property before running the following commands. 
+
+#Create MTP function, 
+#And link it to the gadget configuration
+mkdir /sys/kernel/config/usb_gadget/g1/functions/mtp.mtp
+ln -s /sys/kernel/config/usb_gadget/g1/functions/mtp.mtp /sys/kernel/config/usb_gadget/g1/configs/c.1/mtp.mtp
+
+#Enable the Gadget
+#Replace "ci_hdrc.0" with your platform UDC driver as found in /sys/class/udc/
+echo "dwc3.0.auto" > /sys/kernel/config/usb_gadget/g1/UDC

@@ -1,0 +1,160 @@
+diff -urpN ubuntu-mtp-71_orig/server/server.cpp ubuntu-mtp-71/server/server.cpp
+--- ubuntu-mtp-71_orig/server/server.cpp	2016-04-07 06:03:44.000000000 -0500
++++ ubuntu-mtp-71/server/server.cpp	2016-11-17 10:54:04.783410836 -0600
+@@ -32,9 +32,9 @@
+ #include <libintl.h>
+ #include <locale.h>
+ 
+-#include <hybris/properties/properties.h>
++//#include <hybris/properties/properties.h>
+ #include <glog/logging.h>
+-
++/*
+ #include <core/dbus/bus.h>
+ #include <core/dbus/object.h>
+ #include <core/dbus/property.h>
+@@ -45,11 +45,11 @@
+ #include <core/dbus/types/stl/tuple.h>
+ #include <core/dbus/types/stl/vector.h>
+ #include <core/dbus/types/struct.h>
++*/
+ 
+-
+-namespace dbus = core::dbus;
++//namespace dbus = core::dbus;
+ using namespace android;
+-
++/*
+ namespace core
+ {
+ dbus::Bus::Ptr the_session_bus()
+@@ -98,7 +98,7 @@ struct Service<core::UnityGreeter>
+ }
+ }
+ }
+-
++*/
+ namespace
+ {
+ struct FileSystemConfig
+@@ -114,7 +114,7 @@ class MtpDaemon
+ 
+ private:
+     struct passwd *userdata;
+-    dbus::Bus::Ptr bus;
++//    dbus::Bus::Ptr bus;
+     boost::thread dbus_thread;
+ 
+     // Mtp stuff
+@@ -124,8 +124,9 @@ private:
+     MtpDatabase* mtp_database;
+ 
+     // Security
+-    std::shared_ptr<core::dbus::Property<core::UnityGreeter::Properties::IsActive> > is_active;
+-    bool screen_locked = true;
++//    std::shared_ptr<core::dbus::Property<core::UnityGreeter::Properties::IsActive> > is_active;
++//    bool screen_locked = true;
++    bool screen_locked = false;
+ 
+     // inotify stuff
+     boost::thread notifier_thread;
+@@ -241,7 +242,7 @@ private:
+ 
+         read_more_notify();
+     }
+-
++/*
+     void drive_bus()
+     {
+         try {
+@@ -252,7 +253,7 @@ private:
+             server->stop();
+         }
+     }
+-
++*/
+ public:
+ 
+     MtpDaemon(int fd):
+@@ -287,29 +288,31 @@ public:
+                 FileSystemConfig::directory_perm);
+ 
+         // security / screen locking
+-        bus = core::the_session_bus();
+-        bus->install_executor(core::dbus::asio::make_executor(bus));
+-        dbus_thread = boost::thread(&MtpDaemon::drive_bus, this);
+-        auto greeter_service = dbus::Service::use_service(bus, "com.canonical.UnityGreeter");
+-        dbus::Object::Ptr greeter = greeter_service->object_for_path(dbus::types::ObjectPath("/"));
++//        bus = core::the_session_bus();
++//       bus->install_executor(core::dbus::asio::make_executor(bus));
++//        dbus_thread = boost::thread(&MtpDaemon::drive_bus, this);
++//        auto greeter_service = dbus::Service::use_service(bus, "com.canonical.UnityGreeter");
++//        dbus::Object::Ptr greeter = greeter_service->object_for_path(dbus::types::ObjectPath("/"));
+ 
+-        is_active = greeter->get_property<core::UnityGreeter::Properties::IsActive>();
++//        is_active = greeter->get_property<core::UnityGreeter::Properties::IsActive>();
+     }
+ 
+     void initStorage()
+     {
+-        char product_name[PROP_VALUE_MAX];
++//        char product_name[PROP_VALUE_MAX];
++        char product_name[16];
+ 
+         // Local storage
+-        property_get ("ro.product.model", product_name, "Ubuntu Touch device");
++//        property_get ("ro.product.model", product_name, "Ubuntu Touch device");
+ 
+         home_storage = new MtpStorage(
+             MTP_STORAGE_FIXED_RAM,
+             userdata->pw_dir,
+-	    product_name,
++	    "MTP gadget", //product_name,
+             1024 * 1024 * 100,  /* 100 MB reserved space, to avoid filling the disk */
+             false,
+             0  /* Do not check sizes for internal storage */);
++/*
+         mtp_database->addStoragePath(std::string(userdata->pw_dir) + "/Documents",
+                                      gettext("Documents"),
+                                      MTP_STORAGE_FIXED_RAM, false);
+@@ -325,10 +328,14 @@ public:
+         mtp_database->addStoragePath(std::string(userdata->pw_dir) + "/Downloads",
+                                      gettext("Downloads"),
+                                      MTP_STORAGE_FIXED_RAM, false);
++*/
++        mtp_database->addStoragePath(std::string(userdata->pw_dir) + "/",
++                                     gettext("root"),
++                                     MTP_STORAGE_FIXED_RAM, false);
+         home_storage_added = false;
+ 
+         // Get any already-mounted removable storage.
+-        path p(std::string("/media/") + userdata->pw_name);
++        path p(std::string("/mnt/") + userdata->pw_name);
+         if (exists(p)) {
+             std::vector<path> v;
+             copy(directory_iterator(p), directory_iterator(), std::back_inserter(v));
+@@ -360,6 +367,7 @@ public:
+ 
+     void run()
+     {
++/*
+         if (is_active->get()) {
+             is_active->changed().connect([this](bool active)
+             {
+@@ -385,6 +393,7 @@ public:
+                 }
+             });
+         } else {
++*/
+             screen_locked = false;
+             VLOG(2) << "device is not locked, adding storage";
+             if (home_storage) {
+@@ -403,7 +412,7 @@ public:
+                     server->addStorage(storage);
+                 }
+             }
+-        }
++ //       }
+ 
+         // start the MtpServer main loop
+         server->run();

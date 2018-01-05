@@ -1,0 +1,31 @@
+Format: 1.8
+Date: Thu, 04 Jan 2018 16:32:28 +0000
+Source: mtp
+Binary: libmtpserver1 libmtpserver-dev mtp-server
+Architecture: amd64
+Version: 0.0.4+16.14.20160413-0ubuntu5
+Distribution: zesty
+Urgency: high
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Changed-By: Ben Maddocks <bm16ton@gmail.com>
+Description:
+ libmtpserver-dev - Library for implementing MTP protocol servers - development files
+ libmtpserver1 - Library for implementing MTP protocol servers - shared library
+ mtp-server - Small server implementation of MTP.
+Changes:
+ mtp (0.0.4+16.14.20160413-0ubuntu5) zesty; urgency=high
+ .
+   * No change rebuild against boost1.62.
+Checksums-Sha1:
+ b110be051bb83172b782a88e57ca380db3e92d1f 16422 libmtpserver-dev_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+ 089eaf0d9ba50870da3ffd87b2c520f74ed0be89 53762 libmtpserver1_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+ 13559ea398d01dd1498b88f0ee1626a515bf46db 83494 mtp-server_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+Checksums-Sha256:
+ 202b33fd7959e7db36660ebb12831e4e2145a7003466635be1635f2c26cc0791 16422 libmtpserver-dev_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+ 1b18f7a57294bae84625c21affce23cc43cf925dbe518d80609ed86e1fa50b3d 53762 libmtpserver1_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+ 0f656af945a964daa4faa3f84f4dbf63ecc0e5f308aaa4b9792c13d88c960426 83494 mtp-server_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+Files:
+ 48c940d72af341af1ff119e44add199f 16422 libdevel optional libmtpserver-dev_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+ 33a83328bb46506b2b640e9e45443602 53762 libs optional libmtpserver1_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+ 40325a33fd4ba15dd5530442580a30fe 83494 utils optional mtp-server_0.0.4+16.14.20160413-0ubuntu5_amd64.deb
+Original-Maintainer: Thomas Voß <thomas.voss@canonical.com>

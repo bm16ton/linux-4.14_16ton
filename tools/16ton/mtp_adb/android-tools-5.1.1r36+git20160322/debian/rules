@@ -1,0 +1,52 @@
+#!/usr/bin/make -f
+
+export DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+
+export CC := $(DEB_HOST_GNU_TYPE)-gcc
+
+M := $(CURDIR)/debian/makefiles
+
+INSTALL := install
+INSTALL_PROGRAM = $(INSTALL)
+
+%:
+	dh $@ --with python2 --with bash-completion --with systemd
+
+override_dh_clean:
+	dh_clean
+	mkdir -p core/build_adb
+	$(MAKE) -f $(M)/adb.mk -C core/build_adb clean
+ifeq (,$(filter $(DEB_HOST_ARCH),powerpc s390x ppc64el))
+		mkdir -p core/build_adbd
+		$(MAKE) -f $(M)/adbd.mk -C core/build_adbd clean
+endif
+	mkdir -p core/build_ext4_utils
+	$(MAKE) -f $(M)/ext4_utils.mk -C core/build_ext4_utils clean
+	mkdir -p core/build_fastboot
+	$(MAKE) -f $(M)/fastboot.mk -C core/build_fastboot clean
+
+override_dh_auto_build:
+	mkdir -p core/build_adb
+	$(MAKE) -f $(M)/adb.mk -C core/build_adb
+ifeq (,$(filter $(DEB_HOST_ARCH),powerpc s390x ppc64el))
+	mkdir -p core/build_adbd
+	$(MAKE) -f $(M)/adbd.mk -C core/build_adbd
+endif
+	mkdir -p core/build_ext4_utils
+	$(MAKE) -f $(M)/ext4_utils.mk -C core/build_ext4_utils
+	mkdir -p core/build_fastboot
+	$(MAKE) -f $(M)/fastboot.mk -C core/build_fastboot
+
+override_dh_install:
+	dh_install --sourcedir=.
+	mkdir -p debian/android-tools-adbd/usr/lib/android-tools-adbd
+	$(INSTALL_PROGRAM) debian/android-tools-adbd.pre-start debian/android-tools-adbd/usr/lib/android-tools-adbd/pre-start
+	$(INSTALL_PROGRAM) core/libsparse/simg_dump.py debian/android-tools-fsutils/usr/bin/simg_dump
+	$(INSTALL_PROGRAM) extras/ext4_utils/mkuserimg.sh debian/android-tools-fsutils/usr/bin/mkuserimg
+	$(INSTALL_PROGRAM) extras/ext4_utils/mkubuntuimg.sh debian/android-tools-fsutils/usr/bin/mkubuntuimg
+
+override_dh_installudev:
+	dh_installudev -p android-tools-adb --priority=70
+	dh_installudev -p android-tools-fastboot --priority=70
+	dh_installudev -p android-tools-adbd --priority=98
+

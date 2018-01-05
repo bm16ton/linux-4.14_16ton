@@ -451,12 +451,14 @@ cc39488dff3a4f6672436435978a8c35  usr/include/linux/dn.h
 65f23f531489433d607db49cccb28df2  usr/include/linux/ncp_fs.h
 2aa667a38db6a8d6db159340702f5fd9  usr/include/linux/mic_ioctl.h
 759d7cc63e49fd114525e053e899a99a  usr/include/linux/ife.h
+ebdfa13fb065f6f4b559d342b02afdd3  usr/include/linux/usb/f_accessory.h
 95399b9a3d5a1c3657ef147ca7284f8d  usr/include/linux/usb/cdc-wdm.h
 62ae28dc39e136ffa7b442fb75c224c7  usr/include/linux/usb/charger.h
 d44c8203388be88ea126b6faaee07abb  usr/include/linux/usb/functionfs.h
-1141bb156bf02ccfe2afc4899fddc71c  usr/include/linux/usb/ch9.h
+2c4087e762f5fdd1238cfdc518a0c9f0  usr/include/linux/usb/ch9.h
+68207917d6276f56ad8901ab3646825b  usr/include/linux/usb/f_mtp.h
 ddbb86ccdfef20a15cc58e1cd862e5d9  usr/include/linux/usb/audio.h
-924050191926c50d546578ad00cd4752  usr/include/linux/usb/..install.cmd
+e375c3e88666f432b1a8c0684761baa5  usr/include/linux/usb/..install.cmd
 57de7558dc81b2954640a946e2c38ca8  usr/include/linux/usb/ch11.h
 6125a46bb931246532871140184c763a  usr/include/linux/usb/cdc.h
 bb232cf4f37b99074692c12231e42562  usr/include/linux/usb/video.h
@@ -950,5 +952,5 @@ e5e97a386f501f14ace3de083aea76cc  usr/include/video/edid.h
 370e3c0c7c2c9fe844842787562ee649  usr/include/video/..install.cmd
 38afb7b4536e5f3bd0ee148af65bcd25  usr/include/video/uvesafb.h
 d41d8cd98f00b204e9800998ecf8427e  usr/include/video/.install
-1d2f0a0916df36be9d8fe23142881931  usr/share/doc/linux-libc-dev/changelog.Debian.gz
+08acc7d5386b9e420b73d6b229032b10  usr/share/doc/linux-libc-dev/changelog.Debian.gz
 2c6cd6286401903c7f46f350c084ef15  usr/share/doc/linux-libc-dev/copyright

@@ -1,0 +1,35 @@
+Format: 1.8
+Date: Wed, 13 Apr 2016 06:02:12 +0000
+Source: mtp
+Binary: libmtpserver1 libmtpserver-dev mtp-server
+Architecture: amd64
+Version: 0.0.4+16.04.20160413-0ubuntu1
+Distribution: xenial
+Urgency: medium
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Changed-By: Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>
+Description:
+ libmtpserver-dev - Library for implementing MTP protocol servers - development files
+ libmtpserver1 - Library for implementing MTP protocol servers - shared library
+ mtp-server - Small server implementation of MTP.
+Launchpad-Bugs-Fixed: 1472789
+Changes:
+ mtp (0.0.4+16.04.20160413-0ubuntu1) xenial; urgency=medium
+ .
+   * Update to latest AOSP code (Marshallow) Make MTP work for file > 4GB
+     (LP: #1472789). This involved adding O_LARGEFILE flag when opening a
+     file (the flag is automatically added by bionic, but not by glibc)
+     and fixing parts of the MTP database implementation. (LP: #1472789)
+Checksums-Sha1:
+ d5c10cb265326f65562f768a1d68ab75e1966cc1 16186 libmtpserver-dev_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+ f63ee3a8a1c6b353c7e321f152aef0ba16027265 53402 libmtpserver1_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+ f03a96855f3347afe24a5f16fb3f6d85556e59d4 104980 mtp-server_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+Checksums-Sha256:
+ 5db3986626f64bac8779aff67f6efeba1d8429f64c944cc750a72416bbc28d07 16186 libmtpserver-dev_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+ 9a8dd7fc5bdc06c4015ea1d65afdc1f96b08ebe4d2fa504437314c518ba677ab 53402 libmtpserver1_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+ e2761e2c9bb730459dd34f5b53f07ca2d105ee08d0c0253d33ad26c76d735481 104980 mtp-server_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+Files:
+ e6c194cf3764826fa07f90c7142b284b 16186 libdevel optional libmtpserver-dev_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+ f9b8f25f2a570e07a5869995e3402a88 53402 libs optional libmtpserver1_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+ 576508e90b83c46beec3809d086042a9 104980 utils optional mtp-server_0.0.4+16.04.20160413-0ubuntu1_amd64.deb
+Original-Maintainer: Thomas Voß <thomas.voss@canonical.com>

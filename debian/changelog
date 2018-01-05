@@ -1,5 +1,5 @@
-linux-4.14.10-16ton-full (4.14.10-16ton-full-8) xenial; urgency=low
+linux-4.14.10-16ton-no-404 (4.14.10-16ton-no-404-17) xenial; urgency=low
 
   * Custom built Linux kernel.
 
- -- Anonymous <root@maddocks-Q552UB>  Sun, 31 Dec 2017 23:26:04 -0500
+ -- Anonymous <root@maddocks-Q552UB>  Thu, 04 Jan 2018 17:33:11 -0500

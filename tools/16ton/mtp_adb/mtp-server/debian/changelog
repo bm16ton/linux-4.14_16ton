@@ -1,0 +1,251 @@
+mtp (0.0.4+16.14.20160413-0ubuntu5) zesty; urgency=high
+
+  * Patched away from android deps, libusbhost, fixed deb-pkg stuff etc
+
+ -- Ben Maddocks <bm16ton@gmail.com>  Thu, 04 Jan 2018 16:32:28 +0000
+
+mtp (0.0.4+16.04.20160413-0ubuntu5) zesty; urgency=high
+
+  * No change rebuild against boost1.62.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 01 Nov 2016 16:32:28 +0000
+
+mtp (0.0.4+16.04.20160413-0ubuntu4) yakkety; urgency=medium
+
+  * No-change rebuild for boost soname change.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Aug 2016 08:26:24 +0000
+
+mtp (0.0.4+16.04.20160413-0ubuntu3) yakkety; urgency=medium
+
+  * No-change rebuild for yakkety build-dependencies.
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 01 Jun 2016 17:47:25 +0200
+
+mtp (0.0.4+16.04.20160413-0ubuntu2) xenial; urgency=medium
+
+  * No-change rebuild for enabling arm64.
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@ubuntu.com>  Wed, 04 May 2016 15:57:42 +0200
+
+mtp (0.0.4+16.04.20160413-0ubuntu1) xenial; urgency=medium
+
+  * Update to latest AOSP code (Marshallow) Make MTP work for file > 4GB
+    (LP: #1472789). This involved adding O_LARGEFILE flag when opening a
+    file (the flag is automatically added by bionic, but not by glibc)
+    and fixing parts of the MTP database implementation. (LP: #1472789)
+
+ -- Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>  Wed, 13 Apr 2016 06:02:12 +0000
+
+mtp (0.0.4+15.04.20151126-0ubuntu1) vivid; urgency=medium
+
+  [ Thomas Voß ]
+  * Force rebuild against dbus-cpp.
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+ -- Thomas Voß <ci-train-bot@canonical.com>  Thu, 26 Nov 2015 07:32:27 +0000
+
+mtp (0.0.4+15.04.20150219-0ubuntu2) vivid; urgency=medium
+
+  * Properly fixing the startup script, as the previous change broke
+    mtp on ubuntu touch completely
+
+ -- Ricardo Salveti de Araujo <ricardo.salveti@canonical.com>  Wed, 11 Mar 2015 16:26:19 -0300
+
+mtp (0.0.4+15.04.20150219-0ubuntu1) vivid; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * Fix startup issues on desktop: guard against android_usb not being
+    available and don't fail with an abort when /dev/mtp_usb isn't
+    there; just error and return. (LP: #1421664)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 19 Feb 2015 19:56:15 +0000
+
+mtp (0.0.4+15.04.20150126-0ubuntu1) vivid; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Fix crash when recursively deleting directories; due to the
+    concurrency between inotify notifications from filesystem changes
+    and the delete method already removing items from the database.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 26 Jan 2015 20:22:58 +0000
+
+mtp (0.0.4+15.04.20150120-0ubuntu1) vivid; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Adjust start and stop conditions to properly handle USB connection
+    *and* disconnection, and to do the right thing at boot-time if USB
+    is connected already.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Jan 2015 16:19:48 +0000
+
+mtp (0.0.4+15.04.20141113-0ubuntu2) vivid; urgency=medium
+
+  * Prepare mtp-state & mtp-server jobs to run from session init alone.
+
+ -- Dimitri John Ledkov <dimitri.j.ledkov@linux.intel.com>  Sat, 17 Jan 2015 00:05:58 +0000
+
+mtp (0.0.4+15.04.20141113-0ubuntu1) vivid; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * Remove the limit on respawns on mtp-server to workaround the fact that on
+    unplug/plug, the USB device gets quickly reset a few times and that makes
+    mtp fail reads and exit, which triggers a restart of the job. (LP: #1392405)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 13 Nov 2014 19:37:51 +0000
+
+mtp (0.0.4+15.04.20141104-0ubuntu1) vivid; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Wait for UnityGreeter before starting mtp-server. (LP: #1389223)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 04 Nov 2014 18:23:51 +0000
+
+mtp (0.0.4+15.04.20141103-0ubuntu1) vivid; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Watch for exceptions in the dbus thread; and stop mtp-server
+    gracefully if there are any. (LP: #1378576)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 03 Nov 2014 19:24:01 +0000
+
+mtp (0.0.4+14.10.20140909-0ubuntu1) utopic; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Fix duplicated entries when copying files/directories on Windows.
+    (LP: #1351042)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 09 Sep 2014 03:47:19 +0000
+
+mtp (0.0.4+14.10.20140904-0ubuntu1) utopic; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Fixes for critical bugs: - Avoid crashing in dbus timeouts, just
+    don't ask for the locking state, we can save that. - Allow
+    dragging/copying files on the root of the SD card. - Add support for
+    translating the display name of storage paths; only used for local
+    storage. (LP: #1361181)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 04 Sep 2014 20:50:33 +0000
+
+mtp (0.0.4+14.10.20140827-0ubuntu1) utopic; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * Fix daemon to not crash when the greeter service is not available.
+    (LP: #1360569)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 27 Aug 2014 14:51:13 +0000
+
+mtp (0.0.4+14.10.20140821-0ubuntu1) utopic; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * New release:
+    - Bugfixes.
+    - Enhancements on error handling.
+    - Add support for working with Windows systems.
+    - Add support for locking: don't allow access to storage while the screen
+      is locked.
+    - Support removable storage by watching for mounted storage in the /media
+      directory tree.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 21 Aug 2014 20:05:32 +0000
+
+mtp (0.0.3+14.04.20140409-0ubuntu3) utopic; urgency=medium
+
+  * make sure mtp-server only gets started in user sessions and not in lightdm
+    greeter sessions
+
+ -- Oliver Grawert <ogra@ubuntu.com>  Tue, 03 Jun 2014 13:24:56 +0200
+
+mtp (0.0.3+14.04.20140409-0ubuntu2) utopic; urgency=high
+
+  * No change rebuild against boost1.55.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Tue, 29 Apr 2014 04:38:54 +0100
+
+mtp (0.0.3+14.04.20140409-0ubuntu1) trusty; urgency=medium
+
+  [ Mathieu Trudel-Lapierre ]
+  * New release:
+    - Do better logging; with logging levels for verbosity.
+    - Listen to inotify events to know about changes happening on the
+      filesystem but not initiated by the MTP protocol.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 09 Apr 2014 03:00:23 +0000
+
+mtp (0.0.2+14.04.20140307-0ubuntu1) trusty; urgency=low
+
+  [ Oliver Grawert ]
+  * Fix the installation of the mtp-state.conf upstart job file
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Mar 2014 19:40:09 +0000
+
+mtp (0.0.2+14.04.20131205-0ubuntu2) trusty; urgency=medium
+
+  * add mtp-state upstart job to monitor persist.sys.usb.config for mtp setup
+  * do not stop mtp-server on usb disconnect else re-plugging produces even more
+    races
+
+ -- Oliver Grawert <ogra@ubuntu.com>  Fri, 07 Mar 2014 14:21:07 +0100
+
+mtp (0.0.2+14.04.20131205-0ubuntu1) trusty; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * New release.
+
+  [ Sergio Schvezov ]
+  * Enabling/disabling mtp by tracking the cable state.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 37
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 05 Dec 2013 07:38:37 +0000
+
+mtp (0.0.1+13.10.20130926.3-0ubuntu2) trusty; urgency=low
+
+  * No change rebuild for Boost 1.54 transition.
+
+ -- Dmitrijs Ledkovs <xnox@ubuntu.com>  Tue, 22 Oct 2013 18:08:40 +0100
+
+mtp (0.0.1+13.10.20130926.3-0ubuntu1) saucy; urgency=low
+
+  [ Stéphane Graber ]
+  * Fix upstart jobs. The system job was marked as task but wasn't a
+    task and was therefore keeping lxc-android-config in post-start. The
+    user job was working fine, but was backgrounding the process on the exec
+    line instead of just letting upstart track it directly.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 33
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 26 Sep 2013 22:02:01 +0000
+
+mtp (0.0.1+13.10.20130918-0ubuntu1) saucy; urgency=low
+
+  [ Oliver Grawert ]
+  * fix property handling so existing property settings are respected and mtp
+    is only added/removed to/from the set
+  * make sure we disable mtp on the usb gadget driver during shutdown so gvfsd
+    on the host doesnt spill errors when the phone is rebooted because there is
+    a mtp device but no server attached to it (LP: #1226825).
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 31
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 18 Sep 2013 14:38:45 +0000
+
+mtp (0.0.1+13.10.20130913-0ubuntu1) saucy; urgency=low
+
+  [ Mathieu Trudel-Lapierre ]
+  * Initial release
+  * Automatic snapshot from revision 27 (bootstrap)
+  * Relicense our code to GPL-3.
+  * Expose only Music, Videos, Pictures, Downloads and Documents, plus
+    set the name of the device storage to the device model.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 29
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 13 Sep 2013 19:59:55 +0000

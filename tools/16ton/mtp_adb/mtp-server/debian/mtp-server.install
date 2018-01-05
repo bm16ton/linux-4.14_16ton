@@ -1,0 +1,5 @@
+usr/bin/mtp-server
+usr/share/locale
+debian/mtp-server.conf /usr/share/upstart/sessions/
+debian/mtp-state.conf /usr/share/upstart/sessions/
+debian/tmp/usr/lib/libusbhost.a /usr/lib/

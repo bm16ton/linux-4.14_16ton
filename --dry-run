@@ -1,0 +1,10 @@
+--- net/wireless/reg.c	2016-11-05 13:22:01.610791824 -0400
++++ net/wireless/reg.c	2016-11-05 13:47:18.427428611 -0400
+@@ -2619,6 +2621,7 @@
+ 
+ void regulatory_hint_disconnect(void)
+ {
++	return;
+ 	pr_debug("All devices are disconnected, going to restore regulatory settings\n");
+ 	restore_regulatory_settings(false);
+ }

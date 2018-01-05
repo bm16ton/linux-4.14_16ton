@@ -1,0 +1,23 @@
+.TH mtp-server 1 "12 September 2013" "" "Linux User's Manual"
+
+.SH NAME
+mtp-server \- A simple MTP server implementation
+
+.SH SYNOPSIS
+.B mtp-server
+.br
+
+.SH DESCRIPTION
+.B mtp-server
+expects no command-line parameters. It is used to provide access to files over the MTP protocol,
+for use when connecting devices via USB.
+
+.SH OPTIONS
+.B mtp-server
+expects no options.
+
+.SH NOTES
+This program requires a
+.B /dev/mtp_usb
+device, which is normally only available on Android-based devices using the gadget driver.
+

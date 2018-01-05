@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++11   CMakeFiles/mtp-server.dir/server.cpp.o  -o mtp-server -Wl,-rpath,/sdcard/mtp-0.0.4+16.04.20160413/build: -rdynamic ../libmtpserver.so.1.0.0 ../libusbhost/libusbhost.a -lpthread -lintl -lboost_thread -lboost_system -lboost_filesystem -lboost_unit_test_framework -lboost_chrono -lboost_date_time -lboost_atomic -lpthread -lglog -ldbus-c++-1 -ldbus-1 

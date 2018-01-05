@@ -1,0 +1,15 @@
+Package: libmtpserver1
+Source: mtp
+Version: 0.0.4+16.14.20160413-0ubuntu5
+Architecture: amd64
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Installed-Size: 172
+Depends: libc6 (>= 2.14), libgcc1 (>= 1:3.0), libgoogle-glog0v5, libstdc++6 (>= 5.2)
+Section: libs
+Priority: optional
+Homepage: http://launchpad.net/mtp
+Description: Library for implementing MTP protocol servers - shared library
+ Exposes phone storage over MTP.
+ .
+ This package contains the shared library for MTP.
+Original-Maintainer: Thomas Voß <thomas.voss@canonical.com>

@@ -1,20 +1,20 @@
-Source: linux-4.14.10-16ton-full
+Source: linux-4.14.10-16ton-no-404
 Section: kernel
 Priority: optional
 Maintainer: Anonymous <root@maddocks-Q552UB>
 Build-Depends: bc, kmod, cpio 
 Homepage: http://www.kernel.org/
 
-Package: linux-image-4.14.10-16ton-full
+Package: linux-image-4.14.10-16ton-no-404
 Architecture: any
-Description: Linux kernel, version 4.14.10-16ton-full
+Description: Linux kernel, version 4.14.10-16ton-no-404
  This package contains the Linux kernel, modules and corresponding other
- files, version: 4.14.10-16ton-full.
+ files, version: 4.14.10-16ton-no-404.
 
-Package: linux-headers-4.14.10-16ton-full
+Package: linux-headers-4.14.10-16ton-no-404
 Architecture: any
-Description: Linux kernel headers for 4.14.10-16ton-full on ${kernel:debarch}
- This package provides kernel header files for 4.14.10-16ton-full on ${kernel:debarch}
+Description: Linux kernel headers for 4.14.10-16ton-no-404 on ${kernel:debarch}
+ This package provides kernel header files for 4.14.10-16ton-no-404 on ${kernel:debarch}
  .
  This is useful for people who need to build external modules
 

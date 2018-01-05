@@ -1,0 +1,2 @@
+core/build_adbd/adbd usr/bin/
+debian/android-tools-adbd-reboot-watcher.conf etc/init/

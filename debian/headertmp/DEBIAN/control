@@ -1,9 +1,9 @@
 Package: linux-libc-dev
-Source: linux-4.14.10-16ton-full
-Version: 4.14.10-16ton-full-8
+Source: linux-4.14.10-16ton-no-404
+Version: 4.14.10-16ton-no-404-17
 Architecture: amd64
 Maintainer: Anonymous <root@maddocks-Q552UB>
-Installed-Size: 4982
+Installed-Size: 4990
 Provides: linux-kernel-headers
 Section: devel
 Priority: optional

@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+
+export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
+
+%:
+	dh $@ --with translations -- --fail-missing
+
+override_dh_installinit:
+	dh_installinit -pmtp-server --name=mtp-state --no-start -r -n
+	dh_installinit
+
+override_dh_install:
+	cp debian/mtp-server.mtp-state.upstart debian/mtp-state.conf
+	cp debian/tmp/usr/lib/libusbhost.a /usr/lib
+	dh_install

@@ -1,0 +1,15 @@
+[Unit]
+Description=adbd
+Wants=lxc-android-config.service
+After=lxc-android-config.service
+
+[Service]
+Type=simple
+Restart=on-failure
+SuccessExitStatus=0 127
+ExecStartPre=/usr/lib/android-tools-adbd/pre-start
+ExecStart=/bin/su - -c /usr/bin/adbd
+ExecStopPost=/usr/bin/unlink /dev/socket/adbd
+
+[Install]
+WantedBy=android-container@ro.debuggable\\x3d1.target

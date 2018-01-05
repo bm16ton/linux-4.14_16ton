@@ -1,0 +1,45 @@
+diff -urpN ubuntu-mtp-71_orig/CMakeLists.txt ubuntu-mtp-71/CMakeLists.txt
+--- ubuntu-mtp-71_orig/CMakeLists.txt	2016-04-12 06:07:01.000000000 -0500
++++ ubuntu-mtp-71/CMakeLists.txt	2016-11-18 09:39:50.110423382 -0600
+@@ -14,7 +14,7 @@ set(MTP_VERSION_MINOR 0)
+ set(MTP_VERSION_PATCH 0)
+ 
+ find_package(Boost REQUIRED COMPONENTS thread system filesystem unit_test_framework)
+-pkg_check_modules(DBUSCPP REQUIRED dbus-cpp)
++pkg_check_modules(DBUSCPP REQUIRED dbus-c++-1)
+ pkg_check_modules(GLOG REQUIRED libglog)
+ 
+ set(
+@@ -71,7 +71,6 @@ include_directories(
+ 
+ target_link_libraries(
+   mtpserver
+-  android-properties
+   ${GLOG_LIBRARIES}
+   ${DBUSCPP_LIBRARIES}
+ )
+diff -urpN ubuntu-mtp-71/libusbhost/CMakeLists.txt ubuntu-mtp-71_flashex_clean/libusbhost/CMakeLists.txt
+--- ubuntu-mtp-71/libusbhost/CMakeLists.txt 2013-06-13 05:22:21.000000000 -0500
++++ ubuntu-mtp-71_flashex_clean/libusbhost/CMakeLists.txt   2016-11-18 11:28:54.508741862 -0600
+@@ -8,3 +8,7 @@ add_library(
+     usbhost
+     src/usbhost.c
+ )
++
++install(
++  FILES libusbhost.so DESTINATION lib
++)
+diff -urpN ubuntu-mtp-71/server/CMakeLists.txt ubuntu-mtp-71_flashex_clean/server/CMakeLists.txt
+--- ubuntu-mtp-71/server/CMakeLists.txt 2014-03-27 10:45:30.000000000 -0500
++++ ubuntu-mtp-71_flashex_clean/server/CMakeLists.txt   2016-11-18 11:12:03.254407301 -0600
+@@ -11,7 +11,8 @@ target_link_libraries(
+     mtp-server
+     mtpserver
+     usbhost
+-    android-properties
++    pthread
++    intl
+     ${Boost_LIBRARIES}
+     ${Boost_thread_LIBRARIES}
+     ${Boost_system_LIBRARIES}
+

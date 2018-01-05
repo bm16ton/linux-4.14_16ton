@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+7c795e37fccfd892fc9b4416c304a360 po/CMakeFiles/pofiles_1
+93768254ca2631cf83e89192f91efc71 po/fr.gmo

@@ -2479,8 +2479,6 @@ void regulatory_hint_country_ie(struct wiphy *wiphy, enum nl80211_band band,
 
 	return;
 
-	return;
-
 	/* IE len must be evenly divisible by 2 */
 	if (country_ie_len & 0x01)
 		return;

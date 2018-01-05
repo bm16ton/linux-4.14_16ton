@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/MtpProperty.h
+MtpTypes.h
+../include/MtpTypes.h
+
+../include/MtpStringBuffer.h
+stdint.h
+-
+
+../include/MtpTypes.h
+cstdint
+-
+cstdio
+-
+mutex
+-
+string
+-
+thread
+-
+vector
+-
+
+../include/mtp.h
+stdint.h
+-
+stdlib.h
+-
+
+/home/maddocks/kernels/linux-4.14.10-gpd/tools/16ton/mtp_adb/mtp-server/tests/TestMtpProperty.cpp
+boost/test/unit_test.hpp
+-
+mtp.h
+/home/maddocks/kernels/linux-4.14.10-gpd/tools/16ton/mtp_adb/mtp-server/tests/mtp.h
+MtpProperty.h
+/home/maddocks/kernels/linux-4.14.10-gpd/tools/16ton/mtp_adb/mtp-server/tests/MtpProperty.h
+MtpStringBuffer.h
+/home/maddocks/kernels/linux-4.14.10-gpd/tools/16ton/mtp_adb/mtp-server/tests/MtpStringBuffer.h
+
