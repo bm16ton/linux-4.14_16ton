@@ -1,0 +1,32 @@
+Source: xboxdrv
+Section: utils
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
+Uploaders: Andrey Rahmatullin <wrar@wrar.name>
+Build-Depends: debhelper (>= 9), scons, libusb-1.0-0-dev, libx11-dev,
+ libboost-dev, libdbus-glib-1-dev, libudev-dev
+Standards-Version: 3.9.4
+Homepage: http://pingus.seul.org/~grumbel/xboxdrv/
+Vcs-Git: git://anonscm.debian.org/pkg-games/xboxdrv.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-games/xboxdrv.git;a=summary
+
+Package: xboxdrv
+Architecture: linux-any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: python, python-dbus
+Description: Xbox360 gamepad driver for the userspace
+ This is a Xbox/Xbox360 gamepad driver for Linux that works in
+ userspace. It is an alternative to the xpad kernel driver and has
+ support for Xbox1 gamepads, Xbox360 USB gamepads and Xbox360 wireless
+ gamepads. The Xbox360 guitar and some Xbox1 dancemats might work
+ too. The Xbox 360 racing wheel is not supported, but shouldn't be to
+ hard to add if somebody is interested.
+ .
+ This driver is only of interest if the xpad kernel driver doesn't
+ work for you or if you want more configurabity. If the xpad kernel
+ driver works for you there is no need to try this driver.
+ .
+ In addition to all the Xbox related stuff, the driver also supports
+ the Thrustmaster Dual Power 3 gamepad, including rumble, which isn't
+ supported by the normal kernel driver.

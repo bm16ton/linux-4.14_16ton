@@ -1,0 +1,55 @@
+# Mouse Emulation
+# ===============
+#
+# This configuration file emulates a mouse. The left stick controls
+# the cursor, the right stick becomes a horizontal and vertical scroll
+# wheel, the dpad acts as cursor keys, the start and back buttons
+# become forward and back buttons, the guide button escape and LB and
+# RB become page up and page down and the face button act as mouse
+# button.
+
+[xboxdrv]
+ui-clear=true
+
+[ui-axismap]
+x1^dead:4000 = REL_X:750:-1
+y1^dead:4000 = REL_Y:750:-1
+
+# y2^dead:6000^invert = REL_WHEEL:5:100
+# x2^dead:6000 = REL_HWHEEL:5:100
+# trigger^invert=REL_WHEEL:5:100
+
+y2^dead:6000^invert = rel-repeat:REL_WHEEL:1:50
+x2^dead:6000 = rel-repeat:REL_HWHEEL:1:50
+# trigger^invert = rel-repeat:REL_WHEEL:1:50
+
+lt = KEY_VOLUMEDOWN:20
+rt = KEY_VOLUMEUP:20
+
+[ui-buttonmap]
+a = BTN_LEFT
+b = BTN_RIGHT
+x = BTN_MIDDLE
+y = KEY_ENTER
+
+rb = KEY_PAGEDOWN
+lb = KEY_PAGEUP
+
+tl = KEY_BACKSPACE
+tr = KEY_SPACE
+
+[ui-buttonmap]
+dl = KEY_LEFT
+dr = KEY_RIGHT
+du = KEY_UP
+dd = KEY_DOWN
+
+# lt = KEY_VOLUMEDOWN
+# rt = KEY_VOLUMEUP
+
+[ui-buttonmap]
+start = KEY_FORWARD
+back  = KEY_BACK
+guide = KEY_ESC
+
+# EOF #

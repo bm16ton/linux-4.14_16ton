@@ -1,0 +1,199 @@
+ALPHATEST MODIFIERS EXPLAINED (will work with all serial scripts/languages)
+
+print LED "\0\0\0\0\0\0\0\0\0\0\0" # Synchronize with the sign, multiple 0's ar$
+         ."\001" # Starting packet command, (\001 -> ^A)
+         ."Z" # Type Code (Z->All Signs)
+         ."00" # Sign Address (00->All Signs)
+         ."\002" # Packet section divider (\002 -> ^B)
+         ."E" # Command Code (E->Special Function)
+         ."(" # Generate Speaker Tone
+         ."2" # (1->Generate three, short beeps)
+         ."01" # (10->Set speaker frequency, 00-FE)
+         ."1" # (8->Length of tone, 1-F)
+         ."1" # (2->Number of times tone is repeated, 0-F)
+         ."\004"; # End of packet (\004 -> ^D)
+
+
+# Construct packet to send to the sign, writing to textfile.
+print LED "\0\0\0\0\0\0\0\0\0\0\0" # Synchronize with the sign, multiple 0's ar$
+         ."\001" # Starting packet command, (\001 -> ^A)
+         ."Z" # Type Code (Z->All Signs)
+         ."00" # Sign Address (00->All Signs)
+         ."\002" # Packet section divider (\002 -> ^B)
+         ."A" # Command Code (A->Write TEXT FILE)
+         ."A" # File Label (A->Default Name)
+         ."\033" # Escape Character (Needed)
+         ."0" # Display Position (0->Fill Screen)
+         ."g" # Mode Code (g->Roll Left) (b->Random colors,no scrolling,no effects)
+         ."$message" # The actual message to save to the text file, to be displ$
+         ."\004"; # End of packet (\004 -> ^D)
+
+SPEAKER; (requires COMMAND CODE E I believe)
+	Enable/Disable a Sign’s Speaker — two ASCII characters:
+	“!”  21H
+	“00” 30H + 30H = enable speaker
+	“FF” 46H + 46H = disable speaker (default)
+
+CLEAR MEMORY;
+	“$”  24H
+	To Clear Memory just use “E$”
+
+SET DAY OF WEEK;
+	“&” 26H
+Set Day of Week — one ASCII digit that represents the day of the week. A sign will automatically update the day of the week at 12:00 am every day. Valid entries are
+	“1” 31H = Sunday
+	“2” 32H = Monday
+	“3” 33H = Tuesday
+	“4” 34H = Wednesday
+	“5” 35H = Thursday
+	“6” 36H = Friday
+	“7” 37H = Saturday
+
+Set Time Format — one ASCII character that represents how time is shown on a sign. Valid entries are
+(“‘” 27H)
+	“S” 53H = Standard am/pm format (default)
+	“M” 4DH = 24-hour (military) time
+
+COMMAND CODE				REFERENCE
+“A” 41H 					Write TEXT file
+“B” 42H 					Read TEXT file 
+“E” 45H 					Write SPECIAL FUNCTION commands 
+“F” 46H 					Read SPECIAL FUNCTION commands 
+“G” 47H 					Write STRING file 
+“H” 48H 					Read STRING file 
+“I” 49H 					Write SMALL DOTS PICTURE file 
+“J” 4AH 					Read SMALL DOTS PICTURE file 
+“K” 4BH 					Write RGB DOTS PICTURE file (Alpha 3.0 protocol only)
+“L” 4CH 					Read RGB DOTS PICTURE file (Alpha 3.0 protocol only)
+“M” 4DH 					Write LARGE DOTS PICTURE file 
+“N” 4EH 					Read LARGE DOTS PICTURE file
+“O” 4FH 					Write ALPHAVISION BULLETIN message 
+“T” 54H 					Set Timeout Message (Alpha 2.0 and 3.0 protocols only)
+NOTE:	When nesting commands, only one “Read” Command Code may be used, and it must be the last Command Code before the <EOT>.
+NOTE:	The “Write SPECIAL FUNCTION commands” to Speaker Tone Generation must be the last command in a nested string.
+
+/* COLOR CODES   */
+  COLOR_RED "\x1C\x31"
+  COLOR_GREEN "\x1C\x32"
+  COLOR_AMBER "\x1C\x33"
+  COLOR_DIMRED "\x1C\x34"
+  COLOR_DIMGREEN "\x1C\x35"
+  COLOR_BROWN "\x1C\x36"
+  COLOR_ORANGE "\x1C\x37"
+  COLOR_YELLOW "\x1C\x38"
+  COLOR_RAINBOW1 "\x1C\x39"
+  COLOR_RAINBOW2 "\x1C\x41"
+  COLOR_MIX "\x1C\x42"
+  COLOR_AUTO "\x1C\x43"
+
+/* NEW LINE/PAGE
+  NEW_PAGE "\x0C"
+  NEW_LINE "\x0D"
+
+/* MODES */
+  ROTATE "\x61"
+  HOLD "\x62"
+  FLASH "\x63"
+  ROLL_UP "\x65"
+  ROLL_DOWN "\x66"
+  ROLL_LEFT "\x67"
+  ROLL_RIGHT "\x68"
+  WIPE_UP "\x69"
+  WIPE_DOWN "\x6a"
+  WIPE_LEFT "\x6b"
+  WIPE_RIGHT "\x6c"
+  SCROLL "\x6d"
+  AUTOMODE "\x6f"
+  ROLL_IN "\x70"
+  ROLL_OUT "\x71"
+  WIPE_IN "\x72"
+  WIPE_OUT "\x73"
+  COMPRESSED_ROTATE "\x74"
+  TWINKLE "\x6e\x30"
+  SPARKLE "\x6e\x31"
+  SNOW "\x6e\x32"
+  INTERLOCK "\x6e\x33"
+  SWITCH "\x6e\0x34"
+  SLIDE "\x63\0x35"
+  SPRAY "\x63\0x36"
+  STARBURST "\x63\0x37"
+  WELCOME "\x63\0x38"
+  SLOT_MACHINE "\x63\0x39"
+
+/* SPEED */
+  NO_HOLD_SPEED "\x09"
+  SPEED_SLOWEST "\x15"
+  SPEED_LOW "\x16"
+  SPEED_MEDIUM "\x17"
+  SPEED_HIGH "\x18"
+  SPEED_FASTEST "\x19"
+
+/* FONT */
+  DOUBLE_HEIGHT_OFF "\x05\x30"
+  DOUBLE_HEIGHT_ON "\x05\x31"
+  TRUE_DESCENDERS_OFF "\x06\x30"
+  TRUE_DESCENDERS_ON "\x06\x31"
+  WIDE_CHARS_OFF "\x11"
+  WIDE_CHARS_ON "\x12"
+
+/* POSITIONS */
+  MIDDLE "\x20"
+  TOP "\x22"
+  BOTTOM "\x26"
+  FILL "\x30"
+ 
+/* WIDTH */
+#define WIDTH_PROPORTIONAL "\x1E\x30"
+#define WIDTH_FIXEX "\x1E\x31"
+
+/* COMMAND CODES */
+  SOH "\x01"
+  STX "\x02"
+  ETX "\x03"
+  EOT "\x04"
+  ESCAPE "\x1B"
+
+/* ATTRIBUTES */
+  NO_HOLD_SPEED "\x09"
+  SPEED_SLOWEST "\x15"
+  SPEED_LOW "\x16"
+  SPEED_MEDIUM "\x17"
+  SPEED_HIGH "\x18"
+  SPEED_FASTEST "\x19"
+  DOUBLE_HEIGHT_OFF "\x05\x30"
+  DOUBLE_HEIGHT_ON "\x05\x31"
+  TRUE_DESCENDERS_OFF "\x06\x30"
+  TRUE_DESCENDERS_ON "\x06\x31"
+  WIDE_CHARS_OFF "\x11"
+  WIDE_CHARS_ON "\x12"
+
+  CALL_DATE_0 "\x0B\x30"
+  CALL_DATE_1 "\x0B\x31"
+  CALL_DATE_2 "\x0B\x32"
+  CALL_DATE_3 "\x0B\x33"
+  CALL_DATE_4 "\x0B\x34"
+  CALL_DATE_5 "\x0B\x35"
+  CALL_DATE_6 "\x0B\x36"
+  CALL_DATE_7 "\x0B\x37"
+  CALL_DATE_8 "\x0B\x38"
+  CALL_DATE_9 "\x0B\x39"
+  CALL_TIME "\x13"
+
+  CALL_STRING_X "\x10"
+  CALL_DOTS_PICTURE_X "\x14"
+
+  NO_HOLD_SPEED "\x09"
+  SPEED_SLOWEST "\x15"
+  SPEED_LOW "\x16"
+  SPEED_MEDIUM "\x17"
+  SPEED_HIGH "\x18"
+  SPEED_FASTEST "\x19"
+
+#define TEMPERATURE_CELSIUS "\x08\x1C"
+#define TEMPERATURE_FARENHEIT "\x08\x1D"
+
+#define CALL_COUNTER_1 "\x08\x7A"
+#define CALL_COUNTER_2 "\x08\x7B"
+#define CALL_COUNTER_3 "\x08\x7C"
+#define CALL_COUNTER_4 "\x08\x7D"
+#define CALL_COUNTER_5 "\x08\x7E"

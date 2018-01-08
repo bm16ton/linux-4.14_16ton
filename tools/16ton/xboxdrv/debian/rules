@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	scons CPPFLAGS="$(CPPFLAGS)" CCFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LINKFLAGS="$(LDFLAGS)"
+
+override_dh_auto_install:
+	make install PREFIX="/usr" DESTDIR="$(CURDIR)/debian/xboxdrv"
+	sed -i '1s,#!/usr/bin/env python,#!/usr/bin/python,' $(CURDIR)/debian/xboxdrv/usr/bin/xboxdrvctl

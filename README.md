@@ -1,5 +1,9 @@
 Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
 
+UPDATE: Jan 8th 2018: Added new xboxdrv userland driver in tools/16ton, patched with support for wireless chatpad
+	(from https://github.com/xboxdrv/xboxdrv/tree/8a0b802bfcbc8ae48d803ea61d60ff6b2ddc42c7) plus my own
+	minor patches/changes for dpkg-buildpackahge to work
+
 UPDATE: Jan 5th 2018: new usb-acm-mtp-setup script in tools/16ton/mtp_adb this should work on OTG ports.
 	That said thanks to the work of HansGeode we have automatic port host/client switching, if you dont
 	may need to adjust accordingly.

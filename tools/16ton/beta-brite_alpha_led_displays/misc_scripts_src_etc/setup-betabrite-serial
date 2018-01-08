@@ -1,0 +1,3 @@
+#!/bin/bash
+ln -s /dev/$1 /dev/ttya
+stty 9600 -opost -ocrnl -onlcr cs7 parenb -parodd < /dev/ttya

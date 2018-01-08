@@ -1,0 +1,58 @@
+/home/maddocks/hardware/led_bar/app_linux2/betabrite-0.1.0
+
+DISPLAY TEXT FROM FILE msg ON DEVICE /dev/ttya
+betabrite -s 3 -v -f msg
+
+
+TEST APP CONTENTS;
+###############################################################################################
+
+#!/usr/bin/perl
+# Get the attention of the sign
+print "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+
+# Tell the sign to print the message
+$message = "Ben Fuckin Rocks!";
+print "\001" . "Z" . "00" . "\002" . "AA" . "\x1B" . " b" . $message . "\004";
+
+##############################################################################################
+FIRST SETUP THE TTY (setup script contents)
+##############################################################################################
+
+#!/bin/bash
+ln -s /dev/ttyUSB0 /dev/ttya
+stty 9600 -opost -ocrnl -onlcr cs7 parenb -parodd < /dev/ttya
+
+##############################################################################################
+THEN RUN IT WITH
+./alphatest.pl > /dev/ttya
+
+ALPHATEST MODIFIERS EXPLAINED (will work with all serial scripts/languages)
+
+print LED "\0\0\0\0\0\0\0\0\0\0\0" # Synchronize with the sign, multiple 0's ar$
+         ."\001" # Starting packet command, (\001 -> ^A)
+         ."Z" # Type Code (Z->All Signs)
+         ."00" # Sign Address (00->All Signs)
+         ."\002" # Packet section divider (\002 -> ^B)
+         ."E" # Command Code (E->Special Function)
+         ."(" # Generate Speaker Tone
+         ."2" # (1->Generate three, short beeps)
+         ."01" # (10->Set speaker frequency, 00-FE)
+         ."1" # (8->Length of tone, 1-F)
+         ."1" # (2->Number of times tone is repeated, 0-F)
+         ."\004"; # End of packet (\004 -> ^D)
+
+
+# Construct packet to send to the sign, writing to textfile.
+print LED "\0\0\0\0\0\0\0\0\0\0\0" # Synchronize with the sign, multiple 0's ar$
+         ."\001" # Starting packet command, (\001 -> ^A)
+         ."Z" # Type Code (Z->All Signs)
+         ."00" # Sign Address (00->All Signs)
+         ."\002" # Packet section divider (\002 -> ^B)
+         ."A" # Command Code (A->Write TEXT FILE)
+         ."A" # File Label (A->Default Name)
+         ."\033" # Escape Character (Needed)
+         ."0" # Display Position (0->Fill Screen)
+         ."g" # Mode Code (g->Roll Left) (b->Random colors,no scrolling,no effects)
+         ."$message" # The actual message to save to the text file, to be displ$
+         ."\004"; # End of packet (\004 -> ^D)

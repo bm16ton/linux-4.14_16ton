@@ -1,0 +1,86 @@
+xboxdrv (0.8.6-1ubuntu1) xenial; urgency=medium
+
+  * patched for wireless chatpad support
+
+ -- Ben Maddocks <bm16ton@gmail.com>  Mon, 8 Jan 2018 04:45:22 +0000
+
+xboxdrv (0.8.5-1ubuntu1) xenial; urgency=medium
+
+  * debian/patches/fix-build-flags-parsing.patch: Grab patch from Debian Git
+    to fix FTBFS with *FLAGS environment variables containing >1 flags.
+
+ -- Logan Rosen <logan@ubuntu.com>  Wed, 13 Apr 2016 04:45:22 +0000
+
+xboxdrv (0.8.5-1) unstable; urgency=low
+
+  * New upstream version
+  * debian/control:
+    - bump Standards-Version to 3.9.4 (no change needed)
+  * debian/patches/:
+    - drop use-PATH.patch (not needed anymore as the whole environment is
+      imported now)
+  * debian/control:
+    - use canonical anonscm.d.o URLs in the Vcs-* fields
+  * debian/copyright:
+    - update the copyright years
+
+ -- Andrey Rahmatullin <wrar@wrar.name>  Sun, 05 May 2013 16:17:43 +0600
+
+xboxdrv (0.8.4-1) unstable; urgency=low
+
+  * New upstream version
+  * debian/patches/fix-xboxdrv-manpage.patch:
+    - update for the new upstream version
+  * debian/compat:
+    - bump to 9
+  * debian/control:
+    - bump Build-Depends for debhelper to >= 9
+    - bump Standards-Version to 3.9.3 (no change needed)
+  * debian/patches/use-PATH.patch:
+    - use $PATH from the environment during the build to make use of ccache
+      when it's available
+  * debian/rules:
+    - pass CPPFLAGS, CFLAGS, CXXFLAGS and LDFLAGS to scons
+    - enable all hardening options
+  * debian/copyright:
+    - update the format URL
+    - update copyright years
+
+ -- Andrey Rahmatullin <wrar@wrar.name>  Sat, 16 Jun 2012 16:25:17 +0600
+
+xboxdrv (0.8.2-1) unstable; urgency=low
+
+  * New upstream version
+  * Upload to unstable
+  * debian/control:
+    - change Architecture to linux-any because of a dependency on the linux
+      uinput kernel module
+    - update Build-Depends for the new version: remove libboost-thread1.42-dev,
+      add libboost-dev, libdbus-glib-1-dev and libudev-dev, replace libusb-dev
+      with libusb-1.0-0-dev
+    - bump Standards-Version to 3.9.2 (no change needed)
+    - move the package to the pkg-games team (change Maintainer and
+      Uploaders), update Vcs-* paths respectively
+    - move python and python-dbus from Suggests to Recommends because of new
+      xboxdrvctl script, drop python-gobject from Suggests because
+      xboxdrv-daemon was dropped
+    - small Description fix
+  * debian/copyright:
+    - remove sections for src/gui/evdev.py and kernel/* because the
+      corresponding files were removed
+    - fix GPL2 license file path in debian/copyright
+  * debian/docs:
+    - remove lines for files that were dropped from the source
+  * debian/install:
+    - remove the file, as xboxdrv-daemon was dropped
+  * Fix lintian warnings for xboxdrv.1 manpage
+  * Add xboxdrvctl.1 manpage
+  * Remove /usr/bin/env from the xboxdrvctl shebang (per Python Policy 1.4.2)
+
+ -- Andrey Rahmatullin <wrar@wrar.name>  Tue, 16 Aug 2011 22:05:29 +0600
+
+xboxdrv (0.6.4-1) experimental; urgency=low
+
+  * Initial release (Closes: #610009)
+
+ -- Andrey Rahmatullin <wrar@wrar.name>  Sat, 15 Jan 2011 22:36:10 +0500

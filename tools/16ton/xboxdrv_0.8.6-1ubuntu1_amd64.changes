@@ -1,0 +1,32 @@
+Format: 1.8
+Date: Mon, 8 Jan 2018 04:45:22 +0000
+Source: xboxdrv
+Binary: xboxdrv
+Architecture: source amd64
+Version: 0.8.6-1ubuntu1
+Distribution: xenial
+Urgency: medium
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Changed-By: Ben Maddocks <bm16ton@gmail.com>
+Description:
+ xboxdrv    - Xbox360 gamepad driver for the userspace
+Changes:
+ xboxdrv (0.8.6-1ubuntu1) xenial; urgency=medium
+ .
+   * patched for wireless chatpad support
+Checksums-Sha1:
+ 0d55fbe7d09ce13a04d55aff10ca5d213ae7104d 1234 xboxdrv_0.8.6-1ubuntu1.dsc
+ af579d9f0475c898afec2cf1dacffd59e6672681 357064 xboxdrv_0.8.6.orig.tar.gz
+ 8b1593aaf44b2c273f6125400bebd29669f738c6 6852 xboxdrv_0.8.6-1ubuntu1.debian.tar.xz
+ 17ec83124f53d80f7bba46a2ff9ee566218055c2 520116 xboxdrv_0.8.6-1ubuntu1_amd64.deb
+Checksums-Sha256:
+ 7ec594230fa9b85ff366730f5c16b091105e8efb47186f1a52a4e52b58b4c539 1234 xboxdrv_0.8.6-1ubuntu1.dsc
+ 19108b82d9a3c237d47ab8bf0d6437ab6854df7abfe6ec19bdce82f0365dfb80 357064 xboxdrv_0.8.6.orig.tar.gz
+ f164ccd86c69f87568932e301de35cc65e891a7e88b30c08d5343a65e59f9820 6852 xboxdrv_0.8.6-1ubuntu1.debian.tar.xz
+ d7fb74e93b6dccda35a4c8d5550a87390657a58402a3a0deef8ba8f222e315c4 520116 xboxdrv_0.8.6-1ubuntu1_amd64.deb
+Files:
+ 02f91ada410d743f060f1ff385dbd8d5 1234 utils optional xboxdrv_0.8.6-1ubuntu1.dsc
+ 74b5abc5701af6c1ae758e52d02e5cd8 357064 utils optional xboxdrv_0.8.6.orig.tar.gz
+ dc0718dc55f072d3802e5ca16358cc53 6852 utils optional xboxdrv_0.8.6-1ubuntu1.debian.tar.xz
+ 6401a4a5486a8861e050e65ebb0c4402 520116 utils optional xboxdrv_0.8.6-1ubuntu1_amd64.deb
+Original-Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>

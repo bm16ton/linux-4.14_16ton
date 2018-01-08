@@ -1,0 +1,812 @@
+Pre Release Testing:
+====================
+
+* check the version number
+
+* update NEWS
+
+* check git status
+
+* remove log_tmp()
+
+VERSION="$(cat VERSION)"
+TAG="v${VERSION}"
+git tag -s  "${TAG}" -m "xboxdrv ${TAG}" 
+
+# Normal Source
+git archive --format=tar --prefix="xboxdrv-linux-${VERSION}/" ${TAG} | bzip2 -c > /tmp/xboxdrv-linux-${VERSION}.tar.bz2
+
+git push --tags
+
+
+Ubuntu Package:
+===============
+
+cd ../debian/xboxdrv
+
+# Ubuntu 11.04
+# ============
+git checkout master
+git-import-orig -u 0.8.2 ~/projects/xboxdrv/htdocs/xboxdrv-linux-0.8.2.tar.bz2 
+dch -v "0.8.2-1" "xboxdrv 0.8.2 release"
+git commit -m "xboxdrv 0.8.2 release" -a
+git-buildpackage --git-no-create-orig --git-tag --git-builder="debuild -S"
+sudo pbuilder --build --basetgz /var/cache/pbuilder/base-natty.tgz ../xboxdrv_0.8.2-1.dsc
+dput my-ppa ../xboxdrv_0.8.2-1_source.changes
+
+# Ubuntu 10.10
+# ============
+git checkout master-10.10
+git merge master
+git show master:debian/changelog > debian/changelog 
+dch -b -v "0.8.2-1~maverick1" --distribution maverick "xboxdrv 0.8.2 backport"
+git commit -m "xboxdrv 0.8.2 backport" -a
+git-buildpackage --git-no-create-orig --git-debian-branch=master-10.10 --git-tag --git-builder="debuild -S"
+sudo pbuilder --build --basetgz /var/cache/pbuilder/base-maverick.tgz ../xboxdrv_0.8.2-1~maverick1.dsc
+dput my-ppa ../xboxdrv_0.8.2-1~maverick1_source.changes
+
+# Ubuntu 10.04 (LTS)
+# ==================
+git checkout master-lts
+git merge master
+git show master:debian/changelog > debian/changelog 
+dch -b -v "0.8.2-1~lucid1" --distribution lucid "xboxdrv 0.8.2 backport"
+git commit -m "xboxdrv 0.8.2 backport" -a
+git-buildpackage --git-no-create-orig --git-debian-branch=master-lts --git-tag --git-builder="debuild -S"
+sudo pbuilder --build --basetgz /var/cache/pbuilder/base-lucid.tgz ../xboxdrv_0.8.2-1~lucid1.dsc
+dput my-ppa ../xboxdrv_0.8.2-1~lucid1_source.changes
+
+# Ubuntu 10.10 - xboxdrv-stable
+# =============================
+git checkout stable
+git-buildpackage --git-no-create-orig --git-debian-branch=stable --git-tag --git-builder="debuild -S" --git-debian-tag="stable/0.6.6-1"
+sudo pbuilder --build --basetgz /var/cache/pbuilder/base-maverick.tgz ../xboxdrv-stable_0.6.6-1.dsc
+
+# Ubuntu 10.04 - xboxdrv-stable
+# =============================
+git checkout stable-lts
+git-buildpackage --git-no-create-orig --git-debian-branch=stable-lts --git-tag --git-builder="debuild -S" --git-debian-tag="stable/0.6.6-1_lucid2"
+sudo pbuilder --build --basetgz /var/cache/pbuilder/base-lucid.tgz ../xboxdrv-stable_0.6.6-1~lucid2.dsc
+
+
+Target for 0.8.3
+================
+
+* test if its possible to mix cycle-key with macro: or other advanced
+  ButtonEvents
+
+* "--dbus system" currently does not work as expected
+
+$ sudo ./xboxdrv --daemon  --dbus system --quiet
+[ERROR] XboxdrvDaemon::run(): fatal exception: failed to get unique dbus name: Connection ":1.55" is not allowed to own the service "org.seul.Xboxdrv" due to security policies in the configuration file
+libusb:warning [libusb_close] internal signalling write failed, closing anyway
+libusb:warning [libusb_close] internal signalling write failed, closing anyway
+libusb:warning [libusb_close] internal signalling write failed, closing anyway
+libusb:warning [libusb_close] internal signalling write failed, closing anyway
+
+ -> http://stackoverflow.com/questions/4560877/dbus-bus-request-name-connections-are-not-allowed-to-own-the-service
+
+* update/fix man-page
+
+  -> rewrite the --ui-axismap, --ui-buttonmap section, currently kind
+     of confusing
+
+  -> add --dbus documentation
+
+* cycle-key is incomplete, should have additional mode that allows
+  next/prev without sending events, also has issues with stuck buttons
+  when multiple keys are pressed
+
+  -> only one key should be allowed to be pressed, last one will always be released (still fishy)
+  -> separate last and curr key to allow toggle without press
+  -> have each ButtonEvent be responsible to release the keys it
+     pressed? -> tricky, as it doesn't know those right now
+
+  -> need a time delay before button is actually send for situations
+     where sending the key is expensive (weapon switching in game might be slow)
+
+  -> add an option to have the cycle sequence not wrap around: 
+     -> possible use: throttle in a flightsim mapped to 1-9
+
+  Possible future improvements:
+
+  - next/prev button that don't trigger the key, an activate button or
+    activate by timeout (to work around slow weapon change in some
+    games)
+
+  - graphical overlay that displays the current position
+    -> requires separate process
+
+  - single button inventory: next, hold to activate
+
+
+Target for 0.9.0
+================
+
+* ./xboxdrv --axismap X1=X2,-Y1=Y2,X2=X1,-Y2=Y1   --mouse  -s
+
+   Why do have the axis to be inverted in this case?
+
+* alternative inventory solution: use the dpad, which gives however
+  only eight directions, need some timeout thing to make the
+  directions sticky
+
+* MacroButtonEventHandler is still using raw UInput::send(), should
+  use UIEventEmitterPtr instead, UInput::send_rel_repetitive() should
+  be removed
+
+* develop a simple scripting language or use an existing one
+
+* look at suspend handling
+
+* pass /dev/input/eventX, slot and serial number to on-connect script
+
+* write DummyController that can be used in automated test cases
+
+* allow the creation of virtual mice and keyboards with all buttons
+  and rel events, to allow realtime reconfiguration
+
+* OR all output buttons and axis together
+
+* native REL events
+
+* get rid of UIEvent::resolve_device_id() if possible
+
+* implement filter that removes glitched button events, i.e. events
+  that happen in very low timespans and are caused by broken micro switches
+
+* use FIXME for random code improvements, use BUG for actual problems
+
+* Collect Linux games with force feedback support: Bzflag?
+
+* provide more meaningful debug output for force feedback
+
+* cleanup UIEvent, add UIEventSequence
+
+* --chatpad-debug is broken, use it for all the log_tmp()
+
+* XboxController rumble code is wrong, old usb stuff
+
+* there is a long delay in processing rumble messages, currently
+  worked around by only sending rumble commands on changes, but that
+  isn't a full solution, proper solution would be discarding messages
+  and only sending the current value
+
+* -r 128,128 --quit doesn't work:
+
+[TEMP]  USBController::~USBController(): ~USBController
+libusb:warning [libusb_close] internal signalling write failed, closing anyway
+
+* chatpad doesn't get a 0x1b signal when its connected after xboxdrv
+  is already running
+
+* active wireless controller aren't detected on startup of the daemon,
+  only they have send an event, any way to get activity status of the thing?
+
+* print which sub features are enabled: chatpad, force feedback, headset
+
+* check force feedback
+
+* rumble-test is broken completely
+
+* check output when --silent not given
+
+* check clean shutdown
+
+* check valgrind
+
+* check daemon
+
+* check autofire and other modifier that depend on time
+
+* test all controller
+
+* check that the child process works
+
+* check that uinput gets its timeout/update calls (send_rel_event)
+
+* cleanup a lot of the log_trace() and other temporary debug output
+
+* check that repeated wireless controller connects and disconnects work [done]
+
+* check that --quit works, currently broken
+
+* search for "#ifdef FIXME"
+
+* do proper error checking: 
+
+xboxdrv: src/usb_controller.cpp:218: void USBController::on_read_data(libusb_transfer*): Assertion `ret == LIBUSB_SUCCESS' failed.
+Aborted
+
+* exceptions in glib main loop might be dangerous and not really do what is intended
+
+* move sigint/sigterm handling out of main.cpp and into xboxdrv_daemon.cpp (needs to use gmain_quit())
+
+* LED do currently not get down on controller quit
+
+* move LED setting into ControllerThread or somewhere else, not at controller creation time
+
+* check that threads are cleaned up in daemon
+
+* go through checklist, disable headset and chatpad support for now,
+  do a source only release
+
+Stuff to do before 0.8.x release:
+=================================
+
+* add LD_PRELOAD joystick override hack to running xboxdrv with an app.exe
+
+* change response curve syntax to allow defining two values for the
+  same point, one for the left one for the right to allow hard jumps
+  or allow giving x,y coordinates to have points net evenly spaced out, maybe both
+
+* add expression modifier:
+
+  --modifier X1^expr=V*6+1<<2
+
+* old udev errors:
+
+g++ -o src/xboxdrv_daemon.o -c -isystem/usr/include/dbus-1.0 -isystem/
+usr/lib/dbus-1.0/include -isystem/usr/include/glib-2.0 -isystem/usr/
+lib/glib-2.0/include -pthread -isystem/usr/local/include/libusb-1.0 -g
+-O3 -Wall -ansi -pedantic -DPACKAGE_VERSION='"0.7.3"' -Isrc src/
+xboxdrv_daemon.cpp
+src/xboxdrv_daemon.cpp: In member function 'void
+XboxdrvDaemon::init_udev_monitor(const Options&)':
+src/xboxdrv_daemon.cpp:251: error:
+'udev_monitor_filter_add_match_subsystem_devtype' was not declared in
+this scope
+scons: *** [src/xboxdrv_daemon.o] Error 1
+scons: building terminated because of errors.
+make: *** [xboxdrv] Error 2
+
+* add "null" button and key event to disable a button or axis (useful
+  to not triggering regular events when a shift button is pressed)
+
+* macro support needs to search files in a few more locations;
+
+  * current directory
+  * directory of parent .ini file
+  * users xboxdrv config directory (don't have that yet)
+
+* macro supports needs "init" command (somewhat done)
+
+* add support for "include" in macro
+
+* add support for macros that always reload when evaluated (makes testing easier)
+
+* document REL_ -1 better
+
+* when verbose is given, warn when keys are dual mapped, give list of free keys
+
+* space is currently illegal, but shouldn't be "GUIDE = KEY_LEFTALT + KEY_E" 
+
+* write macro that calibrates the joystick for DOS games
+
+* extra-devices adds a button when one only uses JS_0 buttons, shouldn't happen
+
+* invert y axis on --evdev
+
+* add double-click button, in the same wayne as hold-button
+
+* add --controller 4 or --controller-count 4 or something like that
+
+* add special LED status set switches the LED with the given config
+
+* export build-in config files, both as text and as directory, so that users can browse them
+
+* deadzone:MIN:MAX:SMOOTH is broken (fixed)
+
+* deadzone filter documentation is wrong
+
+* d-bus requires X11?! -> try system bus when running as root
+
+Autolaunch error: X11 initialization failed." failed to open connection to bus: /bin/dbus-launch terminated abnormally with the following error: Autolaunch error: X11 initialization failed.
+
+* add named output variables to chain filters and modifiers?!
+
+== Daemon ==
+
+* check how daemon reacts on suspend
+  - suspending the computer leads to LIBUSB_ERROR_IO, unplugging the
+    controller leads to LIBUSB_ERROR_OTHER
+    -> couldn't be replicated, both give LIBUSB_ERROR_OTHER
+  - errno is set to EBUSY
+  - the device handle can't be reused, device has to be reallocated
+  - integrate this with the "keep backlog of devices currently in use"
+
+* do something with stdout/stderr when its run in --detach mode
+
+== Other ==
+
+* add a way to refresh/reshuffle controller asignment with xboxdrvctrl
+  (i.e. having two controller and unplugging the first won't reassign
+  the second to the first slot, that should be available on request)
+
+* button presses are lost even with "--priority realtime" for the wireless controller
+
+  -> xboxdrv isn't running under realtime priority, only its subthreads, fix that
+  -> figure out how USBReadThread reacts to the device being closed
+     -> USBReadThread doesn't react at all, it becomes stuck in the last call
+
+* use static X11 keysym map to do the string translation?
+
+* split src/axis_event.hpp and src/button_event.hpp
+
+* mouse emulation is very jaggy (try painting in Gimp), caused by
+  REL_X and REL_Y being send independently, while they should be
+  synced up, this is a side-effect of the deadzone, without deadzone,
+  no jaggies
+
+  -> UInput::send_rel_repetitive() needs to syncronize all REL events
+     with the same repeat interval whenever a new event comes in
+
+     send_val = value * time_count / repeat;
+     time_count = 0;
+
+  -> add a repeat timeout 0  that sends on each update
+
+  -> should be use special value '-1' or repurpose '0'?
+
+  -> do we need more rel types? rel-once? or can repeat values be
+     abused?
+     
+     repeat: 0 - always repeat, -1, never repeat, NUM - repeat every NUM msec
+
+  -> add rel-repeat:{repeat} type that repeats more often the more the
+     stick is pressed, to give better scroll wheel emulation
+
+* add "key-repeat", similar to rel-repeat
+
+* add "key-once" or something like that, that only clicks a key
+  without keeping it pressed
+
+* documentation needs to be improved
+
+* --ui-axismap LT=KEY_A:KEY_B:1 
+
+Here KEY_B is the key you want to send and KEY_A is a random other key
+that you don't need. It's a hack as mapping both to KEY_B seems to
+cause some trouble with automatic key repeat for some reason. Note
+that you must not combine this with --trigger-as-zaxis as that will
+disable LT and RT -> already fixed, check it
+
+* add a "click" filter or something like that, that causes a button to only be clicked, not hold
+
+== Documentation ==
+
+* X11 will convert a REL_WHEEL value of 1 into a single click (press
+  and release) of button 4, values of 3 would result in three clicks,
+  etc. REL_HWEEL will be button 6 and 7, add that to documentation somewhere
+
+== Bugs ==
+     
+* multiple ControllerThread lead to UInput::update() being called
+  multiple times, as UInputMessageProcessor does call the update()
+  which is wrong
+
+* glib/D-Bus causes crash/exit when USBController::get_name() returns an invalid unicode string?!
+
+* LED isn't set proper when wireless controllers wake up from power-down
+
+
+== Unsolved/WontFix ==
+
+* after every thread cleanup, do an enumeration over all USB devices,
+  find those not currently used by a Slot and recreate them, this
+  should fix resume issues, this would also fix the issue with
+  ignoring controllers when all slots are full
+
+  -> bad idea, as it would let unused controllers slip into the free
+     slots, could lead to unexpected behaviour
+
+  -> maybe as D-Bus interface?
+
+* allow multiple controllers in non-daemon mode
+  -> not a good idea, complicates stuff and duplicates code
+  -> make daemon mode the default in the future and make it as solid
+     as non-daemon mode
+
+* remember controllers that couldn't be used when all slots where full
+  and use them when a slot got free -> discard, bad idea, as it
+  results in confusing behaviour
+
+* daemon on regular xboxdrv have different controller orderings 
+
+  -> hard to avoid, as wireless controllers are only picked up when
+     active, which they always become later then the wired ones, which
+     are active by default)
+
+* BTN_A@joystick.1 doesn't work for a single joystick, why? (joystick isn't id=0, why?)
+
+* improve output on which uinput devices are created (even with udev
+  there doesn't seem to be a bullet proof way to detect what gets
+  created)
+
+  -> insert "guess code" before the uinput create call and just pretent thats bullet proof
+  -> figure out how exactly device names are choosen (first free or
+     are there other means? need to take special axes/buttons into account)
+
+
+== Daemon ==
+
+* improve output in daemon mode, when --quiet is not given print the
+  number of allocated controller slots
+
+* get rid of all std::cout stuff when using detached daemon, redirect
+  log output to a file, syslog or somewhere else: 
+
+  --silent:  stops event output
+  --quiet:   stops all stdout output (automatically used when --detach is given, except for errors)
+  --verbose: print info level log output
+  --debug:   print debug level log output
+
+
+== D-Bus ==
+
+* interface for next release:
+
+  Daemon/GetControllerSlotCount -> INT // do we need those or can
+  Daemon/GetControllerCount -> INT     // directories be browsed?
+
+== Other ==
+
+* document that Xbox360 wireless controller shuts down at 15min
+
+* give proper exit code when no controller is found
+
+* sort options a bit more between global ones, slot local ones and
+  config local ones
+
+* in INI files should allow:
+
+  [xboxdrv]
+  ui-buttonmap = A=BTN_A,B=BTN_B,...
+
+  - in general cleanup config handling, turn almost everything into
+    proper functions and use the same functions for both cmdline and ini
+
+* allow setting a --default-name from which all other controller names
+  are derived 
+   -> already there in the form of auto.auto? 
+     -> No, as those don't derive the name, but set a fixed one
+
+* allow swap/assign of controller to slots via dbus
+
+* do modifier/filter dump when --verbose is given, make verbose
+  overall more useful
+
+* make more use of percentance values (in deadzone filter for example)
+
+* couldn't convert 'XK_Page_Up' to enum, not a member of X11Keysym
+  currenty code can't handle multple names for a single key
+
+* add a fun modifier that counts button presses and other useless stuff
+
+  - count button presses (done)
+  - count time a button is held down, both in min:sec and percent
+  - count distance an axis travels
+  - allow access/reset via dbus
+
+  * document them, ignore axis and button time for now
+
+* look at Joy2key for better mouse support (mouse acceleration), see Dustin Moline mails
+  * timeout makes a huge difference, real MarbleMouse Trackball send around every 10msec
+  * need to deal with rounding errors to allow small movements
+
+* add --ui-buttonmap A=KEY_A:KEY_B:1000:1 
+
+  the last 0/1 parameter tells if it should do:
+
+   - 0: send on release
+   - 1: always send when pressed
+
+  different games might require different behaviours for the
+  hold-button, so it should be an user option
+
+* add double shift buttons: L+R+start
+
+* add execv: that takes arguments in ARG0:ARG1,... style
+
+* add system: that takes arguments "ARG0 ARG1 ..." style
+
+* add [controller0/config0] support for ControllerOptions
+
+* add [controller0] support for ControllerSlotOptions
+
+* write relaxation modifier/filter
+
+* make extra-event creation a bit more clever, i.e. only create BTN_A
+  when needed, not when another button is present that can be used to
+  identify the device as joystick, also document exactly which
+  buttons/axis combinations are valid.
+
+* allow something like:
+
+  void = BTN_A
+
+  to create empty events on uinput
+
+Other Stuff
+===========
+
+* remove uinput.send_rel_repetitive() replace with just EventHandler::update()
+
+  -> might not be needed, send_rel_repetitive() is kind of convenient  
+
+  -> send_rel_repetitive() doesn't work with multi-axis REL events (mouse emulation)
+
+* boost::lexical_cast<> error messages are useless, make some better ones
+
+Daemon Match Rules
+==================
+
+* add match rule for wireless id -> not really useful as that id is
+  more or less random
+
+* add --exclude, --exclude-group as ControllerMatchRules
+
+* XboxdrvThread or XboxGenericController must hold information on
+  their: bus:dev, vendor:product and other potentially useful
+  information, match rule must match against controller, not
+  udev_device
+   -> doesn't work, as we don't have a controller at that point
+   -> match against abstract ControllerInfo object?
+   -> get_busnum()
+   -> get_devnum()
+
+   -> figure out potential matches early and save the valid slots?
+      -> ugly but could work
+
+* --match again sysname could make sense, seems somewhat constant:
+  "5-2" Xbox1 controller results in "5-2.1", due to being really two
+  devices, would help to now how exactly those are formed
+
+* extend usbid match rule to bcd device
+
+
+Stuff to do before 0.7.3 release:
+=================================
+
+* turn EnumBox into singleton
+
+* allow EnumBox to have multiple names per values per key
+
+* allow --modifier help, --ui-buttonmap X2^help
+
+* move XBOX_BTN_UNKNOWN behind XBOX_BTN_MAX (or make it -1), so
+  iteration can start from 0 instead of 1, also fix incorrect
+  iterations all over the place -> doesn't work as some code uses
+  XBOX_BTN_UNKNOWN as 'no button is pressed'
+
+* document significant patches in AUTHORS
+
+      2     Added latest version of runxboxdrv from Michael Rans <rans@email.com>
+      1     Added trigger deadzone patch from Jan Henning Thorsen <git@flodhest.net> with a few changes
+      1     Applied daniel åkerud <daniel.akerud@gmail.com>'s SIGTERM patch
+      1     Applied low latency patch from daniel åkerud <daniel.akerud@gmail.com>
+      1 Author: Aaron Denney <wnoise@ofb.net>
+      1     hal daemon from Thomas Debouverie <debouverie_thomas@yahoo.fr>
+      1     Implemented --ui-buttonmap A=BTN_A@{device_id} ??!?!?
+
+* need to hide/disable the toggle button from the UIButtonmap
+  - maybe implement some full post-parsing option verification to
+    check for conflicts and necessary modifications?
+  - Options::finish() to do final things?
+
+
+Stuff to do before 0.7.x release:
+=================================
+
+* add Wiimote and PS3 bluetooth support 
+
+* -R, --rumble-test is broken for FirestormDualController (has no analog triggers)
+
+* add ABS support to macros events (need to deal with min/max)
+
+* add support for pairing the controller to the PC (or zero)
+
+  --ps3-pair 00:00:00:00:00:00
+  --ps3-pair-with-bluetooth
+
+* get rid of set_button()/get_button(), turn the message objects into full classes
+
+* make chatpad configurable:
+
+  --ui-chatpad a=KEY_A,green+a=SHIFT_X+KEY_B,...
+
+* make sure that XK_??? names work with keys that are
+  shifted/mode_switched in the keymap, i.e. send key combination
+
+* can't parse:
+
+ --ui-axismap x2=2-ABS_X,y2=2-ABS_Y
+
+  only this works:
+
+ --ui-axismap x2=abs:2-ABS_X,y2=abs:2-ABS_Y
+
+  implement better guessing
+
+* current deadzone code messes up the diagonals
+
+* shifted axis without default mapping don't work:
+
+  ./xboxdrv --ui-axismap lb+x1^cal:-64000:0:64000
+
+  in those cases the default mapping for the unshifted axis should be used
+
+* add analog emulation for button (i.e. the longer its pressed, the higher the value)
+
+* write UIEvent::from_string()
+
+* basic Dualstrike mouse emulation with absolute position:
+
+ ./xboxdrv-dualstrike \
+  --ui-clear \
+  --ui-buttonmap rb=key:1-BTN_LEFT,lb=key:1-BTN_RIGHT \
+  --ui-axismap x2^cal:-25000:0:25000=abs:1-ABS_X,y2^cal:-25000:0:25000=abs:1-ABS_Y \
+  --ui-axismap x1=KEY_LEFT:KEY_RIGHT,y1=KEY_DOWN:KEY_UP  -s
+
+Chatpad
+=======
+
+Figure out a way to load custom keymaps:
+
+* http://madduck.net/docs/extending-xkb/
+* http://stackoverflow.com/questions/1557689/keyboard-remapping-with-more-modifiers
+* http://tldp.org/HOWTO/Keyboard-and-Console-HOWTO-15.html
+
+* setxkbmap -device ... -I xboxdrv/xorg/
+
+xkbprint -label name $DISPLAY - | gv -orientation=seascape -
+http://www.charvolant.org/~doug/xkb/html/xkb.html
+http://pascal.tsu.ru/en/xkb/
+http://wiki.debian.org/XStrikeForce/InputHotplugGuide
+http://git.madduck.net/v/etc/xsession.git?a=blob;f=.xkb/symbols/madduck;hb=refs/heads/xkb
+http://www.x.org/wiki/XKB
+http://sourceforge.net/tracker/download.php?group_id=286545&atid=1214224&file_id=361450&aid=2945171
+
+http://www.x.org/docs/XKB/XKBlib.pdf
+
+http://www.mp3car.com/vbulletin/input-devices/108554-xbox360-chatpad-awsome-backlit-mini-keyboard-16.html#post1256444
+
+* change default axis/button map depending on controller type (tricky as
+  type is only really known after the axis/buttonmap as already been
+  build):
+
+* remove guide button from default mapping when its an Xbox1 controller
+
+* guitar handling was changed in a4e1003cba0ff925358ce5ed84d2bf9a728e93d6 
+
+* REL_ events could need acceleration support, as mouse emulation is currently kind of imprecise
+
+Stuff to do before 0.7.x release:
+=================================
+
+* add extra checks to make sure the evdev buttons and axis given exist
+  on the current device when using --evdev
+
+* allow --type to work even when --device-by-id is not given
+
+* axis emulation
+
+  --ui-axisemulation A:B=ABS_X:5
+
+* match by protocol not, just vendor/product, from xpad.c:
+
+/* Xbox 360 has a vendor-specific class, so we cannot match it with only
+ * USB_INTERFACE_INFO (also specifically refused by USB subsystem), so we
+ * match against vendor id as well. Wired Xbox 360 devices have protocol 1,
+ * wireless controllers have protocol 129. */
+#define XPAD_XBOX360_VENDOR_PROTOCOL(vend,pr) \
+        .match_flags = USB_DEVICE_ID_MATCH_VENDOR | USB_DEVICE_ID_MATCH_INT_INFO, \
+        .idVendor = (vend), \
+        .bInterfaceClass = USB_CLASS_VENDOR_SPEC, \
+        .bInterfaceSubClass = 93, \
+        .bInterfaceProtocol = (pr)
+#define XPAD_XBOX360_VENDOR(vend) \
+        { XPAD_XBOX360_VENDOR_PROTOCOL(vend,1) }, \
+        { XPAD_XBOX360_VENDOR_PROTOCOL(vend,129) }
+
+  --ui-axismap LT=KEY_A:KEY_A:1
+
+Feature
+=======
+
+* figure out a way to make userspace force feedback driver not become dead processes
+
+* test TR:Anniversary with max effect 16
+
+
+fixme:dinput:joy_polldev joystick cannot handle type 21 event (code 0) <- 21 == EV_FF (status report?) 
+
+http://www.immersion.com/developer/downloads/ImmFundamentals/HTML/
+http://msdn.microsoft.com/en-us/library/bb219655(VS.85).aspx
+
+Later versions:
+===============
+
+* The World Tour wireless guitar have 5 buttons and a
+  slide. Currently, the slide is mapped to the x axis, but I don't
+  know if it allows multiple presses at once. I don't have a Xbox, so
+  I don't know if it is allowed at all in the console.
+
+Colour: 	Button: 	Value in X1 (slide):
+Green 	A	-27500
+Red	B	-12900
+Yellow	Y	+7000
+Blue	X	+18500
+Orange	LB1	+32767
+(None)	(None)	-300
+
+* send FF status reports (maybe, is that used by anything?)
+
+* figure out the max values of force feedback effects so that stuff is
+  mapped more properly (kind of done, could need verification)
+
+* figure out which devices xorg/hal handles as keyboard and how to
+  make it always happen, seems to require two keyboard keys, devices
+  with only one aren't registered
+
+* report more precisly what devices got created, include device name (HAL has that information)
+
+* add support for LED messages (can this be used by anything?)
+
+
+Stuff to do before 0.8.0 release:
+=================================
+
+* Playstation 3 controller bluetooth support
+  - http://www.pabr.org/sixlinux/sixlinux.en.html
+  - http://www.motioninjoy.com/
+
+  - figure out what the remaining unknown bits mean:
+
+     data from just pluging the controller in and out a few times
+     without much pause inbetween:
+
+     Dualshock3:
+     // leaving controller plugged in for a longer time settles to this:
+      00 00 03 ef 16 00 00 00 00 33 fc 77 01 de
+
+     00 00 03 ef 16 00 00 00 00 33 fc 77 01 de 
+     00 00 03 ef 16 00 00 00 00 33 fc 77 01 c0
+     00 00 02 ee 12 00 00 00 00 12 fc 77 01 de
+           ^^^^^                         ^^^^^
+     00 00 01 ee 12 00 00 00 00 12 fc 77 01 de 
+     00 00 03 ef 16 00 00 00 00 11 fc 77 01 de 
+     00 00 03 ef 16 00 00 00 00 33 fc 77 01 de 
+     00 00 02 ee 12 00 00 00 00 12 fc 77 01 de 
+     wrong ideas: bluetooth master id
+
+     00 00 01 ef 16 00 00 00 00 11 fc 77 01 c0
+     00 00 03 ef 16 00 00 00 00 11 fc 77 01 c0
+
+     SIXAXIS:
+     00 00 06 ee 10 00 00 00 00 06 83 77 01 81 
+     00 00 06 ee 10 00 00 00 00 06 83 77 01
+     00 00 06 ee 10 00 00 00 00 06 83 77 
+
+     // taken from: http://www.pabr.org/sixlinux/sixlinux.en.html
+     00 00 02 ee 10 00 00 00 00 02 b2 77 01 81
+     
+     random guesses: bluetooth id, serial number, calibration data,
+     battery status
+
+* Wiimote support (either native or via libcwiid
+
+
+Random Stuff
+============
+http://lists.libsdl.org/pipermail/sdl-libsdl.org/2007-March/060263.html
+
+- fix http://userweb.kernel.org/~dtor/eviocgbit-bug.html in evtest
+- cleanup evtest some more, add more features
+- using rumble in scripts doesn't work, since you can't reset rumble back to 0,0
+- thread away on all endpoints
+- read from stdin on the main thread
+- send output to file or so
+usb -d 005:006 -c 5:in,5:out,6:in,7:in,8:out -o /tmp/out, else stdin
+
+# EOF #

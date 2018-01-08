@@ -1,0 +1,6 @@
+These are my basic scripts to control Beta-brite and by extension alpha led signs.
+Its untested on Alpha signs tho, I only have the one beta-brite. All my scripts use
+/dev/ttyUSB0 pls change to suite. I will note this most if not all docs say to run
+stty commands on the port prior to use. On all my ubuntu 16.04 this would cause an
+exact 2minute delay before transmitting ANY data EVERY time over the uart. Without
+setting these options with stty it always worked just fine so I ignored it.
