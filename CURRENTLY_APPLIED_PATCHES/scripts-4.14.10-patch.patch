@@ -1,0 +1,714 @@
+diff -Naur linux-4.14.10/scripts/package/Makefile linux-4.14.10-gpd/scripts/package/Makefile
+--- linux-4.14.10/scripts/package/Makefile	2017-12-29 11:53:50.000000000 -0500
++++ linux-4.14.10-gpd/scripts/package/Makefile	2018-01-04 12:47:46.129107568 -0500
+@@ -49,7 +49,7 @@
+ 	$(MAKE) clean
+ 	$(CONFIG_SHELL) $(MKSPEC) >$(objtree)/kernel.spec
+ 	$(call cmd,src_tar,$(KERNELPATH),kernel.spec)
+-	+rpmbuild $(RPMOPTS) --target $(UTS_MACHINE) -ta $(KERNELPATH).tar.gz
++	rpmbuild $(RPMOPTS) --target $(UTS_MACHINE) -ta $(KERNELPATH).tar.gz
+ 	rm $(KERNELPATH).tar.gz kernel.spec
+ 
+ # binrpm-pkg
+@@ -57,7 +57,7 @@
+ binrpm-pkg: FORCE
+ 	$(MAKE) KBUILD_SRC=
+ 	$(CONFIG_SHELL) $(MKSPEC) prebuilt > $(objtree)/binkernel.spec
+-	+rpmbuild $(RPMOPTS) --define "_builddir $(objtree)" --target \
++	rpmbuild $(RPMOPTS) --define "_builddir $(objtree)" --target \
+ 		$(UTS_MACHINE) -bb $(objtree)/binkernel.spec
+ 	rm binkernel.spec
+ 
+@@ -82,7 +82,7 @@
+ 		$(srctree)/scripts/package/builddeb $@
+ 
+ deb-pkg: FORCE
+-	$(MAKE) clean
++#	$(MAKE) clean
+ 	$(call cmd,src_tar,$(KDEB_SOURCENAME))
+ 	$(MAKE) KBUILD_SRC=
+ 	+$(call cmd,builddeb)
+@@ -91,7 +91,7 @@
+ 	$(MAKE) KBUILD_SRC=
+ 	+$(call cmd,builddeb)
+ 
+-clean-dirs += $(objtree)/debian/
++#clean-dirs += $(objtree)/debian/
+ 
+ 
+ # tarball targets
+diff -Naur linux-4.14.10/scripts/package/Makefile.no_clean linux-4.14.10-gpd/scripts/package/Makefile.no_clean
+--- linux-4.14.10/scripts/package/Makefile.no_clean	1969-12-31 19:00:00.000000000 -0500
++++ linux-4.14.10-gpd/scripts/package/Makefile.no_clean	2018-01-04 12:51:58.685899970 -0500
+@@ -0,0 +1,147 @@
++# Makefile for the different targets used to generate full packages of a kernel
++# It uses the generic clean infrastructure of kbuild
++
++# RPM target
++# ---------------------------------------------------------------------------
++# The rpm target generates two rpm files:
++# /usr/src/packages/SRPMS/kernel-2.6.7rc2-1.src.rpm
++# /usr/src/packages/RPMS/i386/kernel-2.6.7rc2-1.<arch>.rpm
++# The src.rpm files includes all source for the kernel being built
++# The <arch>.rpm includes kernel configuration, modules etc.
++#
++# Process to create the rpm files
++# a) clean the kernel
++# b) Generate .spec file
++# c) Build a tar ball, using symlink to make kernel version
++#    first entry in the path
++# d) and pack the result to a tar.gz file
++# e) generate the rpm files, based on kernel.spec
++# - Use /. to avoid tar packing just the symlink
++
++# Note that the rpm-pkg target cannot be used with KBUILD_OUTPUT,
++# but the binrpm-pkg target can; for some reason O= gets ignored.
++
++# Remove hyphens since they have special meaning in RPM filenames
++KERNELPATH := kernel-$(subst -,_,$(KERNELRELEASE))
++KDEB_SOURCENAME ?= linux-$(KERNELRELEASE)
++export KDEB_SOURCENAME
++# Include only those top-level files that are needed by make, plus the GPL copy
++TAR_CONTENT := $(KBUILD_ALLDIRS) .config .scmversion Makefile \
++               Kbuild Kconfig COPYING $(wildcard localversion*)
++MKSPEC     := $(srctree)/scripts/package/mkspec
++
++quiet_cmd_src_tar = TAR     $(2).tar.gz
++      cmd_src_tar = \
++if test "$(objtree)" != "$(srctree)"; then \
++	echo "Building source tarball is not possible outside the"; \
++	echo "kernel source tree. Don't set KBUILD_OUTPUT, or use the"; \
++	echo "binrpm-pkg or bindeb-pkg target instead."; \
++	false; \
++fi ; \
++$(srctree)/scripts/setlocalversion --save-scmversion; \
++tar -cz $(RCS_TAR_IGNORE) -f $(2).tar.gz \
++	--transform 's:^:$(2)/:S' $(TAR_CONTENT) $(3); \
++rm -f $(objtree)/.scmversion
++
++# rpm-pkg
++# ---------------------------------------------------------------------------
++rpm-pkg rpm: FORCE
++	$(MAKE) clean
++	$(CONFIG_SHELL) $(MKSPEC) >$(objtree)/kernel.spec
++	$(call cmd,src_tar,$(KERNELPATH),kernel.spec)
++	rpmbuild $(RPMOPTS) --target $(UTS_MACHINE) -ta $(KERNELPATH).tar.gz
++	rm $(KERNELPATH).tar.gz kernel.spec
++
++# binrpm-pkg
++# ---------------------------------------------------------------------------
++binrpm-pkg: FORCE
++	$(MAKE) KBUILD_SRC=
++	$(CONFIG_SHELL) $(MKSPEC) prebuilt > $(objtree)/binkernel.spec
++	rpmbuild $(RPMOPTS) --define "_builddir $(objtree)" --target \
++		$(UTS_MACHINE) -bb $(objtree)/binkernel.spec
++	rm binkernel.spec
++
++# Deb target
++# ---------------------------------------------------------------------------
++quiet_cmd_builddeb = BUILDDEB
++      cmd_builddeb = set -e; \
++	test `id -u` = 0 || \
++	test -n "$(KBUILD_PKG_ROOTCMD)" || { \
++		which fakeroot >/dev/null 2>&1 && \
++		KBUILD_PKG_ROOTCMD="fakeroot -u"; \
++	} || { \
++		echo; \
++		echo "builddeb must be run as root (or using fakeroot)."; \
++		echo "KBUILD_PKG_ROOTCMD is unset and fakeroot not found."; \
++		echo "Try setting KBUILD_PKG_ROOTCMD to a command to acquire"; \
++		echo "root privileges (e.g., 'fakeroot -u' or 'sudo')."; \
++		false; \
++	} && \
++	\
++	$$KBUILD_PKG_ROOTCMD $(CONFIG_SHELL) \
++		$(srctree)/scripts/package/builddeb $@
++
++deb-pkg: FORCE
++#	$(MAKE) clean
++	$(call cmd,src_tar,$(KDEB_SOURCENAME))
++	$(MAKE) KBUILD_SRC=
++	+$(call cmd,builddeb)
++
++bindeb-pkg: FORCE
++	$(MAKE) KBUILD_SRC=
++	+$(call cmd,builddeb)
++
++#clean-dirs += $(objtree)/debian/
++
++
++# tarball targets
++# ---------------------------------------------------------------------------
++tar%pkg: FORCE
++	$(MAKE) KBUILD_SRC=
++	$(CONFIG_SHELL) $(srctree)/scripts/package/buildtar $@
++
++clean-dirs += $(objtree)/tar-install/
++
++
++# perf-pkg - generate a source tarball with perf source
++# ---------------------------------------------------------------------------
++
++perf-tar=perf-$(KERNELVERSION)
++
++quiet_cmd_perf_tar = TAR
++      cmd_perf_tar = \
++git --git-dir=$(srctree)/.git archive --prefix=$(perf-tar)/         \
++	HEAD^{tree} $$(cd $(srctree);                               \
++		       echo $$(cat tools/perf/MANIFEST)) \
++	-o $(perf-tar).tar;                                         \
++mkdir -p $(perf-tar);                                               \
++git --git-dir=$(srctree)/.git rev-parse HEAD > $(perf-tar)/HEAD;    \
++(cd $(srctree)/tools/perf;                                          \
++util/PERF-VERSION-GEN $(CURDIR)/$(perf-tar)/);              \
++tar rf $(perf-tar).tar $(perf-tar)/HEAD $(perf-tar)/PERF-VERSION-FILE; \
++rm -r $(perf-tar);                                                  \
++$(if $(findstring tar-src,$@),,                                     \
++$(if $(findstring bz2,$@),bzip2,                                    \
++$(if $(findstring gz,$@),gzip,                                      \
++$(if $(findstring xz,$@),xz,                                        \
++$(error unknown target $@))))                                       \
++	-f -9 $(perf-tar).tar)
++
++perf-%pkg: FORCE
++	$(call cmd,perf_tar)
++
++# Help text displayed when executing 'make help'
++# ---------------------------------------------------------------------------
++help: FORCE
++	@echo '  rpm-pkg             - Build both source and binary RPM kernel packages'
++	@echo '  binrpm-pkg          - Build only the binary kernel RPM package'
++	@echo '  deb-pkg             - Build both source and binary deb kernel packages'
++	@echo '  bindeb-pkg          - Build only the binary kernel deb package'
++	@echo '  tar-pkg             - Build the kernel as an uncompressed tarball'
++	@echo '  targz-pkg           - Build the kernel as a gzip compressed tarball'
++	@echo '  tarbz2-pkg          - Build the kernel as a bzip2 compressed tarball'
++	@echo '  tarxz-pkg           - Build the kernel as a xz compressed tarball'
++	@echo '  perf-tar-src-pkg    - Build $(perf-tar).tar source tarball'
++	@echo '  perf-targz-src-pkg  - Build $(perf-tar).tar.gz source tarball'
++	@echo '  perf-tarbz2-src-pkg - Build $(perf-tar).tar.bz2 source tarball'
++	@echo '  perf-tarxz-src-pkg  - Build $(perf-tar).tar.xz source tarball'
+diff -Naur linux-4.14.10/scripts/package/Makefile.og linux-4.14.10-gpd/scripts/package/Makefile.og
+--- linux-4.14.10/scripts/package/Makefile.og	1969-12-31 19:00:00.000000000 -0500
++++ linux-4.14.10-gpd/scripts/package/Makefile.og	2017-12-29 21:03:00.198295442 -0500
+@@ -0,0 +1,147 @@
++# Makefile for the different targets used to generate full packages of a kernel
++# It uses the generic clean infrastructure of kbuild
++
++# RPM target
++# ---------------------------------------------------------------------------
++# The rpm target generates two rpm files:
++# /usr/src/packages/SRPMS/kernel-2.6.7rc2-1.src.rpm
++# /usr/src/packages/RPMS/i386/kernel-2.6.7rc2-1.<arch>.rpm
++# The src.rpm files includes all source for the kernel being built
++# The <arch>.rpm includes kernel configuration, modules etc.
++#
++# Process to create the rpm files
++# a) clean the kernel
++# b) Generate .spec file
++# c) Build a tar ball, using symlink to make kernel version
++#    first entry in the path
++# d) and pack the result to a tar.gz file
++# e) generate the rpm files, based on kernel.spec
++# - Use /. to avoid tar packing just the symlink
++
++# Note that the rpm-pkg target cannot be used with KBUILD_OUTPUT,
++# but the binrpm-pkg target can; for some reason O= gets ignored.
++
++# Remove hyphens since they have special meaning in RPM filenames
++KERNELPATH := kernel-$(subst -,_,$(KERNELRELEASE))
++KDEB_SOURCENAME ?= linux-$(KERNELRELEASE)
++export KDEB_SOURCENAME
++# Include only those top-level files that are needed by make, plus the GPL copy
++TAR_CONTENT := $(KBUILD_ALLDIRS) .config .scmversion Makefile \
++               Kbuild Kconfig COPYING $(wildcard localversion*)
++MKSPEC     := $(srctree)/scripts/package/mkspec
++
++quiet_cmd_src_tar = TAR     $(2).tar.gz
++      cmd_src_tar = \
++if test "$(objtree)" != "$(srctree)"; then \
++	echo "Building source tarball is not possible outside the"; \
++	echo "kernel source tree. Don't set KBUILD_OUTPUT, or use the"; \
++	echo "binrpm-pkg or bindeb-pkg target instead."; \
++	false; \
++fi ; \
++$(srctree)/scripts/setlocalversion --save-scmversion; \
++tar -cz $(RCS_TAR_IGNORE) -f $(2).tar.gz \
++	--transform 's:^:$(2)/:S' $(TAR_CONTENT) $(3); \
++rm -f $(objtree)/.scmversion
++
++# rpm-pkg
++# ---------------------------------------------------------------------------
++rpm-pkg rpm: FORCE
++	$(MAKE) clean
++	$(CONFIG_SHELL) $(MKSPEC) >$(objtree)/kernel.spec
++	$(call cmd,src_tar,$(KERNELPATH),kernel.spec)
++	+rpmbuild $(RPMOPTS) --target $(UTS_MACHINE) -ta $(KERNELPATH).tar.gz
++	rm $(KERNELPATH).tar.gz kernel.spec
++
++# binrpm-pkg
++# ---------------------------------------------------------------------------
++binrpm-pkg: FORCE
++	$(MAKE) KBUILD_SRC=
++	$(CONFIG_SHELL) $(MKSPEC) prebuilt > $(objtree)/binkernel.spec
++	+rpmbuild $(RPMOPTS) --define "_builddir $(objtree)" --target \
++		$(UTS_MACHINE) -bb $(objtree)/binkernel.spec
++	rm binkernel.spec
++
++# Deb target
++# ---------------------------------------------------------------------------
++quiet_cmd_builddeb = BUILDDEB
++      cmd_builddeb = set -e; \
++	test `id -u` = 0 || \
++	test -n "$(KBUILD_PKG_ROOTCMD)" || { \
++		which fakeroot >/dev/null 2>&1 && \
++		KBUILD_PKG_ROOTCMD="fakeroot -u"; \
++	} || { \
++		echo; \
++		echo "builddeb must be run as root (or using fakeroot)."; \
++		echo "KBUILD_PKG_ROOTCMD is unset and fakeroot not found."; \
++		echo "Try setting KBUILD_PKG_ROOTCMD to a command to acquire"; \
++		echo "root privileges (e.g., 'fakeroot -u' or 'sudo')."; \
++		false; \
++	} && \
++	\
++	$$KBUILD_PKG_ROOTCMD $(CONFIG_SHELL) \
++		$(srctree)/scripts/package/builddeb $@
++
++deb-pkg: FORCE
++	$(MAKE) clean
++	$(call cmd,src_tar,$(KDEB_SOURCENAME))
++	$(MAKE) KBUILD_SRC=
++	+$(call cmd,builddeb)
++
++bindeb-pkg: FORCE
++	$(MAKE) KBUILD_SRC=
++	+$(call cmd,builddeb)
++
++clean-dirs += $(objtree)/debian/
++
++
++# tarball targets
++# ---------------------------------------------------------------------------
++tar%pkg: FORCE
++	$(MAKE) KBUILD_SRC=
++	$(CONFIG_SHELL) $(srctree)/scripts/package/buildtar $@
++
++clean-dirs += $(objtree)/tar-install/
++
++
++# perf-pkg - generate a source tarball with perf source
++# ---------------------------------------------------------------------------
++
++perf-tar=perf-$(KERNELVERSION)
++
++quiet_cmd_perf_tar = TAR
++      cmd_perf_tar = \
++git --git-dir=$(srctree)/.git archive --prefix=$(perf-tar)/         \
++	HEAD^{tree} $$(cd $(srctree);                               \
++		       echo $$(cat tools/perf/MANIFEST)) \
++	-o $(perf-tar).tar;                                         \
++mkdir -p $(perf-tar);                                               \
++git --git-dir=$(srctree)/.git rev-parse HEAD > $(perf-tar)/HEAD;    \
++(cd $(srctree)/tools/perf;                                          \
++util/PERF-VERSION-GEN $(CURDIR)/$(perf-tar)/);              \
++tar rf $(perf-tar).tar $(perf-tar)/HEAD $(perf-tar)/PERF-VERSION-FILE; \
++rm -r $(perf-tar);                                                  \
++$(if $(findstring tar-src,$@),,                                     \
++$(if $(findstring bz2,$@),bzip2,                                    \
++$(if $(findstring gz,$@),gzip,                                      \
++$(if $(findstring xz,$@),xz,                                        \
++$(error unknown target $@))))                                       \
++	-f -9 $(perf-tar).tar)
++
++perf-%pkg: FORCE
++	$(call cmd,perf_tar)
++
++# Help text displayed when executing 'make help'
++# ---------------------------------------------------------------------------
++help: FORCE
++	@echo '  rpm-pkg             - Build both source and binary RPM kernel packages'
++	@echo '  binrpm-pkg          - Build only the binary kernel RPM package'
++	@echo '  deb-pkg             - Build both source and binary deb kernel packages'
++	@echo '  bindeb-pkg          - Build only the binary kernel deb package'
++	@echo '  tar-pkg             - Build the kernel as an uncompressed tarball'
++	@echo '  targz-pkg           - Build the kernel as a gzip compressed tarball'
++	@echo '  tarbz2-pkg          - Build the kernel as a bzip2 compressed tarball'
++	@echo '  tarxz-pkg           - Build the kernel as a xz compressed tarball'
++	@echo '  perf-tar-src-pkg    - Build $(perf-tar).tar source tarball'
++	@echo '  perf-targz-src-pkg  - Build $(perf-tar).tar.gz source tarball'
++	@echo '  perf-tarbz2-src-pkg - Build $(perf-tar).tar.bz2 source tarball'
++	@echo '  perf-tarxz-src-pkg  - Build $(perf-tar).tar.xz source tarball'
+diff -Naur linux-4.14.10/scripts/setlocalversion linux-4.14.10-gpd/scripts/setlocalversion
+--- linux-4.14.10/scripts/setlocalversion	2017-12-29 11:53:50.000000000 -0500
++++ linux-4.14.10-gpd/scripts/setlocalversion	2017-12-29 12:30:11.268519294 -0500
+@@ -161,15 +161,15 @@
+ if test "$CONFIG_LOCALVERSION_AUTO" = "y"; then
+ 	# full scm version string
+ 	res="$res$(scm_version)"
+-else
++#else
+ 	# append a plus sign if the repository is not in a clean
+ 	# annotated or signed tagged state (as git describe only
+ 	# looks at signed or annotated tags - git tag -a/-s) and
+ 	# LOCALVERSION= is not specified
+-	if test "${LOCALVERSION+set}" != "set"; then
+-		scm=$(scm_version --short)
+-		res="$res${scm:++}"
+-	fi
++#	if test "${LOCALVERSION+set}" != "set"; then
++#		scm=$(scm_version --short)
++#		res="$res${scm:++}"
++#	fi
+ fi
+ 
+ echo "$res"
+diff -Naur linux-4.14.10/scripts/setlocalversion.og linux-4.14.10-gpd/scripts/setlocalversion.og
+--- linux-4.14.10/scripts/setlocalversion.og	1969-12-31 19:00:00.000000000 -0500
++++ linux-4.14.10-gpd/scripts/setlocalversion.og	2017-12-29 12:30:11.281852622 -0500
+@@ -0,0 +1,175 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-2.0
++#
++# This scripts adds local version information from the version
++# control systems git, mercurial (hg) and subversion (svn).
++#
++# If something goes wrong, send a mail the kernel build mailinglist
++# (see MAINTAINERS) and CC Nico Schottelius
++# <nico-linuxsetlocalversion -at- schottelius.org>.
++#
++#
++
++usage() {
++	echo "Usage: $0 [--save-scmversion] [srctree]" >&2
++	exit 1
++}
++
++scm_only=false
++srctree=.
++if test "$1" = "--save-scmversion"; then
++	scm_only=true
++	shift
++fi
++if test $# -gt 0; then
++	srctree=$1
++	shift
++fi
++if test $# -gt 0 -o ! -d "$srctree"; then
++	usage
++fi
++
++scm_version()
++{
++	local short
++	short=false
++
++	cd "$srctree"
++	if test -e .scmversion; then
++		cat .scmversion
++		return
++	fi
++	if test "$1" = "--short"; then
++		short=true
++	fi
++
++	# Check for git and a git repo.
++	if test -z "$(git rev-parse --show-cdup 2>/dev/null)" &&
++	   head=`git rev-parse --verify --short HEAD 2>/dev/null`; then
++
++		# If we are at a tagged commit (like "v2.6.30-rc6"), we ignore
++		# it, because this version is defined in the top level Makefile.
++		if [ -z "`git describe --exact-match 2>/dev/null`" ]; then
++
++			# If only the short version is requested, don't bother
++			# running further git commands
++			if $short; then
++				echo "+"
++				return
++			fi
++			# If we are past a tagged commit (like
++			# "v2.6.30-rc5-302-g72357d5"), we pretty print it.
++			if atag="`git describe 2>/dev/null`"; then
++				echo "$atag" | awk -F- '{printf("-%05d-%s", $(NF-1),$(NF))}'
++
++			# If we don't have a tag at all we print -g{commitish}.
++			else
++				printf '%s%s' -g $head
++			fi
++		fi
++
++		# Is this git on svn?
++		if git config --get svn-remote.svn.url >/dev/null; then
++			printf -- '-svn%s' "`git svn find-rev $head`"
++		fi
++
++		# Check for uncommitted changes
++		if git diff-index --name-only HEAD | grep -qv "^scripts/package"; then
++			printf '%s' -dirty
++		fi
++
++		# All done with git
++		return
++	fi
++
++	# Check for mercurial and a mercurial repo.
++	if test -d .hg && hgid=`hg id 2>/dev/null`; then
++		# Do we have an tagged version?  If so, latesttagdistance == 1
++		if [ "`hg log -r . --template '{latesttagdistance}'`" == "1" ]; then
++			id=`hg log -r . --template '{latesttag}'`
++			printf '%s%s' -hg "$id"
++		else
++			tag=`printf '%s' "$hgid" | cut -d' ' -f2`
++			if [ -z "$tag" -o "$tag" = tip ]; then
++				id=`printf '%s' "$hgid" | sed 's/[+ ].*//'`
++				printf '%s%s' -hg "$id"
++			fi
++		fi
++
++		# Are there uncommitted changes?
++		# These are represented by + after the changeset id.
++		case "$hgid" in
++			*+|*+\ *) printf '%s' -dirty ;;
++		esac
++
++		# All done with mercurial
++		return
++	fi
++
++	# Check for svn and a svn repo.
++	if rev=`LANG= LC_ALL= LC_MESSAGES=C svn info 2>/dev/null | grep '^Last Changed Rev'`; then
++		rev=`echo $rev | awk '{print $NF}'`
++		printf -- '-svn%s' "$rev"
++
++		# All done with svn
++		return
++	fi
++}
++
++collect_files()
++{
++	local file res
++
++	for file; do
++		case "$file" in
++		*\~*)
++			continue
++			;;
++		esac
++		if test -e "$file"; then
++			res="$res$(cat "$file")"
++		fi
++	done
++	echo "$res"
++}
++
++if $scm_only; then
++	if test ! -e .scmversion; then
++		res=$(scm_version)
++		echo "$res" >.scmversion
++	fi
++	exit
++fi
++
++if test -e include/config/auto.conf; then
++	. include/config/auto.conf
++else
++	echo "Error: kernelrelease not valid - run 'make prepare' to update it" >&2
++	exit 1
++fi
++
++# localversion* files in the build and source directory
++res="$(collect_files localversion*)"
++if test ! "$srctree" -ef .; then
++	res="$res$(collect_files "$srctree"/localversion*)"
++fi
++
++# CONFIG_LOCALVERSION and LOCALVERSION (if set)
++res="${res}${CONFIG_LOCALVERSION}${LOCALVERSION}"
++
++# scm version string if not at a tagged commit
++if test "$CONFIG_LOCALVERSION_AUTO" = "y"; then
++	# full scm version string
++	res="$res$(scm_version)"
++else
++	# append a plus sign if the repository is not in a clean
++	# annotated or signed tagged state (as git describe only
++	# looks at signed or annotated tags - git tag -a/-s) and
++	# LOCALVERSION= is not specified
++	if test "${LOCALVERSION+set}" != "set"; then
++		scm=$(scm_version --short)
++		res="$res${scm:++}"
++	fi
++fi
++
++echo "$res"
+diff -Naur linux-4.14.10/scripts/setlocalversion.wrking linux-4.14.10-gpd/scripts/setlocalversion.wrking
+--- linux-4.14.10/scripts/setlocalversion.wrking	1969-12-31 19:00:00.000000000 -0500
++++ linux-4.14.10-gpd/scripts/setlocalversion.wrking	2017-12-29 12:30:11.281852622 -0500
+@@ -0,0 +1,166 @@
++#!/bin/sh
++# SPDX-License-Identifier: GPL-2.0
++#
++# This scripts adds local version information from the version
++# control systems git, mercurial (hg) and subversion (svn).
++#
++# If something goes wrong, send a mail the kernel build mailinglist
++# (see MAINTAINERS) and CC Nico Schottelius
++# <nico-linuxsetlocalversion -at- schottelius.org>.
++#
++#
++
++usage() {
++	echo "Usage: $0 [--save-scmversion] [srctree]" >&2
++	exit 1
++}
++
++scm_only=false
++srctree=.
++if test "$1" = "--save-scmversion"; then
++	scm_only=true
++	shift
++fi
++if test $# -gt 0; then
++	srctree=$1
++	shift
++fi
++if test $# -gt 0 -o ! -d "$srctree"; then
++	usage
++fi
++
++scm_version()
++{
++	local short
++	short=false
++
++	cd "$srctree"
++	if test -e .scmversion; then
++		cat .scmversion
++		return
++	fi
++	if test "$1" = "--short"; then
++		short=true
++	fi
++
++	# Check for git and a git repo.
++	if test -z "$(git rev-parse --show-cdup 2>/dev/null)" &&
++	   head=`git rev-parse --verify --short HEAD 2>/dev/null`; then
++
++		# If we are at a tagged commit (like "v2.6.30-rc6"), we ignore
++		# it, because this version is defined in the top level Makefile.
++		if [ -z "`git describe --exact-match 2>/dev/null`" ]; then
++
++			# If only the short version is requested, don't bother
++			# running further git commands
++			if $short; then
++				echo "+"
++				return
++			fi
++			# If we are past a tagged commit (like
++			# "v2.6.30-rc5-302-g72357d5"), we pretty print it.
++			if atag="`git describe 2>/dev/null`"; then
++				echo "$atag" | awk -F- '{printf("-%05d-%s", $(NF-1),$(NF))}'
++
++			# If we don't have a tag at all we print -g{commitish}.
++			else
++				printf '%s%s' -g $head
++			fi
++		fi
++
++		# Is this git on svn?
++		if git config --get svn-remote.svn.url >/dev/null; then
++			printf -- '-svn%s' "`git svn find-rev $head`"
++		fi
++
++		# Check for uncommitted changes
++		if git diff-index --name-only HEAD | grep -qv "^scripts/package"; then
++			printf '%s' -dirty
++		fi
++
++		# All done with git
++		return
++	fi
++
++	# Check for mercurial and a mercurial repo.
++	if test -d .hg && hgid=`hg id 2>/dev/null`; then
++		# Do we have an tagged version?  If so, latesttagdistance == 1
++		if [ "`hg log -r . --template '{latesttagdistance}'`" == "1" ]; then
++			id=`hg log -r . --template '{latesttag}'`
++			printf '%s%s' -hg "$id"
++		else
++			tag=`printf '%s' "$hgid" | cut -d' ' -f2`
++			if [ -z "$tag" -o "$tag" = tip ]; then
++				id=`printf '%s' "$hgid" | sed 's/[+ ].*//'`
++				printf '%s%s' -hg "$id"
++			fi
++		fi
++
++		# Are there uncommitted changes?
++		# These are represented by + after the changeset id.
++		case "$hgid" in
++			*+|*+\ *) printf '%s' -dirty ;;
++		esac
++
++		# All done with mercurial
++		return
++	fi
++
++	# Check for svn and a svn repo.
++	if rev=`LANG= LC_ALL= LC_MESSAGES=C svn info 2>/dev/null | grep '^Last Changed Rev'`; then
++		rev=`echo $rev | awk '{print $NF}'`
++		printf -- '-svn%s' "$rev"
++
++		# All done with svn
++		return
++	fi
++}
++
++collect_files()
++{
++	local file res
++
++	for file; do
++		case "$file" in
++		*\~*)
++			continue
++			;;
++		esac
++		if test -e "$file"; then
++			res="$res$(cat "$file")"
++		fi
++	done
++	echo "$res"
++}
++
++if $scm_only; then
++	if test ! -e .scmversion; then
++		res=$(scm_version)
++		echo "$res" >.scmversion
++	fi
++	exit
++fi
++
++if test -e include/config/auto.conf; then
++	. include/config/auto.conf
++else
++	echo "Error: kernelrelease not valid - run 'make prepare' to update it" >&2
++	exit 1
++fi
++
++# localversion* files in the build and source directory
++res="$(collect_files localversion*)"
++if test ! "$srctree" -ef .; then
++	res="$res$(collect_files "$srctree"/localversion*)"
++fi
++
++# CONFIG_LOCALVERSION and LOCALVERSION (if set)
++res="${res}${CONFIG_LOCALVERSION}${LOCALVERSION}"
++
++# scm version string if not at a tagged commit
++if test "$CONFIG_LOCALVERSION_AUTO" = "y"; then
++	# full scm version string
++	res="$res$(scm_version)"
++fi
++
++echo "$res"

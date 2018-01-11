@@ -615,7 +615,7 @@ d41d8cd98f00b204e9800998ecf8427e  usr/include/linux/netfilter_arp/.install
 ac011cadb9f972549b11f9aa06bd8597  usr/include/linux/tcp.h
 a637ad6a4b7c84bda460dcbf364fc86e  usr/include/linux/atmbr2684.h
 946f9d3d8b97ff76f94aac58db30c35e  usr/include/linux/userfaultfd.h
-c54fbbf54277c94b2e24768c9951b465  usr/include/linux/version.h
+ad781cee911d137711af4a7e89da019e  usr/include/linux/version.h
 746f5204ff439cf2479f9b4ec061dedd  usr/include/linux/icmp.h
 197072b1f2586762f4591cbf2fe2ff44  usr/include/linux/can/raw.h
 da1a83441a729a54071c40c4445cce25  usr/include/linux/can/vxcan.h
@@ -867,7 +867,7 @@ c1f66b7faa2dfa17efdbdf1e416be250  usr/include/asm/shmbuf.h
 3c0d2aecae64c1d94b980ea2eaf00c62  usr/include/asm/unistd_32.h
 be7f1dd42162e5914c51050bb5fad135  usr/include/asm/siginfo.h
 892b575276515e01057bf49a9806fafc  usr/include/asm/socket.h
-5a82033a9fa606283942ffd3cb5e9fd7  usr/include/asm/processor-flags.h
+243fc8872b0dd4069c2d04856585db1a  usr/include/asm/processor-flags.h
 8b7ac215743bc501cf54c7622bc06d6c  usr/include/asm/a.out.h
 26d02885f152812663c265e76cdf9113  usr/include/asm/e820.h
 55f8ec5e3a7ee0e398b33d52b4d28e89  usr/include/asm/termios.h
@@ -952,5 +952,5 @@ e5e97a386f501f14ace3de083aea76cc  usr/include/video/edid.h
 370e3c0c7c2c9fe844842787562ee649  usr/include/video/..install.cmd
 38afb7b4536e5f3bd0ee148af65bcd25  usr/include/video/uvesafb.h
 d41d8cd98f00b204e9800998ecf8427e  usr/include/video/.install
-7527fb27aa3450b93f84721e7f8a450d  usr/share/doc/linux-libc-dev/changelog.Debian.gz
+3c6d37298e2298e5e275d4c75d407cad  usr/share/doc/linux-libc-dev/changelog.Debian.gz
 2c6cd6286401903c7f46f350c084ef15  usr/share/doc/linux-libc-dev/copyright

@@ -3348,7 +3348,6 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/char-misc.git
 S:	Supported
 F:	drivers/char/*
 F:	drivers/misc/*
-F:	drivers/virt/*
 F:	include/linux/miscdevice.h
 
 CHECKPATCH
@@ -9205,16 +9204,6 @@ F:	include/linux/dt-bindings/mux/
 F:	include/linux/mux/
 F:	drivers/mux/
 
-MULTIPLEXER SUBSYSTEM INTEL CHT USB MUX DRIVER
-M:	Hans de Goede <hdegoede@redhat.com>
-S:	Maintained
-F:	drivers/mux/intel-cht-usb-mux.c
-
-MULTIPLEXER SUBSYSTEM PI3USB30532 DRIVER
-M:	Hans de Goede <hdegoede@redhat.com>
-S:	Maintained
-F:	drivers/mux/pi3usb30532.c
-
 MULTISOUND SOUND DRIVER
 M:	Andrew Veliath <andrewtv@usa.net>
 S:	Maintained
@@ -10561,12 +10550,6 @@ L:	linux-crypto@vger.kernel.org
 S:	Maintained
 F:	crypto/pcrypt.c
 F:	include/crypto/pcrypt.h
-
-PEAQ WMI HOTKEYS DRIVER
-M:	Hans de Goede <hdegoede@redhat.com>
-L:	platform-driver-x86@vger.kernel.org
-S:	Maintained
-F:	drivers/platform/x86/peaq-wmi.c
 
 PER-CPU MEMORY ALLOCATOR
 M:	Tejun Heo <tj@kernel.org>
@@ -14372,15 +14355,6 @@ M:	Gerd Hoffmann <kraxel@redhat.com>
 S:	Maintained
 F:	drivers/virtio/virtio_input.c
 F:	include/uapi/linux/virtio_input.h
-
-VIRTUAL BOX GUEST DEVICE DRIVER
-M:	Hans de Goede <hdegoede@redhat.com>
-M:	Arnd Bergmann <arnd@arndb.de>
-M:	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-S:	Maintained
-F:	include/linux/vbox_utils.h
-F:	include/uapi/linux/vbox*.h
-F:	drivers/virt/vboxguest/
 
 VIRTUAL SERIO DEVICE DRIVER
 M:	Stephen Chandler Paul <thatslyude@gmail.com>

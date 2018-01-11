@@ -1,8 +1,16 @@
-Forked from https://github.com/jwrdegoede/linux-sunxi/tree/v4.14-footrail
+﻿UPDATE: Jan 11th 2018: Brought it up to 4.14.13 which has patches for "Meltdown" just enable CONFIG_PAGE_TABLE_ISOLATION
+	in your kernel config. UNFORTUNATELY Spectre doesn't appear to have patches in mainline kernel yet. Tho I have
+	read sum distros have implemented there own out of tree patches. I will hopefully find time to look into
+	those and maybe use them until an official mainline fix is out.
+	INTEL MICROCODE FOR GPD-WIN;
+		https://downloadcenter.intel.com/download/27431/Linux-Processor-Microcode-Data-File?product=93362
+	GENERIC DOWNLOAD SITE TO SELECT DIFFERENT CPU
+		https://downloadcenter.intel.com/download/27431/Linux-Processor-Microcode-Data-File
+
 
 UPDATE: Jan 8th 2018: Added new xboxdrv userland driver in tools/16ton, patched with support for wireless chatpad
 	(from https://github.com/xboxdrv/xboxdrv/tree/8a0b802bfcbc8ae48d803ea61d60ff6b2ddc42c7) plus my own
-	minor patches/changes for dpkg-buildpackahge to work
+	minor patches/changes for dpkg-buildpackage to work
 
 UPDATE: Jan 5th 2018: new usb-acm-mtp-setup script in tools/16ton/mtp_adb this should work on OTG ports.
 	That said thanks to the work of HansGeode we have automatic port host/client switching, if you dont
@@ -14,10 +22,10 @@ UPDATE: Jan 5th 2018: new usb-acm-mtp-setup script in tools/16ton/mtp_adb this s
 
 UPDATE Jan 4th 2018; added two more pairs of dev/prod ids to uss720 (belkin F5UOO2 and D-Link DSB-P36)
 	Added Android usb gadget/configfs/function  USB_F_FS USB_F_MTP USB_F_PTP USB_CONFIGFS_UEVENT
-	also function_accesory but its currently in a dependency cycle and i havent looked at it.
+	also function_accessory but its currently in a dependency cycle and i havent looked at it.
 	So far only mtp is tested (on gpd-win but should work with other otg devices) and works good
 	as far as i can tell. in tools/16ton you will find a heavily patched mtp-server which is hard coded
-	to share /root and no longer has the android/unity dependencys.
+	to share /root and no longer has the android/unity dependencies.
 	Ubuntu's repo version of adbd would segfault (same as mtp-server) and a diff one is on tools, it
 	doesnt segfault and the host machine can see it, havent gotten beyind that yet.
 	The script in tools/16ton usb-mtp-setup run as root then start mtp-server as root

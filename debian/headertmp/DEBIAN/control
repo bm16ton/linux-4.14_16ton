@@ -1,6 +1,6 @@
 Package: linux-libc-dev
-Source: linux-4.14.10-16ton-gpd-win-gaming-conf
-Version: 4.14.10-16ton-gpd-win-gaming-conf-18
+Source: linux-4.14.13-16ton-gpd-win-gaming-conf
+Version: 4.14.13-16ton-gpd-win-gaming-conf-1
 Architecture: amd64
 Maintainer: Anonymous <root@maddocks-Q552UB>
 Installed-Size: 4990

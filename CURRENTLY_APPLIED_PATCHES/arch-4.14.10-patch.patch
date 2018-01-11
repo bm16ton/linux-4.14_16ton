@@ -1,0 +1,95 @@
+diff -Naur linux-4.14.10/arch/x86/include/asm/iosf_mbi.h linux-4.14.10-gpd/arch/x86/include/asm/iosf_mbi.h
+--- linux-4.14.10/arch/x86/include/asm/iosf_mbi.h	2017-12-29 11:53:50.000000000 -0500
++++ linux-4.14.10-gpd/arch/x86/include/asm/iosf_mbi.h	2017-12-29 12:30:10.391853014 -0500
+@@ -140,11 +140,17 @@
+ int iosf_mbi_register_pmic_bus_access_notifier(struct notifier_block *nb);
+ 
+ /**
+- * iosf_mbi_register_pmic_bus_access_notifier - Unregister PMIC bus notifier
++ * iosf_mbi_register_pmic_bus_access_notifier_unlocked - Unregister PMIC bus
++ *                                                       notifier
++ *
++ * Note the caller must call iosf_mbi_punit_acquire() before calling this
++ * to ensure the bus is inactive before unregistering (and call
++ * iosf_mbi_punit_release() afterwards).
+  *
+  * @nb: notifier_block to unregister
+  */
+-int iosf_mbi_unregister_pmic_bus_access_notifier(struct notifier_block *nb);
++int iosf_mbi_unregister_pmic_bus_access_notifier_unlocked(
++	struct notifier_block *nb);
+ 
+ /**
+  * iosf_mbi_call_pmic_bus_access_notifier_chain - Call PMIC bus notifier chain
+@@ -154,6 +160,11 @@
+  */
+ int iosf_mbi_call_pmic_bus_access_notifier_chain(unsigned long val, void *v);
+ 
++/**
++ * iosf_mbi_assert_punit_acquired - Assert that the P-Unit has been acquired.
++ */
++void iosf_mbi_assert_punit_acquired(void);
++
+ #else /* CONFIG_IOSF_MBI is not enabled */
+ static inline
+ bool iosf_mbi_available(void)
+@@ -192,7 +203,8 @@
+ }
+ 
+ static inline
+-int iosf_mbi_unregister_pmic_bus_access_notifier(struct notifier_block *nb)
++int iosf_mbi_unregister_pmic_bus_access_notifier_unlocked(
++	struct notifier_block *nb)
+ {
+ 	return 0;
+ }
+@@ -203,6 +215,8 @@
+ 	return 0;
+ }
+ 
++static inline void iosf_mbi_assert_punit_acquired(void) {}
++
+ #endif /* CONFIG_IOSF_MBI */
+ 
+ #endif /* IOSF_MBI_SYMS_H */
+diff -Naur linux-4.14.10/arch/x86/platform/intel/iosf_mbi.c linux-4.14.10-gpd/arch/x86/platform/intel/iosf_mbi.c
+--- linux-4.14.10/arch/x86/platform/intel/iosf_mbi.c	2017-12-29 11:53:50.000000000 -0500
++++ linux-4.14.10-gpd/arch/x86/platform/intel/iosf_mbi.c	2017-12-29 12:30:10.561852938 -0500
+@@ -218,19 +218,15 @@
+ }
+ EXPORT_SYMBOL(iosf_mbi_register_pmic_bus_access_notifier);
+ 
+-int iosf_mbi_unregister_pmic_bus_access_notifier(struct notifier_block *nb)
++int iosf_mbi_unregister_pmic_bus_access_notifier_unlocked(
++	struct notifier_block *nb)
+ {
+-	int ret;
++	WARN_ON(!mutex_is_locked(&iosf_mbi_punit_mutex));
+ 
+-	/* Wait for the bus to go inactive before unregistering */
+-	mutex_lock(&iosf_mbi_punit_mutex);
+-	ret = blocking_notifier_chain_unregister(
++	return blocking_notifier_chain_unregister(
+ 				&iosf_mbi_pmic_bus_access_notifier, nb);
+-	mutex_unlock(&iosf_mbi_punit_mutex);
+-
+-	return ret;
+ }
+-EXPORT_SYMBOL(iosf_mbi_unregister_pmic_bus_access_notifier);
++EXPORT_SYMBOL(iosf_mbi_unregister_pmic_bus_access_notifier_unlocked);
+ 
+ int iosf_mbi_call_pmic_bus_access_notifier_chain(unsigned long val, void *v)
+ {
+@@ -239,6 +235,12 @@
+ }
+ EXPORT_SYMBOL(iosf_mbi_call_pmic_bus_access_notifier_chain);
+ 
++void iosf_mbi_assert_punit_acquired(void)
++{
++	WARN_ON(!mutex_is_locked(&iosf_mbi_punit_mutex));
++}
++EXPORT_SYMBOL(iosf_mbi_assert_punit_acquired);
++
+ #ifdef CONFIG_IOSF_MBI_DEBUG
+ static u32	dbg_mdr;
+ static u32	dbg_mcr;
