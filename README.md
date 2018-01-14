@@ -1,4 +1,9 @@
-﻿UPDATE: Jan 11th 2018: Brought it up to 4.14.13 which has patches for "Meltdown" just enable CONFIG_PAGE_TABLE_ISOLATION
+﻿UPDATE: JAN 14TH: Just added the as of yet not mainlined retpoline patches to help mitigate the spectre vulnerability.
+	It requires a patched gcc which is also not commited yet so use the one in my repo for now.
+	https://github.com/bm16ton/gcc-retpoline
+	Ill be able to remove these patches as soon as the finished code is mainlined
+
+UPDATE: Jan 11th 2018: Brought it up to 4.14.13 which has patches for "Meltdown" just enable CONFIG_PAGE_TABLE_ISOLATION
 	in your kernel config. UNFORTUNATELY Spectre doesn't appear to have patches in mainline kernel yet. Tho I have
 	read sum distros have implemented there own out of tree patches. I will hopefully find time to look into
 	those and maybe use them until an official mainline fix is out.
