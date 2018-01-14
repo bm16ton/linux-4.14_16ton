@@ -1,0 +1,11 @@
+--- /usr/src/nvidia-384-384.90.backup/dkms.conf	2017-12-27 01:04:52.669273167 -0500
++++ /usr/src/nvidia-384-384.90/dkms.conf	2017-12-27 01:28:24.974628109 -0500
+@@ -14,7 +14,7 @@
+ DEST_MODULE_NAME[2]="nvidia_384_drm"
+ DEST_MODULE_LOCATION[2]="/kernel/drivers/char/drm"
+ AUTOINSTALL="yes"
+-PATCH[0]="buildfix_kernel_4.14.patch"
++#PATCH[0]="buildfix_kernel_4.14.patch"
+ #PATCH[1]="buildfix_kernel_4.9.patch"
+ #PATCH_MATCH[0]="^4.[6-7]"
+ #PATCH[0]="allow_sublevel_greater_than_5.patch"
