@@ -1,0 +1,31 @@
+# -*- Makefile -*-
+
+include ${XA_ABSTOPSRCDIR}/mconfig
+-include ${XA_ABSTOPSRCDIR}/mconfig.*
+
+obj-m                    += compat_xtables.o
+
+obj-${build_ACCOUNT}     += ACCOUNT/
+obj-${build_CHAOS}       += xt_CHAOS.o
+obj-${build_DELUDE}      += xt_DELUDE.o
+obj-${build_DHCPMAC}     += xt_DHCPMAC.o
+obj-${build_DNETMAP}     += xt_DNETMAP.o
+obj-${build_ECHO}        += xt_ECHO.o
+obj-${build_IPMARK}      += xt_IPMARK.o
+obj-${build_LOGMARK}     += xt_LOGMARK.o
+obj-${build_SYSRQ}       += xt_SYSRQ.o
+obj-${build_TARPIT}      += xt_TARPIT.o
+obj-${build_condition}   += xt_condition.o
+obj-${build_fuzzy}       += xt_fuzzy.o
+obj-${build_geoip}       += xt_geoip.o
+obj-${build_iface}       += xt_iface.o
+obj-${build_ipp2p}       += xt_ipp2p.o
+obj-${build_ipv4options} += xt_ipv4options.o
+obj-${build_length2}     += xt_length2.o
+obj-${build_lscan}       += xt_lscan.o
+obj-${build_pknock}      += pknock/
+obj-${build_psd}         += xt_psd.o
+obj-${build_quota2}      += xt_quota2.o
+
+-include ${M}/*.Kbuild
+-include ${M}/Kbuild.*

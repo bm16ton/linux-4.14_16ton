@@ -1,0 +1,83 @@
+#!/usr/bin/perl -w
+
+use HTTP::Request;
+use LWP::UserAgent;
+use strict;
+
+&main(\@ARGV);
+
+sub main
+{
+	local *FH;
+
+	if (!-d "downloads") {
+		if (!mkdir("downloads")) {
+			die "Could not create downloads/ directory";
+		}
+	}
+
+	open(FH, "<sources");
+	while (defined($_ = <FH>)) {
+		chomp $_;
+		$_ =~ s/#.*//gs;
+		$_ =~ s/^\s+|\s+$//gs;
+		if (length($_) == 0) {
+			next;
+		}
+		&process_index($_);
+	}
+
+	close FH;
+}
+
+sub process_index
+{
+	my $top = shift @_;
+	my($agent, $res, $url);
+	local *FH;
+
+	$agent = LWP::UserAgent->new();
+	$agent->env_proxy();
+
+	$url = &slash_remove("$top/xa-index.txt");
+	print "  GET     $url\n";
+	$res = $agent->get($url);
+	if (!$res->is_success()) {
+		print STDERR "  `->     ", $res->status_line(), "\n";
+		return;
+	}
+
+	foreach my $ext (split(/\s+/, $res->content())) {
+		my($ex_url, $ex_res);
+
+		$ex_url = &slash_remove("$top/$ext");
+		print "  GET     $ex_url\n";
+
+		$ex_res = $agent->mirror($ex_url, "downloads/$ext");
+		if ($ex_res->code() == 304) {
+			# "Not modified" = up to date
+			next;
+		}
+		if (!$ex_res->is_success()) {
+			print STDERR "  `->     ", $ex_res->status_line(), "\n";
+			next;
+		}
+
+		print "  UNPACK  downloads/$ext\n";
+		system "tar", "-xjf", "downloads/$ext";
+	}
+}
+
+sub slash_remove
+{
+	my $s = shift @_;
+	$s =~ s{(\w+://)(.*)}{$1.&slash_remove2($2)}eg;
+	return $s;
+}
+
+sub slash_remove2
+{
+	my $s = shift @_;
+	$s =~ s{/+}{/}g;
+	return $s;
+}

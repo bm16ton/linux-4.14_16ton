@@ -1,0 +1,8 @@
+.PP
+This module matches a rate limit based on a fuzzy logic controller (FLC).
+.TP
+\fB\-\-lower\-limit\fP \fInumber\fP
+Specifies the lower limit, in packets per second.
+.TP
+\fB\-\-upper\-limit\fP \fInumber\fP
+Specifies the upper limit, also in packets per second.

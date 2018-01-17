@@ -3,6 +3,10 @@ to create my patches or to edit older patches to work on newer kernels. Ive been
 if you use my kernel, family and friends will most likely die randomly, your house will burn down and maybe on the
 the far reaches of possibility your PC will work funny or not at all. You have been warned.
 
+SECOND UPDATE: JAN 17TH: fixed issue with atheros when booting with wireless disabled. 4.14.14/w patches seems to
+	fine. Just added debugfs entry for selecting channel width (thanks openwrt) recompiling now to test. FYI
+	the debugfs 5=5 10=10 default=default yup confusing;)
+
 UPDATE: JAN 17TH: Linux 4.14.14 added the official retpoline patches, but the gcc toolchains have yet to be put
 	into any repos that i know of. For now use the toolchain on my github ill check later today for any newer
 	versions.Im currently compiling the 4.14.14 with all patches. If it compiles and works fine ill update github
