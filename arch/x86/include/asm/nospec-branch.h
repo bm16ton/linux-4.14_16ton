@@ -27,21 +27,26 @@
 #define RSB_CLEAR_LOOPS		32	/* To forcibly overwrite all entries */
 #define RSB_FILL_LOOPS		16	/* To avoid underflow */
 
-#define __FILL_RETURN_BUFFER(reg, nr, sp, uniq)	\
+/*
+ * Google experimented with loop-unrolling and this turned out to be
+ * the optimal version — two calls, each with their own speculation
+ * trap should their return address end up getting used, in a loop.
+ */
+#define __FILL_RETURN_BUFFER(reg, nr, sp)	\
 	mov	$(nr/2), reg;			\
-.Ldo_call1_ ## uniq:				\
-	call	.Ldo_call2_ ## uniq;		\
-.Ltrap1_ ## uniq:				\
+771:						\
+	call	772f;				\
+773:	/* speculation trap */			\
 	pause;					\
-	jmp	.Ltrap1_ ## uniq;		\
-.Ldo_call2_ ## uniq:				\
-	call	.Ldo_loop_ ## uniq;		\
-.Ltrap2_ ## uniq:				\
+	jmp	773b;				\
+772:						\
+	call	774f;				\
+775:	/* speculation trap */			\
 	pause;					\
-	jmp	.Ltrap2_ ## uniq;		\
-.Ldo_loop_ ## uniq:				\
+	jmp	775b;				\
+774:						\
 	dec	reg;				\
-	jnz	.Ldo_call1_ ## uniq;		\
+	jnz	771b;				\
 	add	$(BITS_PER_LONG/8) * nr, sp;
 
 #ifdef __ASSEMBLY__
@@ -121,7 +126,7 @@
 #ifdef CONFIG_RETPOLINE
 	ANNOTATE_NOSPEC_ALTERNATIVE
 	ALTERNATIVE "jmp .Lskip_rsb_\@",				\
-		__stringify(__FILL_RETURN_BUFFER(\reg,\nr,%_ASM_SP,\@))	\
+		__stringify(__FILL_RETURN_BUFFER(\reg,\nr,%_ASM_SP))	\
 		\ftr
 .Lskip_rsb_\@:
 #endif
@@ -198,7 +203,7 @@ static inline void vmexit_fill_RSB(void)
 
 	asm volatile (ANNOTATE_NOSPEC_ALTERNATIVE
 		      ALTERNATIVE("jmp 910f",
-				  __stringify(__FILL_RETURN_BUFFER(%0, RSB_CLEAR_LOOPS, %1, __LINE__)),
+				  __stringify(__FILL_RETURN_BUFFER(%0, RSB_CLEAR_LOOPS, %1)),
 				  X86_FEATURE_RETPOLINE)
 		      "910:"
 		      : "=&r" (loops), ASM_CALL_CONSTRAINT

@@ -1,5 +1,0 @@
-lib/xtables
-usr/lib/*/lib*.so.*
-usr/sbin/*
-geoip/xt_geoip_build                    /usr/lib/xtables-addons
-geoip/xt_geoip_dl                       /usr/lib/xtables-addons

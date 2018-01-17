@@ -30,6 +30,7 @@ MODULE_PARM_DESC(16ton, "Enable ALL bands, increase txpower");
 EXPORT_SYMBOL(ath_16ton);
 
 static int __ath_regd_init(struct ath_regulatory *reg);
+static struct reg_dmn_pair_mapping *ath_get_regpair(int regdmn);
 
 /*
  * This is a set of common rules used by our world regulatory domains.
@@ -117,6 +118,9 @@ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
 	if (IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_CERT_TESTING))
 		return true;
 
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
+		return true;
+
 	if (ath_16ton)
 		return true;
 
@@ -189,6 +193,8 @@ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
 
 static bool ath_reg_dyn_country_user_allow(struct ath_regulatory *reg)
 {
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
+		return true;
 	if (!IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_REG_HINTS))
 		return false;
 	if (ath_16ton)
@@ -349,11 +355,10 @@ ath_reg_apply_beaconing_flags(struct wiphy *wiphy,
 	struct ieee80211_channel *ch;
 	unsigned int i;
 
-#ifdef CONFIG_ATH_USER_REGD
-	return;
-#endif
-
 	if (ath_16ton)
+		return;
+
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
 		return;
 
 	for (band = 0; band < NUM_NL80211_BANDS; band++) {
@@ -389,11 +394,10 @@ ath_reg_apply_ir_flags(struct wiphy *wiphy,
 {
 	struct ieee80211_supported_band *sband;
 
-#ifdef CONFIG_ATH_USER_REGD
-	return;
-#endif
-
 	if (ath_16ton)
+		return;
+
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
 		return;
 
 	sband = wiphy->bands[NL80211_BAND_2GHZ];
@@ -425,11 +429,10 @@ static void ath_reg_apply_radar_flags(struct wiphy *wiphy,
 	struct ieee80211_channel *ch;
 	unsigned int i;
 
-#ifdef CONFIG_ATH_USER_REGD
-	return;
-#endif
-
 	if (ath_16ton)
+		return;
+
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
 		return;
 
 	if (!wiphy->bands[NL80211_BAND_5GHZ])
@@ -569,6 +572,11 @@ void ath_reg_notifier_apply(struct wiphy *wiphy,
 		ath_reg_dyn_country(wiphy, reg, request);
 		break;
 	}
+
+	/* Prevent broken CTLs from being applied */
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD) &&
+	    reg->regpair != common->reg_world_copy.regpair)
+		reg->regpair = ath_get_regpair(WOR0_WORLD);
 }
 EXPORT_SYMBOL(ath_reg_notifier_apply);
 
@@ -665,11 +673,9 @@ ath_regd_init_wiphy(struct ath_regulatory *reg,
 
 	wiphy->reg_notifier = reg_notifier;
 
-#ifdef CONFIG_ATH_USER_REGD
-	return 0;
-#endif
-
 	if (ath_16ton)
+		return 0;
+	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
 		return 0;
 
 	wiphy->regulatory_flags |= REGULATORY_STRICT_REG |
@@ -800,10 +806,7 @@ ath_regd_init(struct ath_regulatory *reg,
 	if (r)
 		return r;
 
-	if (ath_is_world_regd(reg))
-		memcpy(&common->reg_world_copy, reg,
-		       sizeof(struct ath_regulatory));
-
+	memcpy(&common->reg_world_copy, reg, sizeof(struct ath_regulatory));
 	ath_regd_init_wiphy(reg, wiphy, reg_notifier);
 
 	return 0;

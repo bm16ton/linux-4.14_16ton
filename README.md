@@ -1,46 +1,61 @@
-﻿UPDATE: JAN 14TH: Just added the as of yet not mainlined retpoline patches to help mitigate the spectre vulnerability.
+WARNING/DISCLAIMER I am not a kernel developer. I don't even know C. I use logical deduction, trial and error etc
+to create my patches or to edit older patches to work on newer kernels. Ive been very lucky so far. So that said
+if you use my kernel, family and friends will most likely die randomly, your house will burn down and maybe on the
+the far reaches of possibility your PC will work funny or not at all. You have been warned.
+
+UPDATE: JAN 17TH: Linux 4.14.14 added the official retpoline patches, but the gcc toolchains have yet to be put
+	into any repos that i know of. For now use the toolchain on my github ill check later today for any newer
+	versions.Im currently compiling the 4.14.14 with all patches. If it compiles and works fine ill update github
+	today.I ran tests with everything on 4.14.13. digital photo frame framebuffer for tiny DPF's work great. The
+	usb	modules from android work great too. Only problem I found was if running usb_f_fs usb_f_mtp usb_f_ptp
+	with mtp server by itself has major issues. Everything from large amount of files being displayed to hitting
+	back in file explorer would freeze it. But combining with ACM and net it seems to work fine. Atheros with
+	CTL disabled works fine unless you disable wireless with network manager and reboot with wireless still
+	disabled the kernels freaks and hates life. So yeah don't do that. Other then that all seems to work fine.
+
+﻿UPDATE: JAN 14TH: Just added the not yet mainlined retpoline patches to help mitigate the spectre vulnerability.
 	It requires a patched gcc which is also not commited yet so use the one in my repo for now.
 	https://github.com/bm16ton/gcc-retpoline
 	Ill be able to remove these patches as soon as the finished code is mainlined
 
-UPDATE: Jan 11th 2018: Brought it up to 4.14.13 which has patches for "Meltdown" just enable CONFIG_PAGE_TABLE_ISOLATION
+UPDATE: Jan 11th 2018: Brought to 4.14.13 which has patches for "Meltdown" just enable CONFIG_PAGE_TABLE_ISOLATION
 	in your kernel config. UNFORTUNATELY Spectre doesn't appear to have patches in mainline kernel yet. Tho I have
 	read sum distros have implemented there own out of tree patches. I will hopefully find time to look into
 	those and maybe use them until an official mainline fix is out.
 	INTEL MICROCODE FOR GPD-WIN;
-		https://downloadcenter.intel.com/download/27431/Linux-Processor-Microcode-Data-File?product=93362
+		https://download center.intel.com/download/27431/Linux-Processor-Microcode-Data-File?product=93362
 	GENERIC DOWNLOAD SITE TO SELECT DIFFERENT CPU
-		https://downloadcenter.intel.com/download/27431/Linux-Processor-Microcode-Data-File
+		https://download center.intel.com/download/27431/Linux-Processor-Microcode-Data-File
 
 
 UPDATE: Jan 8th 2018: Added new xboxdrv userland driver in tools/16ton, patched with support for wireless chatpad
 	(from https://github.com/xboxdrv/xboxdrv/tree/8a0b802bfcbc8ae48d803ea61d60ff6b2ddc42c7) plus my own
 	minor patches/changes for dpkg-buildpackage to work
 
-UPDATE: Jan 5th 2018: new usb-acm-mtp-setup script in tools/16ton/mtp_adb this should work on OTG ports.
+UPDATE: Jan 5th 2018: new usb-ACM-mtp-setup script in tools/16ton/mtp_adb this should work on OTG ports.
 	That said thanks to the work of HansGeode we have automatic port host/client switching, if you dont
 	may need to adjust accordingly.
-	MTP ttyACM and Mass storage WORK! just compile the required modules in. Use config-newist_use_this
-	"cp config-newist_use_this .config"  then compile and install "make deb-pkg" sudo dpkg -i ../*.deb"
-	"sudo cp tools/16ton/mtp_adb/usb-acm-mtp-setup /usr/local/sbin"      reboot
-    "sudo usb-acm-mtp-setup"  then plug usb into PC.
+	MTP ttyACM and Mass storage WORK! just compile the required modules in. Use config-newest_use_this
+	"cp config-newest_use_this .config"  then compile and install "make deb-pkg" sudo dpkg -i ../*.deb"
+	"sudo cp tools/16ton/mtp_adb/usb-ACM-mtp-setup /usr/local/sbin"      reboot
+    "sudo usb-ACM-mtp-setup"  then plug usb into PC.
 
 UPDATE Jan 4th 2018; added two more pairs of dev/prod ids to uss720 (belkin F5UOO2 and D-Link DSB-P36)
 	Added Android usb gadget/configfs/function  USB_F_FS USB_F_MTP USB_F_PTP USB_CONFIGFS_UEVENT
-	also function_accessory but its currently in a dependency cycle and i havent looked at it.
+	also function_accessory but its currently in a dependency cycle and i haven't looked at it.
 	So far only mtp is tested (on gpd-win but should work with other otg devices) and works good
 	as far as i can tell. in tools/16ton you will find a heavily patched mtp-server which is hard coded
 	to share /root and no longer has the android/unity dependencies.
 	Ubuntu's repo version of adbd would segfault (same as mtp-server) and a diff one is on tools, it
-	doesnt segfault and the host machine can see it, havent gotten beyind that yet.
+	doesn't segfault and the host machine can see it, haven't gotten beyond that yet.
 	The script in tools/16ton usb-mtp-setup run as root then start mtp-server as root
 
-	In tools/16ton/parport is program called pport wich allows you to use parport and serial
+	In tools/16ton/parport is program called pport which allows you to use parport and serial
 	ports as GPIO. Even works with usb to parallel with uss720 chipsets. Ill add schematic sometime
-	to show how to wire transistors and relays to controll bigger things.
+	to show how to wire transistors and relays to control bigger things.
 
 UPDATE Dec 27 2017; brought up to 4.14.9
-	nvidia 384 doesnt compile against 4.14.9, patches to fix this in CURRENTLY_APPLIED_PATCHES
+	nvidia 384 doesn't compile against 4.14.9, patches to fix this in CURRENTLY_APPLIED_PATCHES
 	directory out-of-tree now has the following out of tree kernel modules (I believe they all have dkms support)
 			i2c-ch341-usb    kernel i2c driver for ch341a
 			spi-ch341-usb	 kernel spi driver for ch341a
@@ -66,22 +81,22 @@ wifi.scan-rand-mac-address=no
 
 
 ADDITIONS:
-	increased max txpower for the bradcom wifi to 30db MUCH HIGHER THEN THE CARD CAN HANDLE MOST LIKELY SET MAX AT BOOT!
+	increased max txpower for the brcm wifi to 30db MUCH HIGHER THEN THE CARD CAN PROBABLY HANDLE SET MAX AT BOOT!
 	added pl-25A1 usb-2-usb network adapter
 	added laplink usb2usb network adapter (orange body)
 	added Marvell Avastar 88W8897 BACK into the kernel
 
-Im sures there more, and more is on the way
+Im sure there more, and more is on the way
 
 in tools/16ton
 
 tools/16ton/iwleeprom
-	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writting to certain intel and
+	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writing to certain intel and
 	atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and
-	22 on 5ghz on Intel cards and for Atheros cards it changes the eeprom reg domain to 0x6A tho ive seen multiple
-    sources say 65 unlocks 5ghz a quick look at linux driver makes me think 6A will be less restrictive, if im wrong
-	edit ath9kio.c search for 0x6A and replace it with 0x65, recompile. THO FOR ATHEROS CARDS THIS IS NOT REQUIRED AT
-	ALL WHEN USING MY KERNEL. This might open things for windows people, i dunno i hate microsoft products.
+	22 on 5ghz on Intel cards and for Atheros cards it changes the eeprom reg domain to 0x6A tho Ive seen multiple
+    sources say 65 unlocks 5ghz a quick look at Linux driver makes me think 6A will be less restrictive.If im wrong
+	edit ath9kio.c search for 0x6A and replace it with 0x65, recompile. THO FOR ATHEROS CARDS THIS IS NOT REQUIRED
+	AT ALL WHEN USING MY KERNEL. This might open things for windows people, i dunno i hate microsoft products.
 
 tools/16ton/iw-3.17-16ton
 	patched iw tools needed for my kernel patches
@@ -95,3 +110,24 @@ tools/16ton/dpf/st2205term*
 tools/16ton/dpf/FRAMEBUFFER/*
 	The userland application required for the tiny usb digital photo frame
 	based off the ax206 chipsets. and the stand alone kernel module source (maybe older then in tree)
+
+SPECIAL THANKS OR CREDIT GOES TO (list may not be comprehensive will keep working on it)
+hansdegoede https://hansdegoede.livejournal.com/17445.html   (a real kernel developer, and talented programmer)
+TINY DIGITAL PHOTO FRAME STUFF;
+https://github.com/dreamlayers/dpf-ax    (A combonation of patches and code from all around)
+http://sourceforge.net/projects/dpf-ax/files   (ax206 files for hacking the firmware)
+http://picframe.spritesserver.nl/wiki/index.php/
+http://picframe.spritesserver.nl/wiki/index.php/DPF_with_AppoTech_AX206  (seems to go up and down)
+https://forum.doozan.com  (found the beginning of a framebuffer for ax206 for much older kernels here based on one
+for samsung dpf's found on this site;)
+https://ssl.webpack.de/puschmann.net/page/
+Atheros txpower module parameters i found from;
+https://github.com/bortek/EZ-WifiBroadcast   (this uses wifi cards in promisc mode for tx/rx making it better for
+ analog tx IE video. The extra channels needed alotta work)
+Atheros ignore eeprom and dont take on the AP's regdomain patches from openwrt
+https://github.com/openwrt/openwrt/tree/master/package/kernel/mac80211/patches   (tho mine came from much older
+versions just realized everythings updated will check)
+The marvel 8897 wireless card used to be in the kernel but was removed I simply reversed the removal patch and have
+slightly edited over the kernel versions to keep it being applied. I guess noone will get this chipset for reg usb
+wifi cards (mine came from broken xboxone wifi/bluetooth and maybe nfc its a good card)
+hrm probly more to follow.

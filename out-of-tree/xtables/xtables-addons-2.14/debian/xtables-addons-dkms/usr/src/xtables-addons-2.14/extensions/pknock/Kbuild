@@ -1,5 +1,0 @@
-# -*- Makefile -*-
-
-EXTRA_CFLAGS = -I${src}/..
-
-obj-m += xt_pknock.o
