@@ -194,7 +194,7 @@ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
 static bool ath_reg_dyn_country_user_allow(struct ath_regulatory *reg)
 {
 	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
-		return true;
+		return false;
 	if (!IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_REG_HINTS))
 		return false;
 	if (ath_16ton)

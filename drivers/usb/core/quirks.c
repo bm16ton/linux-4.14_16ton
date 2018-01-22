@@ -48,6 +48,10 @@ static const struct usb_device_id usb_quirk_list[] = {
 	/* Creative SB Audigy 2 NX */
 	{ USB_DEVICE(0x041e, 0x3020), .driver_info = USB_QUIRK_RESET_RESUME },
 
+	/* Atheros ath3k bt */
+	{ USB_DEVICE(0x0489, 0xe076), .driver_info = USB_QUIRK_DELAY_INIT },
+	{ USB_DEVICE(0x0489, 0xe076), .driver_info = USB_QUIRK_RESET_RESUME },
+
 	/* USB3503 */
 	{ USB_DEVICE(0x0424, 0x3503), .driver_info = USB_QUIRK_RESET_RESUME },
 

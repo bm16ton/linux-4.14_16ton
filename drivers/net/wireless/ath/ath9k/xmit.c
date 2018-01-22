@@ -188,10 +188,25 @@ static void ath_send_bar(struct ath_atx_tid *tid, u16 seqno)
 }
 
 static void ath_set_rates(struct ieee80211_vif *vif, struct ieee80211_sta *sta,
-			  struct ath_buf *bf)
+			  struct ath_buf *bf, bool ps)
 {
+	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(bf->bf_mpdu);
+
+	if (ps) {
+		/* Clear the first rate to avoid using a sample rate for PS frames */
+		info->control.rates[0].idx = -1;
+		info->control.rates[0].count = 0;
+	}
+
 	ieee80211_get_tx_rates(vif, sta, bf->bf_mpdu, bf->rates,
 			       ARRAY_SIZE(bf->rates));
+	if (!ps)
+		return;
+
+	if (bf->rates[0].count > 2)
+		bf->rates[0].count = 2;
+
+	bf->rates[1].idx = -1;
 }
 
 static void ath_txq_skb_done(struct ath_softc *sc, struct ath_txq *txq,
@@ -1502,7 +1517,7 @@ ath_tx_form_burst(struct ath_softc *sc, struct ath_txq *txq,
 			break;
 		}
 
-		ath_set_rates(tid->an->vif, tid->an->sta, bf);
+		ath_set_rates(tid->an->vif, tid->an->sta, bf, false);
 	} while (1);
 }
 
@@ -1532,7 +1547,7 @@ static bool ath_tx_sched_aggr(struct ath_softc *sc, struct ath_txq *txq,
 		return false;
 	}
 
-	ath_set_rates(tid->an->vif, tid->an->sta, bf);
+	ath_set_rates(tid->an->vif, tid->an->sta, bf, false);
 	if (aggr)
 		aggr_len = ath_tx_form_aggr(sc, txq, tid, &bf_q, bf);
 	else
@@ -1690,7 +1705,7 @@ void ath9k_release_buffered_frames(struct ieee80211_hw *hw,
 				break;
 
 			list_add_tail(&bf->list, &bf_q);
-			ath_set_rates(tid->an->vif, tid->an->sta, bf);
+			ath_set_rates(tid->an->vif, tid->an->sta, bf, true);
 			if (bf_isampdu(bf)) {
 				ath_tx_addto_baw(sc, tid, bf);
 				bf->bf_state.bf_type &= ~BUF_AGGR;
@@ -2390,7 +2405,7 @@ int ath_tx_start(struct ieee80211_hw *hw, struct sk_buff *skb,
 	if (txctl->paprd)
 		bf->bf_state.bfs_paprd_timestamp = jiffies;
 
-	ath_set_rates(vif, sta, bf);
+	ath_set_rates(vif, sta, bf, ps_resp);
 	ath_tx_send_normal(sc, txq, tid, skb);
 
 out:
@@ -2429,7 +2444,7 @@ void ath_tx_cabq(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 			break;
 
 		bf->bf_lastbf = bf;
-		ath_set_rates(vif, NULL, bf);
+		ath_set_rates(vif, NULL, bf, false);
 		ath_buf_set_rate(sc, bf, &info, fi->framelen, false);
 		duration += info.rates[0].PktDuration;
 		if (bf_tail)
@@ -2946,7 +2961,7 @@ int ath9k_tx99_send(struct ath_softc *sc, struct sk_buff *skb,
 		return -EINVAL;
 	}
 
-	ath_set_rates(sc->tx99_vif, NULL, bf);
+	ath_set_rates(sc->tx99_vif, NULL, bf, false);
 
 	ath9k_hw_set_desc_link(sc->sc_ah, bf->bf_desc, bf->bf_daddr);
 	ath9k_hw_tx99_start(sc->sc_ah, txctl->txq->axq_qnum);
