@@ -1,0 +1,6 @@
+requires boot command iomem=relaxed
+or kernel compiled without  STRICT_DEVMEM STRICT_IODEVMEM  DON'T RECOMMEND its simple enough to add/remove boot command.
+
+run "iwleeprom -s -D1" first as it will tell you which commands you can use on your card and if the OTP (one time programable)
+fuse has been tripped. The fuse once tripped makes it impossible to write anything new to the eeprom and your stuck
+with what you got.

@@ -1,0 +1,14 @@
+So with kernel patches all 5ghz channels are now completely open but the txpower is listed for each channel as much lower
+then the crda rules say.
+
+With reghack the channels are completely open and list txpower as the same as the crda rules but in practice they still
+wont go to the higher txpower values, THAT SAID ITS STILL HIGHER THEN THE KERNEL PATCHES ALLOW
+
+IE
+	KERNEL PATCHES
+5ghz channel 56
+ch 56 lists txpower as 15dBm but i could only get it to 14dBm
+
+	REGHACK
+5ghz channel 56
+ch 56 lists txpower as 33dBm but i could only get it to 20dBm
