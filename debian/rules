@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+build:
+	$(MAKE)
+
+binary-arch:
+	$(MAKE) KDEB_SOURCENAME=linux-4.14.15-16ton-gpd-win-gaming-conf+ KDEB_PKGVERSION=4.14.15-16ton-gpd-win-gaming-conf+-1 bindeb-pkg
+
+clean:
+	rm -rf debian/*tmp debian/files
+	mv debian/ debian.backup # debian/ might be cleaned away
+	$(MAKE) clean
+	mv debian.backup debian
+
+binary: binary-arch

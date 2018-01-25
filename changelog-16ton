@@ -1,3 +1,6 @@
+SECOND UPDATE: Jan 25th: readded cpu optimizations for alota cpu's and added the kali-wifi-injection patches.
+	removed watchdog from rt2800usb (ralink)
+
 UPDATE: Jan 25th: updated to 4.14.15 still testing sum mwifiex. brcmfmac, ath9k patches b4 commiting
 
 SECOND UPDATE: JAN 17TH: fixed issue with atheros when booting with wireless disabled. 4.14.14/w patches seems to
