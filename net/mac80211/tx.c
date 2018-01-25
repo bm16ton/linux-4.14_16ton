@@ -809,13 +809,9 @@ ieee80211_tx_h_sequence(struct ieee80211_tx_data *tx)
 	 * FIXME This may break hostapd and some other injectors.
 	 * This should be done using a radiotap flag.
 	 */
-	if (unlikely((info->flags & IEEE80211_TX_CTL_INJECTED) &&
-	   !(tx->sdata->u.mntr_flags & MONITOR_FLAG_COOK_FRAMES))) {
-		if (!ieee80211_has_morefrags(hdr->frame_control))
-			info->flags |= IEEE80211_TX_CTL_NO_ACK;
+	if (unlikely(info->control.vif->type == NL80211_IFTYPE_MONITOR))
 		return TX_CONTINUE;
-	}
-
+	
 	if (unlikely(ieee80211_is_ctl(hdr->frame_control)))
 		return TX_CONTINUE;
 
