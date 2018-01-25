@@ -1025,6 +1025,8 @@ struct mwifiex_adapter {
 	u8 active_scan_triggered;
 	bool usb_mc_status;
 	bool usb_mc_setup;
+	u8 *cfg_data;
+	int cfg_len;
 	struct cfg80211_wowlan_nd_info *nd_info;
 	struct ieee80211_regdomain *regd;
 
@@ -1678,6 +1680,8 @@ void mwifiex_process_multi_chan_event(struct mwifiex_private *priv,
 void mwifiex_multi_chan_resync(struct mwifiex_adapter *adapter);
 int mwifiex_set_mac_address(struct mwifiex_private *priv,
 			    struct net_device *dev);
+
+void marvell_set_vendor_commands(struct wiphy *wiphy);
 
 #ifdef CONFIG_DEBUG_FS
 void mwifiex_debugfs_init(void);

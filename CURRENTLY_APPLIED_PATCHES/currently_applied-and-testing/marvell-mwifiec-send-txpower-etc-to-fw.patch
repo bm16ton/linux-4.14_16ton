@@ -1,0 +1,225 @@
+diff --git a/drivers/net/wireless/marvell/mwifiex/Makefile b/drivers/net/wireless/marvell/mwifiex/Makefile
+index fdfd9bf..8b34ce9 100644
+--- a/drivers/net/wireless/marvell/mwifiex/Makefile
++++ b/drivers/net/wireless/marvell/mwifiex/Makefile
+@@ -42,6 +42,7 @@  mwifiex-y += cfg80211.o
+ mwifiex-y += ethtool.o
+ mwifiex-y += 11h.o
+ mwifiex-y += tdls.o
++mwifiex-y += vendor.o
+ mwifiex-$(CONFIG_DEBUG_FS) += debugfs.o
+ obj-$(CONFIG_MWIFIEX) += mwifiex.o
+
+diff --git a/drivers/net/wireless/marvell/mwifiex/cfg80211.c b/drivers/net/wireless/marvell/mwifiex/cfg80211.c
+index 65dd85d..2057024 100644
+--- a/drivers/net/wireless/marvell/mwifiex/cfg80211.c
++++ b/drivers/net/wireless/marvell/mwifiex/cfg80211.c
+@@ -3842,6 +3842,8 @@  int mwifiex_register_cfg80211(struct mwifiex_adapter *adapter)
+ 	if (adapter->fw_api_ver == MWIFIEX_FW_V15)
+ 		wiphy->features |= NL80211_FEATURE_SK_TX_STATUS;
+
++	marvell_set_vendor_commands(wiphy);
++
+ 	/* Reserve space for mwifiex specific private data for BSS */
+ 	wiphy->bss_priv_size = sizeof(struct mwifiex_bss_priv);
+
+diff --git a/drivers/net/wireless/marvell/mwifiex/fw.h b/drivers/net/wireless/marvell/mwifiex/fw.h
+index 89938f6..d7beac4 100644
+--- a/drivers/net/wireless/marvell/mwifiex/fw.h
++++ b/drivers/net/wireless/marvell/mwifiex/fw.h
+@@ -1212,6 +1212,7 @@  enum SNMP_MIB_INDEX {
+ 	FRAG_THRESH_I = 8,
+ 	DOT11D_I = 9,
+ 	DOT11H_I = 10,
++	TURBO_MODE_I = 39,
+ };
+
+ enum mwifiex_assocmd_failurepoint {
+diff --git a/drivers/net/wireless/marvell/mwifiex/main.h b/drivers/net/wireless/marvell/mwifiex/main.h
+index a86e2ae..b3cfdcf 100644
+--- a/drivers/net/wireless/marvell/mwifiex/main.h
++++ b/drivers/net/wireless/marvell/mwifiex/main.h
+@@ -994,6 +994,8 @@  struct mwifiex_adapter {
+ 	u8 active_scan_triggered;
+ 	bool usb_mc_status;
+ 	bool usb_mc_setup;
++	u8 *cfg_data;
++	int cfg_len;
+ };
+
+ void mwifiex_process_tx_queue(struct mwifiex_adapter *adapter);
+@@ -1569,6 +1571,8 @@  void mwifiex_process_multi_chan_event(struct mwifiex_private *priv,
+ 				      struct sk_buff *event_skb);
+ void mwifiex_multi_chan_resync(struct mwifiex_adapter *adapter);
+
++void marvell_set_vendor_commands(struct wiphy *wiphy);
++
+ #ifdef CONFIG_DEBUG_FS
+ void mwifiex_debugfs_init(void);
+ void mwifiex_debugfs_remove(void);
+diff --git a/drivers/net/wireless/marvell/mwifiex/sta_cmd.c b/drivers/net/wireless/marvell/mwifiex/sta_cmd.c
+index d28a53f..803e711 100644
+--- a/drivers/net/wireless/marvell/mwifiex/sta_cmd.c
++++ b/drivers/net/wireless/marvell/mwifiex/sta_cmd.c
+@@ -1498,9 +1498,10 @@  static int mwifiex_cmd_cfg_data(struct mwifiex_private *priv,
+ {
+ 	struct mwifiex_adapter *adapter = priv->adapter;
+ 	struct property *prop = data_buf;
+-	u32 len;
++	u32 len = 0;
+ 	u8 *data = (u8 *)cmd + S_DS_GEN;
+ 	int ret;
++	const struct firmware *cal_data = adapter->cal_data;
+
+ 	if (prop) {
+ 		len = prop->length;
+@@ -1511,11 +1512,20 @@  static int mwifiex_cmd_cfg_data(struct mwifiex_private *priv,
+ 		mwifiex_dbg(adapter, INFO,
+ 			    "download cfg_data from device tree: %s\n",
+ 			    prop->name);
+-	} else if (adapter->cal_data->data && adapter->cal_data->size > 0) {
+-		len = mwifiex_parse_cal_cfg((u8 *)adapter->cal_data->data,
+-					    adapter->cal_data->size, data);
++	} else if (cal_data) {
++		if (cal_data->data && cal_data->size > 0) {
++			len = mwifiex_parse_cal_cfg((u8 *)cal_data->data,
++						    cal_data->size, data);
++			mwifiex_dbg(adapter, INFO,
++				    "download cfg_data from config file\n");
++		} else {
++			return -1;
++		}
++	} else if (adapter->cfg_data && adapter->cfg_len > 0) {
++		len = mwifiex_parse_cal_cfg(adapter->cfg_data,
++					    adapter->cfg_len, data);
+ 		mwifiex_dbg(adapter, INFO,
+-			    "download cfg_data from config file\n");
++			    "download cfg_data from iw vendor command\n");
+ 	} else {
+ 		return -1;
+ 	}
+diff --git a/drivers/net/wireless/marvell/mwifiex/vendor.c b/drivers/net/wireless/marvell/mwifiex/vendor.c
+new file mode 100644
+index 0000000..662531c
+--- /dev/null
++++ b/drivers/net/wireless/marvell/mwifiex/vendor.c
+@@ -0,0 +1,83 @@
++/* Marvell Wireless LAN device driver: TDLS handling
++ *
++ * Copyright (C) 2014, Marvell International Ltd.
++ *
++ * This software file (the "File") is distributed by Marvell International
++ * Ltd. under the terms of the GNU General Public License Version 2, June 1991
++ * (the "License").  You may use, redistribute and/or modify this File in
++ * accordance with the terms and conditions of the License, a copy of which
++ * is available on the worldwide web at
++ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
++ *
++ * THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY DISCLAIMED.  The License provides additional details about
++ * this warranty disclaimer.
++ */
++
++#include <net/mac80211.h>
++#include <net/netlink.h>
++#include "vendor.h"
++#include "main.h"
++
++static int
++marvell_vendor_cmd_set_turbo_mode(struct wiphy *wiphy,
++				  struct wireless_dev *wdev,
++				  const void *data, int data_len)
++{
++	struct mwifiex_private *priv = mwifiex_netdev_get_priv(wdev->netdev);
++	u8 mode = *(u8 *)data;
++	int ret;
++
++	ret = mwifiex_send_cmd(priv, HostCmd_CMD_802_11_SNMP_MIB,
++			       HostCmd_ACT_GEN_SET, TURBO_MODE_I, &mode, true);
++
++	return 0;
++}
++
++static int
++mwifiex_vendor_cmd_set_cfg_data(struct wiphy *wiphy,
++				struct wireless_dev *wdev,
++				const void *data, int data_len)
++{
++	struct mwifiex_private *priv = mwifiex_netdev_get_priv(wdev->netdev);
++	int ret;
++
++	priv->adapter->cfg_data = (u8 *)data;
++	priv->adapter->cfg_len = data_len;
++
++	ret = mwifiex_send_cmd(priv, HostCmd_CMD_CFG_DATA,
++			       HostCmd_ACT_GEN_SET, 0, NULL, true);
++
++	priv->adapter->cfg_data = NULL;
++	priv->adapter->cfg_len = 0;
++
++	return 0;
++}
++
++static const struct wiphy_vendor_command marvell_vendor_commands[] = {
++	{
++		.info = {
++			.vendor_id = MARVELL_OUI,
++			.subcmd = MARVELL_VENDOR_CMD_SET_TURBO_MODE,
++		},
++		.flags = WIPHY_VENDOR_CMD_NEED_NETDEV |
++			 WIPHY_VENDOR_CMD_NEED_RUNNING,
++		.doit = marvell_vendor_cmd_set_turbo_mode,
++	},
++	{
++		.info = {
++			.vendor_id = MARVELL_OUI,
++			.subcmd = MARVELL_VENDOR_CMD_SET_CONF_DATA,
++		},
++		.flags = WIPHY_VENDOR_CMD_NEED_NETDEV |
++			 WIPHY_VENDOR_CMD_NEED_RUNNING,
++		.doit = mwifiex_vendor_cmd_set_cfg_data,
++	},
++};
++
++void marvell_set_vendor_commands(struct wiphy *wiphy)
++{
++	wiphy->vendor_commands = marvell_vendor_commands;
++	wiphy->n_vendor_commands = ARRAY_SIZE(marvell_vendor_commands);
++}
+diff --git a/drivers/net/wireless/marvell/mwifiex/vendor.h b/drivers/net/wireless/marvell/mwifiex/vendor.h
+new file mode 100644
+index 0000000..be723f6
+--- /dev/null
++++ b/drivers/net/wireless/marvell/mwifiex/vendor.h
+@@ -0,0 +1,28 @@
++/* Marvell Wireless LAN device driver: TDLS handling
++ *
++ * Copyright (C) 2014, Marvell International Ltd.
++ *
++ * This software file (the "File") is distributed by Marvell International
++ * Ltd. under the terms of the GNU General Public License Version 2, June 1991
++ * (the "License").  You may use, redistribute and/or modify this File in
++ * accordance with the terms and conditions of the License, a copy of which
++ * is available on the worldwide web at
++ * http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
++ *
++ * THE FILE IS DISTRIBUTED AS-IS, WITHOUT WARRANTY OF ANY KIND, AND THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE
++ * ARE EXPRESSLY DISCLAIMED.  The License provides additional details about
++ * this warranty disclaimer.
++ */
++
++#ifndef __MARVELL_VENDOR_H__
++#define __MARVELL_VENDOR_H__
++
++#define MARVELL_OUI	0x005043
++
++enum marvell_vendor_commands {
++	MARVELL_VENDOR_CMD_SET_TURBO_MODE,
++	MARVELL_VENDOR_CMD_SET_CONF_DATA,
++};
++
++#endif /* __MARVELL_VENDOR_H__ */
+
+

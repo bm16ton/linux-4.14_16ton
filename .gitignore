@@ -51,6 +51,8 @@ Module.symvers
 # Debian directory (make deb-pkg)
 #
 # /debian/
+debian/*
+debian/headertmp*
 debian/hdrtmp/
 debian/tmp
 #
