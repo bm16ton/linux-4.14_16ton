@@ -1862,20 +1862,6 @@ u32 ath9k_hw_get_tsf_offset(struct timespec *last, struct timespec *cur)
 }
 EXPORT_SYMBOL(ath9k_hw_get_tsf_offset);
 
-void ath9k_hw_update_diag(struct ath_hw *ah)
-{
-	if (test_bit(ATH_DIAG_DISABLE_RX, &ah->diag))
-		REG_SET_BIT(ah, AR_DIAG_SW, AR_DIAG_RX_DIS);
-	else
-		REG_CLR_BIT(ah, AR_DIAG_SW, AR_DIAG_RX_DIS);
-
-	if (test_bit(ATH_DIAG_DISABLE_TX, &ah->diag))
-		REG_SET_BIT(ah, AR_DIAG_SW, AR_DIAG_LOOP_BACK);
-	else
-		REG_CLR_BIT(ah, AR_DIAG_SW, AR_DIAG_LOOP_BACK);
-}
-EXPORT_SYMBOL(ath9k_hw_update_diag);
-
 int ath9k_hw_reset(struct ath_hw *ah, struct ath9k_channel *chan,
 		   struct ath9k_hw_cal_data *caldata, bool fastcc)
 {
@@ -2084,7 +2070,6 @@ int ath9k_hw_reset(struct ath_hw *ah, struct ath9k_channel *chan,
 		ar9003_hw_disable_phy_restart(ah);
 
 	ath9k_hw_apply_gpio_override(ah);
-	ath9k_hw_update_diag(ah);
 
 	if (AR_SREV_9565(ah) && common->bt_ant_diversity)
 		REG_SET_BIT(ah, AR_BTCOEX_WL_LNADIV, AR_BTCOEX_WL_LNADIV_FORCE_ON);

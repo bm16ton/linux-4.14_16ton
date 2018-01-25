@@ -1,0 +1,1 @@
+/usr/bin/ccache  g++     CMakeFiles/test-storage.dir/TestMtpStorage.o  -o test-storage -rdynamic -lmtpserver -lusbhost 

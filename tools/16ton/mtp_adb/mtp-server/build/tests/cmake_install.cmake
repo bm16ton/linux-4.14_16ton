@@ -1,4 +1,4 @@
-# Install script for directory: /sdcard/mtp-0.0.4+16.04.20160413/tests
+# Install script for directory: /home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

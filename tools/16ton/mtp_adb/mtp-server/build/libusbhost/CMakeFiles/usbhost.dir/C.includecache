@@ -16,7 +16,7 @@ linux/usb/ch9.h
 linux/usb_ch9.h
 -
 
-/sdcard/mtp-0.0.4+16.04.20160413/libusbhost/src/usbhost.c
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/src/usbhost.c
 stdio.h
 -
 stdlib.h
@@ -48,5 +48,5 @@ linux/usbdevice_fs.h
 asm/byteorder.h
 -
 usbhost/usbhost.h
-/sdcard/mtp-0.0.4+16.04.20160413/libusbhost/src/usbhost/usbhost.h
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/src/usbhost/usbhost.h
 

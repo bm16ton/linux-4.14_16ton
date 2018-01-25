@@ -1,0 +1,1 @@
+/usr/bin/ccache  g++     CMakeFiles/test-packet.dir/TestMtpPacket.o  -o test-packet -rdynamic -lmtpserver -lusbhost 

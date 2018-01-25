@@ -1,0 +1,8 @@
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/rebuild_cache.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/test-packet.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/edit_cache.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/test-property.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/test-utils.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/test-storage.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/test-debug.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/build/CMakeFiles/test-server.dir

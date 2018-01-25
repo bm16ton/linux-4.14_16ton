@@ -1,0 +1,1 @@
+/usr/bin/ccache  g++     CMakeFiles/test-property.dir/TestMtpProperty.o  -o test-property -rdynamic -lmtpserver -lusbhost 

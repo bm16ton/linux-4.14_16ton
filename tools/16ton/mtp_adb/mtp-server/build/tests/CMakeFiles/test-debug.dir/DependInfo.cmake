@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/sdcard/mtp-0.0.4+16.04.20160413/tests/TestMtpDebug.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/tests/CMakeFiles/test-debug.dir/TestMtpDebug.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/tests/TestMtpDebug.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/tests/CMakeFiles/test-debug.dir/TestMtpDebug.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -26,8 +26,8 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/DependInfo.cmake"
-  "/sdcard/mtp-0.0.4+16.04.20160413/build/libusbhost/CMakeFiles/usbhost.dir/DependInfo.cmake"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/DependInfo.cmake"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libusbhost/CMakeFiles/usbhost.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

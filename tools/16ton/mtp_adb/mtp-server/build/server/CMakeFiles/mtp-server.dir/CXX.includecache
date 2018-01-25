@@ -102,7 +102,7 @@ stdint.h
 stdlib.h
 -
 
-/sdcard/mtp-0.0.4+16.04.20160413/server/UbuntuMtpDatabase.h
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/server/UbuntuMtpDatabase.h
 mtp.h
 -
 MtpDatabase.h
@@ -158,9 +158,9 @@ boost/date_time/posix_time/posix_time.hpp
 glog/logging.h
 -
 
-/sdcard/mtp-0.0.4+16.04.20160413/server/server.cpp
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/server/server.cpp
 UbuntuMtpDatabase.h
-/sdcard/mtp-0.0.4+16.04.20160413/server/UbuntuMtpDatabase.h
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/server/UbuntuMtpDatabase.h
 MtpServer.h
 -
 MtpStorage.h

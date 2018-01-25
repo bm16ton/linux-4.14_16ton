@@ -19,8 +19,8 @@
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 
-#include "mtp.h"
-#include "MtpPacket.h"
+#include "../include/mtp.h"
+#include "../include/MtpPacket.h"
 
 using namespace android;
 

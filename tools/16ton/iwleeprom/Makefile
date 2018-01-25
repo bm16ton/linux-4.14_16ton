@@ -1,7 +1,7 @@
 SBINDIR=/usr/local/sbin
 MANDIR=/usr/share/man/man8
 OBJDIR=obj
-
+CFLAGS="-DRETPOLINE $CFLAGS"
 all: $(OBJDIR) iwleeprom iwleeprom.8.gz
 
 debug:

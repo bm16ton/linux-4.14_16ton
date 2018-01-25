@@ -519,12 +519,6 @@ enum {
 	ATH9K_RESET_COLD,
 };
 
-enum {
-	ATH_DIAG_DISABLE_RX,
-	ATH_DIAG_DISABLE_TX,
-	ATH_DIAG_TRIGGER_ERROR,
-};
-
 struct ath9k_hw_version {
 	u32 magic;
 	u16 devid;
@@ -811,8 +805,6 @@ struct ath_hw {
 	u32 ah_flags;
 	s16 nf_override;
 
-	unsigned long diag;
-
 	bool reset_power_on;
 	bool htc_reset_init;
 
@@ -1075,7 +1067,6 @@ void ath9k_hw_check_nav(struct ath_hw *ah);
 bool ath9k_hw_check_alive(struct ath_hw *ah);
 
 bool ath9k_hw_setpower(struct ath_hw *ah, enum ath9k_power_mode mode);
-void ath9k_hw_update_diag(struct ath_hw *ah);
 
 /* Generic hw timer primitives */
 struct ath_gen_timer *ath_gen_timer_alloc(struct ath_hw *ah,

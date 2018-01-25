@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/sdcard/mtp-0.0.4+16.04.20160413/libusbhost/src/usbhost.c" "/sdcard/mtp-0.0.4+16.04.20160413/build/libusbhost/CMakeFiles/usbhost.dir/src/usbhost.c.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/src/usbhost.c" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libusbhost/CMakeFiles/usbhost.dir/src/usbhost.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

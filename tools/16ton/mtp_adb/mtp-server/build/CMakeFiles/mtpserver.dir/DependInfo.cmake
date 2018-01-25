@@ -4,21 +4,21 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpDataPacket.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpDataPacket.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpDebug.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpDebug.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpDevice.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpDevice.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpDeviceInfo.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpDeviceInfo.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpEventPacket.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpEventPacket.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpObjectInfo.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpObjectInfo.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpPacket.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpPacket.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpProperty.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpProperty.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpRequestPacket.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpRequestPacket.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpResponsePacket.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpResponsePacket.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpServer.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpServer.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpStorage.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpStorage.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpStorageInfo.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpStorageInfo.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpStringBuffer.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpStringBuffer.cpp.o"
-  "/sdcard/mtp-0.0.4+16.04.20160413/src/MtpUtils.cpp" "/sdcard/mtp-0.0.4+16.04.20160413/build/CMakeFiles/mtpserver.dir/src/MtpUtils.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpDataPacket.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpDataPacket.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpDebug.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpDebug.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpDevice.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpDevice.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpDeviceInfo.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpDeviceInfo.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpEventPacket.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpEventPacket.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpObjectInfo.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpObjectInfo.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpPacket.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpPacket.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpProperty.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpProperty.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpRequestPacket.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpRequestPacket.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpResponsePacket.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpResponsePacket.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpServer.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpServer.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpStorage.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpStorage.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpStorageInfo.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpStorageInfo.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpStringBuffer.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpStringBuffer.cpp.o"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/src/MtpUtils.cpp" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/CMakeFiles/mtpserver.dir/src/MtpUtils.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -40,8 +40,8 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Pairs of files generated by the same build rule.
 set(CMAKE_MULTIPLE_OUTPUT_PAIRS
-  "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so" "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so.1.0.0"
-  "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so.1" "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so.1.0.0"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so.1.0.0"
+  "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so.1" "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so.1.0.0"
   )
 
 

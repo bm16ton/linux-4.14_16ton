@@ -1,0 +1,7 @@
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/rebuild_cache.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/install/strip.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/usbhost.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/install.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/install/local.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/list_install_components.dir
+/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/libusbhost/build/CMakeFiles/edit_cache.dir

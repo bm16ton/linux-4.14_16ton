@@ -1,0 +1,65 @@
+UPDATE: Jan 25th: updated to 4.14.15 still testing sum mwifiex. brcmfmac, ath9k patches b4 commiting
+
+SECOND UPDATE: JAN 17TH: fixed issue with atheros when booting with wireless disabled. 4.14.14/w patches seems to
+	fine. Just added debugfs entry for selecting channel width (thanks openwrt) recompiling now to test. FYI
+	the debugfs 5=5 10=10 default=default yup confusing;)
+
+UPDATE: JAN 17TH: Linux 4.14.14 added the official retpoline patches, but the gcc toolchains have yet to be put
+	into any repos that i know of. For now use the toolchain on my github ill check later today for any newer
+	versions.Im currently compiling the 4.14.14 with all patches. If it compiles and works fine ill update github
+	today.I ran tests with everything on 4.14.13. digital photo frame framebuffer for tiny DPF's work great. The
+	usb	modules from android work great too. Only problem I found was if running usb_f_fs usb_f_mtp usb_f_ptp
+	with mtp server by itself has major issues. Everything from large amount of files being displayed to hitting
+	back in file explorer would freeze it. But combining with ACM and net it seems to work fine. Atheros with
+	CTL disabled works fine unless you disable wireless with network manager and reboot with wireless still
+	disabled the kernels freaks and hates life. So yeah don't do that. Other then that all seems to work fine.
+
+﻿UPDATE: JAN 14TH: Just added the not yet mainlined retpoline patches to help mitigate the spectre vulnerability.
+	It requires a patched gcc which is also not commited yet so use the one in my repo for now.
+	https://github.com/bm16ton/gcc-retpoline
+	Ill be able to remove these patches as soon as the finished code is mainlined
+
+UPDATE: Jan 11th 2018: Brought to 4.14.13 which has patches for "Meltdown" just enable CONFIG_PAGE_TABLE_ISOLATION
+	in your kernel config. UNFORTUNATELY Spectre doesn't appear to have patches in mainline kernel yet. Tho I have
+	read sum distros have implemented there own out of tree patches. I will hopefully find time to look into
+	those and maybe use them until an official mainline fix is out.
+	INTEL MICROCODE FOR GPD-WIN;
+		https://download center.intel.com/download/27431/Linux-Processor-Microcode-Data-File?product=93362
+	GENERIC DOWNLOAD SITE TO SELECT DIFFERENT CPU
+		https://download center.intel.com/download/27431/Linux-Processor-Microcode-Data-File
+
+
+UPDATE: Jan 8th 2018: Added new xboxdrv userland driver in tools/16ton, patched with support for wireless chatpad
+	(from https://github.com/xboxdrv/xboxdrv/tree/8a0b802bfcbc8ae48d803ea61d60ff6b2ddc42c7) plus my own
+	minor patches/changes for dpkg-buildpackage to work
+
+UPDATE: Jan 5th 2018: new usb-ACM-mtp-setup script in tools/16ton/mtp_adb this should work on OTG ports.
+	That said thanks to the work of HansGeode we have automatic port host/client switching, if you dont
+	may need to adjust accordingly.
+	MTP ttyACM and Mass storage WORK! just compile the required modules in. Use config-newest_use_this
+	"cp config-newest_use_this .config"  then compile and install "make deb-pkg" sudo dpkg -i ../*.deb"
+	"sudo cp tools/16ton/mtp_adb/usb-ACM-mtp-setup /usr/local/sbin"      reboot
+    "sudo usb-ACM-mtp-setup"  then plug usb into PC.
+
+UPDATE Jan 4th 2018; added two more pairs of dev/prod ids to uss720 (belkin F5UOO2 and D-Link DSB-P36)
+	Added Android usb gadget/configfs/function  USB_F_FS USB_F_MTP USB_F_PTP USB_CONFIGFS_UEVENT
+	also function_accessory but its currently in a dependency cycle and i haven't looked at it.
+	So far only mtp is tested (on gpd-win but should work with other otg devices) and works good
+	as far as i can tell. in tools/16ton you will find a heavily patched mtp-server which is hard coded
+	to share /root and no longer has the android/unity dependencies.
+	Ubuntu's repo version of adbd would segfault (same as mtp-server) and a diff one is on tools, it
+	doesn't segfault and the host machine can see it, haven't gotten beyond that yet.
+	The script in tools/16ton usb-mtp-setup run as root then start mtp-server as root
+
+	In tools/16ton/parport is program called pport which allows you to use parport and serial
+	ports as GPIO. Even works with usb to parallel with uss720 chipsets. Ill add schematic sometime
+	to show how to wire transistors and relays to control bigger things.
+
+UPDATE Dec 27 2017; brought up to 4.14.9
+	nvidia 384 doesn't compile against 4.14.9, patches to fix this in CURRENTLY_APPLIED_PATCHES
+	directory out-of-tree now has the following out of tree kernel modules (I believe they all have dkms support)
+			i2c-ch341-usb    kernel i2c driver for ch341a
+			spi-ch341-usb	 kernel spi driver for ch341a
+			xtables-addons   iptables addons
+
+UPDATE Dec 22 2017; Brought up to 4.14.8

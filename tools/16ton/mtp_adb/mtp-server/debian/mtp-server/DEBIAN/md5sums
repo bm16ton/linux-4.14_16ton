@@ -1,8 +1,0 @@
-61c2a56001ecfbde711d767042cbe755  usr/bin/mtp-server
-088917e368a1b007067bae225cbba8ac  usr/lib/libusbhost.a
-6bf6d2e71ed22acd0d3c39ee18910482  usr/share/doc/mtp-server/changelog.Debian.gz
-2614ef9af13923db4ab08f9570bfcece  usr/share/doc/mtp-server/copyright
-fe5c4ccf111f6871a78a133cdde75a2a  usr/share/locale/fr/LC_MESSAGES/mtp-server.mo
-6f49b216f72b9b9c5f4e26af687d3bbd  usr/share/man/man1/mtp-server.1.gz
-9a236037b4293b69df9e516462b7fbeb  usr/share/upstart/sessions/mtp-server.conf
-fb82d48ae9303e402a2d178dc3f5fbc6  usr/share/upstart/sessions/mtp-state.conf

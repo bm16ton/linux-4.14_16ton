@@ -527,11 +527,6 @@ irqreturn_t ath_isr(int irq, void *dev)
 	if (test_bit(ATH_OP_HW_RESET, &common->op_flags))
 		return IRQ_HANDLED;
 
-	if (test_bit(ATH_DIAG_TRIGGER_ERROR, &ah->diag)) {
-		status |= ATH9K_INT_FATAL;
-		clear_bit(ATH_DIAG_TRIGGER_ERROR, &ah->diag);
-	}
-
 	/*
 	 * If there are no status bits set, then this interrupt was not
 	 * for me (should have been caught above).

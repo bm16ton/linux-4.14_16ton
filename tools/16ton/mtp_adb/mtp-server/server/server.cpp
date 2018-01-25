@@ -332,7 +332,7 @@ public:
         mtp_database->addStoragePath(std::string(userdata->pw_dir) + "/",
                                      gettext("sdcard"),
                                      MTP_STORAGE_FIXED_RAM, false);
-        home_storage_added = false;
+        home_storage_added = true;
 
         // Get any already-mounted removable storage.
         path p(std::string("/mnt/") + userdata->pw_name);

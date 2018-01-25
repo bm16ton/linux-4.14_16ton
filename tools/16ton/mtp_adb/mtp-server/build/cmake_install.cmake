@@ -1,4 +1,4 @@
-# Install script for directory: /sdcard/mtp-0.0.4+16.04.20160413
+# Install script for directory: /home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -32,7 +32,7 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
   set(CMAKE_INSTALL_SO_NO_EXE "1")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libmtpserver.so.1.0.0"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libmtpserver.so.1"
@@ -46,9 +46,9 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
     endif()
   endforeach()
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES
-    "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so.1.0.0"
-    "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so.1"
-    "/sdcard/mtp-0.0.4+16.04.20160413/build/libmtpserver.so"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so.1.0.0"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so.1"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libmtpserver.so"
     )
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/libmtpserver.so.1.0.0"
@@ -64,35 +64,35 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
   endforeach()
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/mtp" TYPE FILE FILES
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpDatabase.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpDataPacket.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpDebug.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpDevice.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpDeviceInfo.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpEventPacket.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/mtp.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpObjectInfo.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpPacket.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpProperty.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpRequestPacket.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpResponsePacket.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpServer.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpStorage.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpStorageInfo.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpStringBuffer.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpTypes.h"
-    "/sdcard/mtp-0.0.4+16.04.20160413/include/MtpUtils.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpDatabase.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpDataPacket.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpDebug.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpDevice.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpDeviceInfo.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpEventPacket.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/mtp.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpObjectInfo.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpPacket.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpProperty.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpRequestPacket.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpResponsePacket.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpServer.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpStorage.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpStorageInfo.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpStringBuffer.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpTypes.h"
+    "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/include/MtpUtils.h"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/sdcard/mtp-0.0.4+16.04.20160413/build/libusbhost/cmake_install.cmake")
-  include("/sdcard/mtp-0.0.4+16.04.20160413/build/server/cmake_install.cmake")
-  include("/sdcard/mtp-0.0.4+16.04.20160413/build/tests/cmake_install.cmake")
-  include("/sdcard/mtp-0.0.4+16.04.20160413/build/po/cmake_install.cmake")
+  include("/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/libusbhost/cmake_install.cmake")
+  include("/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/server/cmake_install.cmake")
+  include("/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/tests/cmake_install.cmake")
+  include("/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/po/cmake_install.cmake")
 
 endif()
 
@@ -104,5 +104,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/sdcard/mtp-0.0.4+16.04.20160413/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/maddocks/kernels/linux-gpd-4.14.14/tools/16ton/mtp_adb/mtp-server/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
