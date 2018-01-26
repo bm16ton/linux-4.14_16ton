@@ -1450,6 +1450,50 @@ static const struct file_operations fops_chanbw = {
 };
 
 
+static ssize_t read_file_diag(struct file *file, char __user *user_buf,
+			     size_t count, loff_t *ppos)
+{
+	struct ath_softc *sc = file->private_data;
+	struct ath_hw *ah = sc->sc_ah;
+	char buf[32];
+	unsigned int len;
+
+	len = sprintf(buf, "0x%08lx\n", ah->diag);
+	return simple_read_from_buffer(user_buf, count, ppos, buf, len);
+}
+
+static ssize_t write_file_diag(struct file *file, const char __user *user_buf,
+			     size_t count, loff_t *ppos)
+{
+	struct ath_softc *sc = file->private_data;
+	struct ath_hw *ah = sc->sc_ah;
+	unsigned long diag;
+	char buf[32];
+	ssize_t len;
+
+	len = min(count, sizeof(buf) - 1);
+	if (copy_from_user(buf, user_buf, len))
+		return -EFAULT;
+
+	buf[len] = '\0';
+	if (kstrtoul(buf, 0, &diag))
+		return -EINVAL;
+
+	ah->diag = diag;
+	ath9k_hw_update_diag(ah);
+
+	return count;
+}
+
+static const struct file_operations fops_diag = {
+	.read = read_file_diag,
+	.write = write_file_diag,
+	.open = simple_open,
+	.owner = THIS_MODULE,
+	.llseek = default_llseek,
+};
+
+
 int ath9k_init_debug(struct ath_hw *ah)
 {
 	struct ath_common *common = ath9k_hw_common(ah);
@@ -1471,6 +1515,8 @@ int ath9k_init_debug(struct ath_hw *ah)
 
 	debugfs_create_file("chanbw", S_IRUSR | S_IWUSR, sc->debug.debugfs_phy,
 			    sc, &fops_chanbw);
+	debugfs_create_file("diag", S_IRUSR | S_IWUSR, sc->debug.debugfs_phy,
+				sc, &fops_diag);
 	debugfs_create_devm_seqfile(sc->dev, "dma", sc->debug.debugfs_phy,
 				    read_file_dma);
 	debugfs_create_devm_seqfile(sc->dev, "interrupt", sc->debug.debugfs_phy,
