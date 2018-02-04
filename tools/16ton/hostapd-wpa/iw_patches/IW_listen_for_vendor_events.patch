@@ -1,0 +1,42 @@
+From e8b3b3124262742839b5dc786b35a05bce28c3fe Mon Sep 17 00:00:00 2001
+From: Johannes Berg <johannes.berg@intel.com>
+Date: Fri, 24 Jan 2014 15:56:02 +0100
+Subject: listen to vendor events
+
+---
+ event.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/event.c b/event.c
+index bfdb0fb..2d92249 100644
+--- a/event.c
++++ b/event.c
+@@ -531,6 +531,11 @@ static int print_event(struct nl_msg *msg, void *arg)
+ 		       (unsigned long long)nla_get_u64(tb[NL80211_ATTR_COOKIE]),
+ 		       tb[NL80211_ATTR_ACK] ? "acked" : "no ack");
+ 		break;
++	case NL80211_CMD_VENDOR:
++		printf("vendor event %.6x:%d\n",
++			nla_get_u32(tb[NL80211_ATTR_VENDOR_ID]),
++			nla_get_u32(tb[NL80211_ATTR_VENDOR_SUBCMD]));
++		break;
+ 	default:
+ 		printf("unknown event %d\n", gnlh->cmd);
+ 		break;
+@@ -601,6 +606,13 @@ int __prepare_listen_events(struct nl80211_state *state)
+ 			return ret;
+ 	}
+ 
++	mcid = nl_get_multicast_id(state->nl_sock, "nl80211", "vendor");
++	if (mcid >= 0) {
++		ret = nl_socket_add_membership(state->nl_sock, mcid);
++		if (ret)
++			return ret;
++	}
++
+ 	return 0;
+ }
+ 
+-- 
+cgit v1.1
+

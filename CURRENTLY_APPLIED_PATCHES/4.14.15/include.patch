@@ -1,0 +1,2618 @@
+diff -Naur linux-4.14.15/include/acpi/acpi_bus.h linux-gpd-4.14.15/include/acpi/acpi_bus.h
+--- linux-4.14.15/include/acpi/acpi_bus.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/acpi/acpi_bus.h	2018-01-25 09:02:03.678215304 -0500
+@@ -212,7 +212,7 @@
+ 	u32 of_compatible_ok:1;
+ 	u32 coherent_dma:1;
+ 	u32 cca_seen:1;
+-	u32 spi_i2c_slave:1;
++	u32 serial_bus_slave:1;
+ 	u32 reserved:19;
+ };
+ 
+diff -Naur linux-4.14.15/include/acpi/acpi_drivers.h linux-gpd-4.14.15/include/acpi/acpi_drivers.h
+--- linux-4.14.15/include/acpi/acpi_drivers.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/acpi/acpi_drivers.h	2018-01-25 09:02:03.679215302 -0500
+@@ -58,7 +58,7 @@
+ #define ACPI_VIDEO_HID			"LNXVIDEO"
+ #define ACPI_BAY_HID			"LNXIOBAY"
+ #define ACPI_DOCK_HID			"LNXDOCK"
+-#define ACPI_ECDT_HID			"LNXEC"
++#define ACPI_ECDT_HID			"LNXECDT"
+ /* Quirk for broken IBM BIOSes */
+ #define ACPI_SMBUS_IBM_HID		"SMBUSIBM"
+ 
+diff -Naur linux-4.14.15/include/drm/drm_connector.h linux-gpd-4.14.15/include/drm/drm_connector.h
+--- linux-4.14.15/include/drm/drm_connector.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/drm/drm_connector.h	2018-01-25 09:02:03.680215300 -0500
+@@ -223,6 +223,15 @@
+ #define DRM_COLOR_FORMAT_YCRCB420	(1<<3)
+ 
+ 	/**
++	 * @panel_orientation: Read only connector property for built-in panels,
++	 * indicating the orientation of the panel vs the device's casing.
++	 * drm_connector_init() sets this to DRM_MODE_PANEL_ORIENTATION_UNKNOWN.
++	 * When not UNKNOWN this gets used by the drm_fb_helpers to rotate the
++	 * fb to compensate and gets exported as prop to userspace.
++	 */
++	int panel_orientation;
++
++	/**
+ 	 * @color_formats: HDMI Color formats, selects between RGB and YCrCb
+ 	 * modes. Used DRM_COLOR_FORMAT\_ defines, which are _not_ the same ones
+ 	 * as used to describe the pixel format in framebuffers, and also don't
+@@ -1012,6 +1021,8 @@
+ 					    const struct edid *edid);
+ void drm_mode_connector_set_link_status_property(struct drm_connector *connector,
+ 						 uint64_t link_status);
++int drm_connector_init_panel_orientation_property(
++	struct drm_connector *connector, int width, int height);
+ 
+ /**
+  * struct drm_tile_group - Tile group metadata
+diff -Naur linux-4.14.15/include/drm/drm_mode_config.h linux-gpd-4.14.15/include/drm/drm_mode_config.h
+--- linux-4.14.15/include/drm/drm_mode_config.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/drm/drm_mode_config.h	2018-01-25 09:02:03.682215297 -0500
+@@ -741,6 +741,13 @@
+ 	 */
+ 	struct drm_property *suggested_y_property;
+ 
++	/**
++	 * @panel_orientation_property: Optional connector property indicating
++	 * how the lcd-panel is mounted inside the casing (e.g. normal or
++	 * upside-down).
++	 */
++	struct drm_property *panel_orientation_property;
++
+ 	/* dumb ioctl parameters */
+ 	uint32_t preferred_depth, prefer_shadow;
+ 
+diff -Naur linux-4.14.15/include/linux/fb.h linux-gpd-4.14.15/include/linux/fb.h
+--- linux-4.14.15/include/linux/fb.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/fb.h	2018-01-25 09:02:03.683215295 -0500
+@@ -815,6 +815,12 @@
+ 			const struct fb_videomode *default_mode,
+ 			unsigned int default_bpp);
+ 
++#ifdef CONFIG_DMI
++int fb_get_panel_rotate_quirk(int width, int height);
++#else
++#define fb_get_panel_rotate_quirk(width, height) (-1)
++#endif /* CONFIG_DMI */
++
+ /* Convenience logging macros */
+ #define fb_err(fb_info, fmt, ...)					\
+ 	pr_err("fb%d: " fmt, (fb_info)->node, ##__VA_ARGS__)
+diff -Naur linux-4.14.15/include/linux/gpio_keys.h linux-gpd-4.14.15/include/linux/gpio_keys.h
+--- linux-4.14.15/include/linux/gpio_keys.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/gpio_keys.h	2018-01-25 09:02:03.684215293 -0500
+@@ -16,6 +16,8 @@
+  * @debounce_interval:	debounce ticks interval in msecs
+  * @can_disable:	%true indicates that userspace is allowed to
+  *			disable button via sysfs
++ * @no_wakeup_events:	For wake-up source buttons only, if %true then no input
++ *			events will be generated if pressed while suspended
+  * @value:		axis value for %EV_ABS
+  * @irq:		Irq number in case of interrupt keys
+  */
+@@ -28,6 +30,7 @@
+ 	int wakeup;
+ 	int debounce_interval;
+ 	bool can_disable;
++	bool no_wakeup_events;
+ 	int value;
+ 	unsigned int irq;
+ };
+diff -Naur linux-4.14.15/include/linux/i2c.h linux-gpd-4.14.15/include/linux/i2c.h
+--- linux-4.14.15/include/linux/i2c.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/i2c.h	2018-01-25 09:02:03.686215289 -0500
+@@ -139,6 +139,9 @@
+  * struct i2c_driver - represent an I2C device driver
+  * @class: What kind of i2c device we instantiate (for detect)
+  * @attach_adapter: Callback for bus addition (deprecated)
++ * @match: Allows the driver to override the default i2c_bus match behavior
++ *         return < 0 to fail the match, > 0 to force a match, 0 to fallback
++ *         to default id matching
+  * @probe: Callback for device binding - soon to be deprecated
+  * @probe_new: New callback for device binding
+  * @remove: Callback for device unbinding
+@@ -180,6 +183,9 @@
+ 	 */
+ 	int (*attach_adapter)(struct i2c_adapter *) __deprecated;
+ 
++	/* Set this to override standard i2c_bus match behavior */
++	int (*match)(struct i2c_client *);
++
+ 	/* Standard driver model interfaces */
+ 	int (*probe)(struct i2c_client *, const struct i2c_device_id *);
+ 	int (*remove)(struct i2c_client *);
+@@ -304,6 +310,7 @@
+  * @type: chip type, to initialize i2c_client.name
+  * @flags: to initialize i2c_client.flags
+  * @addr: stored in i2c_client.addr
++ * @dev_name: Overrides the default <busnr>-<addr> dev_name if set
+  * @platform_data: stored in i2c_client.dev.platform_data
+  * @archdata: copied into i2c_client.dev.archdata
+  * @of_node: pointer to OpenFirmware device node
+@@ -328,6 +335,7 @@
+ 	char		type[I2C_NAME_SIZE];
+ 	unsigned short	flags;
+ 	unsigned short	addr;
++	const char	*dev_name;
+ 	void		*platform_data;
+ 	struct dev_archdata	*archdata;
+ 	struct device_node *of_node;
+diff -Naur linux-4.14.15/include/linux/libata.h linux-gpd-4.14.15/include/linux/libata.h
+--- linux-4.14.15/include/linux/libata.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/libata.h	2018-01-25 09:02:03.688215285 -0500
+@@ -522,6 +522,7 @@
+ 	ATA_LPM_UNKNOWN,
+ 	ATA_LPM_MAX_POWER,
+ 	ATA_LPM_MED_POWER,
++	ATA_LPM_MED_POWER_WITH_DIPM, /* Med power + DIPM as win IRST does */
+ 	ATA_LPM_MIN_POWER,
+ };
+ 
+diff -Naur linux-4.14.15/include/linux/mux/consumer.h linux-gpd-4.14.15/include/linux/mux/consumer.h
+--- linux-4.14.15/include/linux/mux/consumer.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/mux/consumer.h	2018-01-25 09:02:03.689215284 -0500
+@@ -18,6 +18,25 @@
+ struct device;
+ struct mux_control;
+ 
++/**
++ * struct mux_lookup -	Mux consumer to mux-controller lookup table entry
++ * @list:		List head, internal use only.
++ * @provider:		dev_name() of the mux-chip's parent-dev.
++ * @index:		mux-controller's index in the mux-chip's mux array
++ * @dev_id:		dev_name() of the consumer to map to this controller
++ * @mux_name		name the consumer passes to mux_control_get
++ */
++struct mux_lookup {
++	struct list_head list;
++	const char *provider;
++	unsigned int index;
++	const char *dev_id;
++	const char *mux_name;
++};
++
++void mux_add_table(struct mux_lookup *table, size_t num);
++void mux_remove_table(struct mux_lookup *table, size_t num);
++
+ unsigned int mux_control_states(struct mux_control *mux);
+ int __must_check mux_control_select(struct mux_control *mux,
+ 				    unsigned int state);
+@@ -26,9 +45,13 @@
+ int mux_control_deselect(struct mux_control *mux);
+ 
+ struct mux_control *mux_control_get(struct device *dev, const char *mux_name);
++struct mux_control *mux_control_get_optional(struct device *dev,
++					     const char *mux_name);
+ void mux_control_put(struct mux_control *mux);
+ 
+ struct mux_control *devm_mux_control_get(struct device *dev,
+ 					 const char *mux_name);
++struct mux_control *devm_mux_control_get_optional(struct device *dev,
++						  const char *mux_name);
+ 
+ #endif /* _LINUX_MUX_CONSUMER_H */
+diff -Naur linux-4.14.15/include/linux/mux/driver.h linux-gpd-4.14.15/include/linux/mux/driver.h
+--- linux-4.14.15/include/linux/mux/driver.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/mux/driver.h	2018-01-25 09:02:03.690215282 -0500
+@@ -36,6 +36,9 @@
+  * @states:		The number of mux controller states.
+  * @idle_state:		The mux controller state to use when inactive, or one
+  *			of MUX_IDLE_AS_IS and MUX_IDLE_DISCONNECT.
++ * @init_as_is:		Set to true to have the core leave the mux controller
++ *			state as-is until first selection. If @idle_state is
++ *			MUX_IDLE_AS_IS, @init_as_is is irrelevant.
+  *
+  * Mux drivers may only change @states and @idle_state, and may only do so
+  * between allocation and registration of the mux controller. Specifically,
+@@ -50,6 +53,7 @@
+ 
+ 	unsigned int states;
+ 	int idle_state;
++	bool init_as_is;
+ };
+ 
+ /**
+diff -Naur linux-4.14.15/include/linux/mux/usb.h linux-gpd-4.14.15/include/linux/mux/usb.h
+--- linux-4.14.15/include/linux/mux/usb.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/mux/usb.h	2018-01-25 09:02:03.691215280 -0500
+@@ -0,0 +1,31 @@
++/*
++ * mux/usb.h - definitions for USB multiplexers
++ *
++ * Copyright (C) 2017 Hans de Goede <hdegoede@redhat.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++#ifndef _LINUX_MUX_USB_H
++#define _LINUX_MUX_USB_H
++
++/* Mux state values for USB device/host role muxes */
++#define MUX_USB_DEVICE		(0) /* USB device mode */
++#define MUX_USB_HOST		(1) /* USB host mode */
++#define MUX_USB_STATES		(2)
++
++/*
++ * Mux state values for Type-C polarity/role/altmode muxes.
++ *
++ * MUX_TYPEC_POLARITY_INV may be or-ed together with any other mux-state as
++ * inverted-polarity (Type-C plugged in upside down) can happen with any
++ * other mux-state.
++ */
++#define MUX_TYPEC_POLARITY_INV		BIT(0)   /* Polarity inverted bit */
++#define MUX_TYPEC_USB			(0 << 1) /* USB only mode */
++#define MUX_TYPEC_USB_AND_DP		(1 << 1) /* USB host + 2 lanes DP */
++#define MUX_TYPEC_DP			(2 << 1) /* 4 lanes Display Port */
++#define MUX_TYPEC_STATES		(3 << 1)
++
++#endif /* _LINUX_MUX_TYPEC_H */
+diff -Naur linux-4.14.15/include/linux/usb/class-dual-role.h linux-gpd-4.14.15/include/linux/usb/class-dual-role.h
+--- linux-4.14.15/include/linux/usb/class-dual-role.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/class-dual-role.h	2018-01-25 09:02:03.692215278 -0500
+@@ -0,0 +1,129 @@
++#ifndef __LINUX_CLASS_DUAL_ROLE_H__
++#define __LINUX_CLASS_DUAL_ROLE_H__
++
++#include <linux/workqueue.h>
++#include <linux/errno.h>
++#include <linux/types.h>
++
++struct device;
++
++enum dual_role_supported_modes {
++	DUAL_ROLE_SUPPORTED_MODES_DFP_AND_UFP = 0,
++	DUAL_ROLE_SUPPORTED_MODES_DFP,
++	DUAL_ROLE_SUPPORTED_MODES_UFP,
++/*The following should be the last element*/
++	DUAL_ROLE_PROP_SUPPORTED_MODES_TOTAL,
++};
++
++enum {
++	DUAL_ROLE_PROP_MODE_UFP = 0,
++	DUAL_ROLE_PROP_MODE_DFP,
++	DUAL_ROLE_PROP_MODE_NONE,
++/*The following should be the last element*/
++	DUAL_ROLE_PROP_MODE_TOTAL,
++};
++
++enum {
++	DUAL_ROLE_PROP_PR_SRC = 0,
++	DUAL_ROLE_PROP_PR_SNK,
++	DUAL_ROLE_PROP_PR_NONE,
++/*The following should be the last element*/
++	DUAL_ROLE_PROP_PR_TOTAL,
++
++};
++
++enum {
++	DUAL_ROLE_PROP_DR_HOST = 0,
++	DUAL_ROLE_PROP_DR_DEVICE,
++	DUAL_ROLE_PROP_DR_NONE,
++/*The following should be the last element*/
++	DUAL_ROLE_PROP_DR_TOTAL,
++};
++
++enum {
++	DUAL_ROLE_PROP_VCONN_SUPPLY_NO = 0,
++	DUAL_ROLE_PROP_VCONN_SUPPLY_YES,
++/*The following should be the last element*/
++	DUAL_ROLE_PROP_VCONN_SUPPLY_TOTAL,
++};
++
++enum dual_role_property {
++	DUAL_ROLE_PROP_SUPPORTED_MODES = 0,
++	DUAL_ROLE_PROP_MODE,
++	DUAL_ROLE_PROP_PR,
++	DUAL_ROLE_PROP_DR,
++	DUAL_ROLE_PROP_VCONN_SUPPLY,
++};
++
++struct dual_role_phy_instance;
++
++/* Description of typec port */
++struct dual_role_phy_desc {
++	/* /sys/class/dual_role_usb/<name>/ */
++	const char *name;
++	enum dual_role_supported_modes supported_modes;
++	enum dual_role_property *properties;
++	size_t num_properties;
++
++	/* Callback for "cat /sys/class/dual_role_usb/<name>/<property>" */
++	int (*get_property)(struct dual_role_phy_instance *dual_role,
++			     enum dual_role_property prop,
++			     unsigned int *val);
++	/* Callback for "echo <value> >
++	 *                      /sys/class/dual_role_usb/<name>/<property>" */
++	int (*set_property)(struct dual_role_phy_instance *dual_role,
++			     enum dual_role_property prop,
++			     const unsigned int *val);
++	/* Decides whether userspace can change a specific property */
++	int (*property_is_writeable)(struct dual_role_phy_instance *dual_role,
++				      enum dual_role_property prop);
++};
++
++struct dual_role_phy_instance {
++	const struct dual_role_phy_desc *desc;
++
++	/* Driver private data */
++	void *drv_data;
++
++	struct device dev;
++	struct work_struct changed_work;
++};
++
++#if IS_ENABLED(CONFIG_DUAL_ROLE_USB_INTF)
++extern void dual_role_instance_changed(struct dual_role_phy_instance
++				       *dual_role);
++extern struct dual_role_phy_instance *__must_check
++devm_dual_role_instance_register(struct device *parent,
++				 const struct dual_role_phy_desc *desc);
++extern void devm_dual_role_instance_unregister(struct device *dev,
++					       struct dual_role_phy_instance
++					       *dual_role);
++extern int dual_role_get_property(struct dual_role_phy_instance *dual_role,
++				  enum dual_role_property prop,
++				  unsigned int *val);
++extern int dual_role_set_property(struct dual_role_phy_instance *dual_role,
++				  enum dual_role_property prop,
++				  const unsigned int *val);
++extern int dual_role_property_is_writeable(struct dual_role_phy_instance
++					   *dual_role,
++					   enum dual_role_property prop);
++extern void *dual_role_get_drvdata(struct dual_role_phy_instance *dual_role);
++#else /* CONFIG_DUAL_ROLE_USB_INTF */
++static inline void dual_role_instance_changed(struct dual_role_phy_instance
++				       *dual_role){}
++static inline struct dual_role_phy_instance *__must_check
++devm_dual_role_instance_register(struct device *parent,
++				 const struct dual_role_phy_desc *desc)
++{
++	return ERR_PTR(-ENOSYS);
++}
++static inline void devm_dual_role_instance_unregister(struct device *dev,
++					       struct dual_role_phy_instance
++					       *dual_role){}
++static inline void *dual_role_get_drvdata(struct dual_role_phy_instance
++		*dual_role)
++{
++	return ERR_PTR(-ENOSYS);
++}
++#endif /* CONFIG_DUAL_ROLE_USB_INTF */
++#endif /* __LINUX_CLASS_DUAL_ROLE_H__ */
+diff -Naur linux-4.14.15/include/linux/usb/composite.h linux-gpd-4.14.15/include/linux/usb/composite.h
+--- linux-4.14.15/include/linux/usb/composite.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/composite.h	2018-01-25 09:02:03.693215276 -0500
+@@ -583,6 +583,7 @@
+ 	struct config_group group;
+ 	struct list_head cfs_list;
+ 	struct usb_function_driver *fd;
++	struct usb_function *f;
+ 	int (*set_inst_name)(struct usb_function_instance *inst,
+ 			      const char *name);
+ 	void (*free_func_inst)(struct usb_function_instance *inst);
+diff -Naur linux-4.14.15/include/linux/usb/debug.h linux-gpd-4.14.15/include/linux/usb/debug.h
+--- linux-4.14.15/include/linux/usb/debug.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/debug.h	2018-01-25 09:02:03.694215274 -0500
+@@ -0,0 +1,189 @@
++/*
++ * <linux/usb/debug.h> -- USB Debug Class definitions.
++ *
++ * Usb debug class specific constants, based on:
++ * USB 3.1 Device Class Specification for Debug Devices
++ * Revision 1.0 – July 14, 2015
++ * http://www.usb.org/developers/docs/usb_31_072715.zip
++ *
++ * Copyright (C) 2015, Intel Corporation.
++ *
++ * This software is distributed under the terms of the GNU General Public
++ * License ("GPL") version 2, as published by the Free Software Foundation.
++ *
++ */
++
++#ifndef __LINUX_USB_DEBUG_H
++#define __LINUX_USB_DEBUG_H
++
++#include <linux/types.h>
++
++/*
++ * USB Debug Class Rev. 1.0
++ * Appendix A: Debug-Device-Class Codes
++ * Table 8-2: Debug Interface Sub-Class Code (SC_DEBUG)
++ */
++#define USB_SUBCLASS_DBC		0x02
++#define USB_SUBCLASS_DBC_DFX		0x03
++#define USB_SUBCLASS_DBC_TRACE		0x04
++#define USB_SUBCLASS_DVC_GP		0x05
++#define USB_SUBCLASS_DVC_DFX		0x06
++#define USB_SUBCLASS_DVC_TRACE		0x07
++#define USB_SUBCLASS_DEBUG_CONTROL	0x08
++
++/*
++ * USB Debug Class Rev. 1.0
++ * Appendix A: Debug-Device-Class Codes
++ * Table 8-3: Debug Interface Protocol Code (PC_DEBUG)
++ */
++#define DC_PROTOCOL_CODE_UNDEFINED	0x00
++#define DC_PROTOCOL_VENDOR_OR_GNU	0x01
++
++#define DC_PROTOCOL_GP_VENDOR	0x00
++#define DC_PROTOCOL_GP_GNU	0x01
++
++/*
++ * USB Debug Class Rev. 1.0
++ * 4.4.6 Debug-Unit Descriptor
++ * Table 4-9: Debug Unit Descriptor - bmControl
++ */
++#define DC_CTL_SET_CFG_DATA_SG			(1 << 0)
++#define DC_CTL_SET_CFG_DATA			(1 << 1)
++#define DC_CTL_GET_CFG_DATA			(1 << 2)
++#define DC_CTL_SET_CFG_ADDR			(1 << 3)
++#define DC_CTL_GET_CFG_ADDR			(1 << 4)
++#define DC_CTL_SET_OP_MODE			(1 << 7)
++#define DC_CTL_GET_OP_MODE			(1 << 8)
++#define DC_CTL_SET_BUFF_INFO			(1 << 11)
++#define DC_CTL_GET_BUFF_INFO			(1 << 12)
++#define DC_CTL_SET_RESET			(1 << 13)
++
++
++/*
++ * USB Debug Class Rev. 1.0
++ * Appendix A: Debug-Device-Class Codes
++ * Table 8-6: Debug Class-Specific Descriptor SubTypes
++ */
++#define DC_UNDEFINED			0x00
++#define DC_INPUT_CONNECTION		0x01
++#define DC_OUTPUT_CONNECTION		0x02
++#define DC_DEBUG_UNIT			0x03
++#define DC_DEBUG_ATTRIBUTES		0x04
++
++/*
++ * USB Debug Class Rev. 1.0
++ *
++ * 4.4.4 Input-Connection Descriptor
++ * Table 4-7: Input Connection Descriptor - bConnectionType
++ *
++ * 4.4.5 Output Connection Descriptor
++ * Table 4-8: Output Connection Descriptor - bConnectionType
++ */
++#define DC_CONNECTION_USB			0x00
++#define DC_CONNECTION_DEBUG_CONTROL		0x01
++#define DC_CONNECTION_DEBUG_DATA		0x02
++#define DC_CONNECTION_DEBUG_DATA_CONTROL	0x03
++
++
++/*
++ * USB Debug Class Rev. 1.0
++ * 4.4.6 Debug-Unit Descriptor
++ * Table 4-11: dTraceFormat
++ */
++#define DC_VENDOR_FORMAT(v, f)    (((v)<<24)|(f))
++/*Vendor N/A*/
++#define DC_TRACE_NOT_FORMATED_PASSTHROUGH	DC_VENDOR_FORMAT(0x0, 0x0)
++#define DC_TRACE_NOT_FORMATED_HEADER		DC_VENDOR_FORMAT(0x0, 0x1)
++#define DC_TRACE_NOT_FORMATED_FOOTER		DC_VENDOR_FORMAT(0x0, 0x2)
++#define DC_TRACE_NOT_FORMATED_GUID		DC_VENDOR_FORMAT(0x0, 0x5)
++#define DC_TRACE_NOT_FORMATED_UTF8		DC_VENDOR_FORMAT(0x0, 0x6)
++/*Vendor Intel*/
++#define DC_TRACE_INTEL_FORMATED_VENDOR		DC_VENDOR_FORMAT(0x1, 0x0)
++/*Vendor ARM*/
++#define DC_TRACE_ARM_FORMATED_VENDOR		DC_VENDOR_FORMAT(0x2, 0x0)
++/*Vendor ST*/
++#define DC_TRACE_ST_FORMATED_VENDOR		DC_VENDOR_FORMAT(0x3, 0x0)
++/*Vendor TI*/
++#define DC_TRACE_TI_FORMATED_VENDOR		DC_VENDOR_FORMAT(0x4, 0x0)
++/*Vendor Qualcomm*/
++#define DC_TRACE_QCOMM_FORMATED_VENDOR		DC_VENDOR_FORMAT(0x5, 0x0)
++/*Vendor AMD*/
++#define DC_TRACE_AMD_FORMATED_VENDOR		DC_VENDOR_FORMAT(0x6, 0x0)
++/*Vendor MIPI*/
++#define DC_TRACE_MIPI_FORMATED			DC_VENDOR_FORMAT(0x80, 0x0)
++/*Vendor Nexus*/
++#define DC_TRACE_NEXUS_FORMATED			DC_VENDOR_FORMAT(0x81, 0x0)
++
++/*
++ * USB Debug Class Rev. 1.0
++ * 4.4.6 Debug-Unit Descriptor
++ * Table 4-9: Debug Unit Descriptor - bDebugUnitType
++ */
++#define DC_UNIT_TYPE_UNDEFINED			0x00
++#define DC_UNIT_TYPE_DFX			0x01
++#define DC_UNIT_TYPE_SELECT			0x02
++#define DC_UNIT_TYPE_TRACE_ROUTE		0x03
++#define DC_UNIT_TYPE_TRACE_PROC			0x04
++#define DC_UNIT_TYPE_TRACE_GEN			0x05
++#define DC_UNIT_TYPE_TRACE_SINK			0x06
++#define DC_UNIT_TYPE_CONTROL			0x07
++#define DC_UNIT_TYPE_VENDOR_FIRST		0x40
++#define DC_UNIT_TYPE_VENDOR_LAST		0x5F
++
++/*
++ * USB Debug Class Rev. 1.0
++ * 4.4.6 Debug-Unit Descriptor
++ * Table 4-10: Debug Sub-Unit Type
++ */
++#define DC_UNIT_SUBTYPE_NULL			0x00
++#define DC_UNIT_SUBTYPE_CPU			0x01
++#define DC_UNIT_SUBTYPE_GFX			0x02
++#define DC_UNIT_SUBTYPE_VIDEO			0x03
++#define DC_UNIT_SUBTYPE_IMAGING			0x04
++#define DC_UNIT_SUBTYPE_AUDIO			0x05
++#define DC_UNIT_SUBTYPE_MODEM			0x06
++#define DC_UNIT_SUBTYPE_BLUETOOTH		0x07
++#define DC_UNIT_SUBTYPE_PWR_MGT			0x08
++#define DC_UNIT_SUBTYPE_SECURITY		0x09
++#define DC_UNIT_SUBTYPE_SENSOR			0x0A
++#define DC_UNIT_SUBTYPE_BUSWATCH		0x0B
++#define DC_UNIT_SUBTYPE_LOCATION		0x0C
++#define DC_UNIT_SUBTYPE_TRACEZIP		0x0D
++#define DC_UNIT_SUBTYPE_TAPCTL			0x0E
++#define DC_UNIT_SUBTYPE_MEMACC			0x0F
++#define DC_UNIT_SUBTYPE_OTHER			0x3F
++#define DC_UNIT_SUBTYPE_SWLOGGER		0x40
++#define DC_UNIT_SUBTYPE_SWROUTER		0x41
++#define DC_UNIT_SUBTYPE_SWUNINT			0x42
++#define DC_UNIT_SUBTYPE_SWCFGUNINT		0x43
++#define DC_UNIT_SUBTYPE_SWDEBUGGER		0x44
++#define DC_UNIT_SUBTYPE_VENDOR_FIRST		0x80
++#define DC_UNIT_SUBTYPE_VENDOR_LAST		0xBF
++#define DC_UNIT_SUBTYPE_STANDARDS		0xFF
++
++/*
++ * USB Debug Class Rev. 1.0
++ * Appendix A: Debug-Device-Class Codes
++ * Table 8-5: Debug Class-Specific Commands bRequest
++ */
++/*Set*/
++#define DC_REQUEST_SET_CONFIG_DATA		0x01 /*S 5.4.4 T 5-6*/
++#define DC_REQUEST_SET_CONFIG_DATA_SINGLE	0x02 /*S 5.4.3 T 5-4*/
++#define DC_REQUEST_SET_CONFIG_ADDRESS		0x03 /*S 5.4.6 T 5-8*/
++#define DC_REQUEST_SET_ALT_STACK		0x04 /*S 5.4.8 T 5-10*/
++#define DC_REQUEST_SET_OPERATING_MODE		0x05 /*S 5.4.10 T 5-15*/
++#define DC_REQUEST_SET_TRACE			0x06 /*S 5.4.14 T 5-23*/
++#define DC_REQUEST_SET_BUFFER			0x09 /*S 5.4.16 T 5-25*/
++#define DC_REQUEST_SET_RESET			0x0A /*S 5.4.18 T 5-28f*/
++/*Get*/
++#define DC_REQUEST_GET_CONFIG_DATA		0x81 /*S 5.4.5 T 5-7*/
++#define DC_REQUEST_GET_CONFIG_DATA_SINGLE	0x82
++#define DC_REQUEST_GET_CONFIG_ADDRESS		0x83 /*S 5.4.7 T 5-9*/
++#define DC_REQUEST_GET_ALT_STACK		0x84 /*S 5.4.9 T 5-11*/
++#define DC_REQUEST_GET_OPERATING_MODE		0x85 /*S 5.4.11 T 5-18*/
++#define DC_REQUEST_GET_TRACE			0x86 /*S 5.4.15 T 5-24*/
++#define DC_REQUEST_GET_INFO			0x87 /*S 5.4.12 T 5-19*/
++#define DC_REQUEST_GET_ERROR			0x88 /*S 5.4.13 T 5-21*/
++#define DC_REQUEST_GET_BUFFER			0x89 /*S 5.4.17 T 5-27*/
++
++#endif /* __LINUX_USB_DEBUG_H */
+diff -Naur linux-4.14.15/include/linux/usb/f_accessory.h linux-gpd-4.14.15/include/linux/usb/f_accessory.h
+--- linux-4.14.15/include/linux/usb/f_accessory.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/f_accessory.h	2018-01-25 09:02:03.695215273 -0500
+@@ -0,0 +1,23 @@
++/*
++ * Gadget Function Driver for Android USB accessories
++ *
++ * Copyright (C) 2011 Google, Inc.
++ * Author: Mike Lockwood <lockwood@android.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef __LINUX_USB_F_ACCESSORY_H
++#define __LINUX_USB_F_ACCESSORY_H
++
++#include <uapi/linux/usb/f_accessory.h>
++
++#endif /* __LINUX_USB_F_ACCESSORY_H */
+diff -Naur linux-4.14.15/include/linux/usb/f_mtp.h linux-gpd-4.14.15/include/linux/usb/f_mtp.h
+--- linux-4.14.15/include/linux/usb/f_mtp.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/f_mtp.h	2018-01-25 09:02:03.695215273 -0500
+@@ -0,0 +1,23 @@
++/*
++ * Gadget Function Driver for MTP
++ *
++ * Copyright (C) 2010 Google, Inc.
++ * Author: Mike Lockwood <lockwood@android.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef __LINUX_USB_F_MTP_H
++#define __LINUX_USB_F_MTP_H
++
++#include <uapi/linux/usb/f_mtp.h>
++
++#endif /* __LINUX_USB_F_MTP_H */
+diff -Naur linux-4.14.15/include/linux/usb/pd_bdo.h linux-gpd-4.14.15/include/linux/usb/pd_bdo.h
+--- linux-4.14.15/include/linux/usb/pd_bdo.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/pd_bdo.h	2018-01-25 09:02:03.696215271 -0500
+@@ -0,0 +1,31 @@
++/*
++ * Copyright 2015-2017 Google, Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef __LINUX_USB_PD_BDO_H
++#define __LINUX_USB_PD_BDO_H
++
++/* BDO : BIST Data Object */
++#define BDO_MODE_RECV		(0 << 28)
++#define BDO_MODE_TRANSMIT	(1 << 28)
++#define BDO_MODE_COUNTERS	(2 << 28)
++#define BDO_MODE_CARRIER0	(3 << 28)
++#define BDO_MODE_CARRIER1	(4 << 28)
++#define BDO_MODE_CARRIER2	(5 << 28)
++#define BDO_MODE_CARRIER3	(6 << 28)
++#define BDO_MODE_EYE		(7 << 28)
++#define BDO_MODE_TESTDATA	(8 << 28)
++
++#define BDO_MODE_MASK(mode)	((mode) & 0xf0000000)
++
++#endif
+diff -Naur linux-4.14.15/include/linux/usb/pd.h linux-gpd-4.14.15/include/linux/usb/pd.h
+--- linux-4.14.15/include/linux/usb/pd.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/pd.h	2018-01-25 09:02:03.697215269 -0500
+@@ -0,0 +1,298 @@
++/*
++ * Copyright 2015-2017 Google, Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef __LINUX_USB_PD_H
++#define __LINUX_USB_PD_H
++
++#include <linux/types.h>
++#include <linux/usb/typec.h>
++
++/* USB PD Messages */
++enum pd_ctrl_msg_type {
++	/* 0 Reserved */
++	PD_CTRL_GOOD_CRC = 1,
++	PD_CTRL_GOTO_MIN = 2,
++	PD_CTRL_ACCEPT = 3,
++	PD_CTRL_REJECT = 4,
++	PD_CTRL_PING = 5,
++	PD_CTRL_PS_RDY = 6,
++	PD_CTRL_GET_SOURCE_CAP = 7,
++	PD_CTRL_GET_SINK_CAP = 8,
++	PD_CTRL_DR_SWAP = 9,
++	PD_CTRL_PR_SWAP = 10,
++	PD_CTRL_VCONN_SWAP = 11,
++	PD_CTRL_WAIT = 12,
++	PD_CTRL_SOFT_RESET = 13,
++	/* 14-15 Reserved */
++};
++
++enum pd_data_msg_type {
++	/* 0 Reserved */
++	PD_DATA_SOURCE_CAP = 1,
++	PD_DATA_REQUEST = 2,
++	PD_DATA_BIST = 3,
++	PD_DATA_SINK_CAP = 4,
++	/* 5-14 Reserved */
++	PD_DATA_VENDOR_DEF = 15,
++};
++
++#define PD_REV10	0x0
++#define PD_REV20	0x1
++
++#define PD_HEADER_CNT_SHIFT	12
++#define PD_HEADER_CNT_MASK	0x7
++#define PD_HEADER_ID_SHIFT	9
++#define PD_HEADER_ID_MASK	0x7
++#define PD_HEADER_PWR_ROLE	BIT(8)
++#define PD_HEADER_REV_SHIFT	6
++#define PD_HEADER_REV_MASK	0x3
++#define PD_HEADER_DATA_ROLE	BIT(5)
++#define PD_HEADER_TYPE_SHIFT	0
++#define PD_HEADER_TYPE_MASK	0xf
++
++#define PD_HEADER(type, pwr, data, id, cnt)				\
++	((((type) & PD_HEADER_TYPE_MASK) << PD_HEADER_TYPE_SHIFT) |	\
++	 ((pwr) == TYPEC_SOURCE ? PD_HEADER_PWR_ROLE : 0) |		\
++	 ((data) == TYPEC_HOST ? PD_HEADER_DATA_ROLE : 0) |		\
++	 (PD_REV20 << PD_HEADER_REV_SHIFT) |				\
++	 (((id) & PD_HEADER_ID_MASK) << PD_HEADER_ID_SHIFT) |		\
++	 (((cnt) & PD_HEADER_CNT_MASK) << PD_HEADER_CNT_SHIFT))
++
++#define PD_HEADER_LE(type, pwr, data, id, cnt) \
++	cpu_to_le16(PD_HEADER((type), (pwr), (data), (id), (cnt)))
++
++static inline unsigned int pd_header_cnt(u16 header)
++{
++	return (header >> PD_HEADER_CNT_SHIFT) & PD_HEADER_CNT_MASK;
++}
++
++static inline unsigned int pd_header_cnt_le(__le16 header)
++{
++	return pd_header_cnt(le16_to_cpu(header));
++}
++
++static inline unsigned int pd_header_type(u16 header)
++{
++	return (header >> PD_HEADER_TYPE_SHIFT) & PD_HEADER_TYPE_MASK;
++}
++
++static inline unsigned int pd_header_type_le(__le16 header)
++{
++	return pd_header_type(le16_to_cpu(header));
++}
++
++static inline unsigned int pd_header_msgid(u16 header)
++{
++	return (header >> PD_HEADER_ID_SHIFT) & PD_HEADER_ID_MASK;
++}
++
++static inline unsigned int pd_header_msgid_le(__le16 header)
++{
++	return pd_header_msgid(le16_to_cpu(header));
++}
++
++#define PD_MAX_PAYLOAD		7
++
++/**
++ * struct pd_message - PD message as seen on wire
++ * @header:	PD message header
++ * @payload:	PD message payload
++ */
++struct pd_message {
++	__le16 header;
++	__le32 payload[PD_MAX_PAYLOAD];
++} __packed;
++
++/* PDO: Power Data Object */
++#define PDO_MAX_OBJECTS		7
++
++enum pd_pdo_type {
++	PDO_TYPE_FIXED = 0,
++	PDO_TYPE_BATT = 1,
++	PDO_TYPE_VAR = 2,
++};
++
++#define PDO_TYPE_SHIFT		30
++#define PDO_TYPE_MASK		0x3
++
++#define PDO_TYPE(t)	((t) << PDO_TYPE_SHIFT)
++
++#define PDO_VOLT_MASK		0x3ff
++#define PDO_CURR_MASK		0x3ff
++#define PDO_PWR_MASK		0x3ff
++
++#define PDO_FIXED_DUAL_ROLE	BIT(29)	/* Power role swap supported */
++#define PDO_FIXED_SUSPEND	BIT(28) /* USB Suspend supported (Source) */
++#define PDO_FIXED_HIGHER_CAP	BIT(28) /* Requires more than vSafe5V (Sink) */
++#define PDO_FIXED_EXTPOWER	BIT(27) /* Externally powered */
++#define PDO_FIXED_USB_COMM	BIT(26) /* USB communications capable */
++#define PDO_FIXED_DATA_SWAP	BIT(25) /* Data role swap supported */
++#define PDO_FIXED_VOLT_SHIFT	10	/* 50mV units */
++#define PDO_FIXED_CURR_SHIFT	0	/* 10mA units */
++
++#define PDO_FIXED_VOLT(mv)	((((mv) / 50) & PDO_VOLT_MASK) << PDO_FIXED_VOLT_SHIFT)
++#define PDO_FIXED_CURR(ma)	((((ma) / 10) & PDO_CURR_MASK) << PDO_FIXED_CURR_SHIFT)
++
++#define PDO_FIXED(mv, ma, flags)			\
++	(PDO_TYPE(PDO_TYPE_FIXED) | (flags) |		\
++	 PDO_FIXED_VOLT(mv) | PDO_FIXED_CURR(ma))
++
++#define PDO_BATT_MAX_VOLT_SHIFT	20	/* 50mV units */
++#define PDO_BATT_MIN_VOLT_SHIFT	10	/* 50mV units */
++#define PDO_BATT_MAX_PWR_SHIFT	0	/* 250mW units */
++
++#define PDO_BATT_MIN_VOLT(mv) ((((mv) / 50) & PDO_VOLT_MASK) << PDO_BATT_MIN_VOLT_SHIFT)
++#define PDO_BATT_MAX_VOLT(mv) ((((mv) / 50) & PDO_VOLT_MASK) << PDO_BATT_MAX_VOLT_SHIFT)
++#define PDO_BATT_MAX_POWER(mw) ((((mw) / 250) & PDO_PWR_MASK) << PDO_BATT_MAX_PWR_SHIFT)
++
++#define PDO_BATT(min_mv, max_mv, max_mw)			\
++	(PDO_TYPE(PDO_TYPE_BATT) | PDO_BATT_MIN_VOLT(min_mv) |	\
++	 PDO_BATT_MAX_VOLT(max_mv) | PDO_BATT_MAX_POWER(max_mw))
++
++#define PDO_VAR_MAX_VOLT_SHIFT	20	/* 50mV units */
++#define PDO_VAR_MIN_VOLT_SHIFT	10	/* 50mV units */
++#define PDO_VAR_MAX_CURR_SHIFT	0	/* 10mA units */
++
++#define PDO_VAR_MIN_VOLT(mv) ((((mv) / 50) & PDO_VOLT_MASK) << PDO_VAR_MIN_VOLT_SHIFT)
++#define PDO_VAR_MAX_VOLT(mv) ((((mv) / 50) & PDO_VOLT_MASK) << PDO_VAR_MAX_VOLT_SHIFT)
++#define PDO_VAR_MAX_CURR(ma) ((((ma) / 10) & PDO_CURR_MASK) << PDO_VAR_MAX_CURR_SHIFT)
++
++#define PDO_VAR(min_mv, max_mv, max_ma)				\
++	(PDO_TYPE(PDO_TYPE_VAR) | PDO_VAR_MIN_VOLT(min_mv) |	\
++	 PDO_VAR_MAX_VOLT(max_mv) | PDO_VAR_MAX_CURR(max_ma))
++
++static inline enum pd_pdo_type pdo_type(u32 pdo)
++{
++	return (pdo >> PDO_TYPE_SHIFT) & PDO_TYPE_MASK;
++}
++
++static inline unsigned int pdo_fixed_voltage(u32 pdo)
++{
++	return ((pdo >> PDO_FIXED_VOLT_SHIFT) & PDO_VOLT_MASK) * 50;
++}
++
++static inline unsigned int pdo_min_voltage(u32 pdo)
++{
++	return ((pdo >> PDO_VAR_MIN_VOLT_SHIFT) & PDO_VOLT_MASK) * 50;
++}
++
++static inline unsigned int pdo_max_voltage(u32 pdo)
++{
++	return ((pdo >> PDO_VAR_MAX_VOLT_SHIFT) & PDO_VOLT_MASK) * 50;
++}
++
++static inline unsigned int pdo_max_current(u32 pdo)
++{
++	return ((pdo >> PDO_VAR_MAX_CURR_SHIFT) & PDO_CURR_MASK) * 10;
++}
++
++static inline unsigned int pdo_max_power(u32 pdo)
++{
++	return ((pdo >> PDO_BATT_MAX_PWR_SHIFT) & PDO_PWR_MASK) * 250;
++}
++
++/* RDO: Request Data Object */
++#define RDO_OBJ_POS_SHIFT	28
++#define RDO_OBJ_POS_MASK	0x7
++#define RDO_GIVE_BACK		BIT(27)	/* Supports reduced operating current */
++#define RDO_CAP_MISMATCH	BIT(26) /* Not satisfied by source caps */
++#define RDO_USB_COMM		BIT(25) /* USB communications capable */
++#define RDO_NO_SUSPEND		BIT(24) /* USB Suspend not supported */
++
++#define RDO_PWR_MASK			0x3ff
++#define RDO_CURR_MASK			0x3ff
++
++#define RDO_FIXED_OP_CURR_SHIFT		10
++#define RDO_FIXED_MAX_CURR_SHIFT	0
++
++#define RDO_OBJ(idx) (((idx) & RDO_OBJ_POS_MASK) << RDO_OBJ_POS_SHIFT)
++
++#define PDO_FIXED_OP_CURR(ma) ((((ma) / 10) & RDO_CURR_MASK) << RDO_FIXED_OP_CURR_SHIFT)
++#define PDO_FIXED_MAX_CURR(ma) ((((ma) / 10) & RDO_CURR_MASK) << RDO_FIXED_MAX_CURR_SHIFT)
++
++#define RDO_FIXED(idx, op_ma, max_ma, flags)			\
++	(RDO_OBJ(idx) | (flags) |				\
++	 PDO_FIXED_OP_CURR(op_ma) | PDO_FIXED_MAX_CURR(max_ma))
++
++#define RDO_BATT_OP_PWR_SHIFT		10	/* 250mW units */
++#define RDO_BATT_MAX_PWR_SHIFT		0	/* 250mW units */
++
++#define RDO_BATT_OP_PWR(mw) ((((mw) / 250) & RDO_PWR_MASK) << RDO_BATT_OP_PWR_SHIFT)
++#define RDO_BATT_MAX_PWR(mw) ((((mw) / 250) & RDO_PWR_MASK) << RDO_BATT_MAX_PWR_SHIFT)
++
++#define RDO_BATT(idx, op_mw, max_mw, flags)			\
++	(RDO_OBJ(idx) | (flags) |				\
++	 RDO_BATT_OP_PWR(op_mw) | RDO_BATT_MAX_PWR(max_mw))
++
++static inline unsigned int rdo_index(u32 rdo)
++{
++	return (rdo >> RDO_OBJ_POS_SHIFT) & RDO_OBJ_POS_MASK;
++}
++
++static inline unsigned int rdo_op_current(u32 rdo)
++{
++	return ((rdo >> RDO_FIXED_OP_CURR_SHIFT) & RDO_CURR_MASK) * 10;
++}
++
++static inline unsigned int rdo_max_current(u32 rdo)
++{
++	return ((rdo >> RDO_FIXED_MAX_CURR_SHIFT) &
++		RDO_CURR_MASK) * 10;
++}
++
++static inline unsigned int rdo_op_power(u32 rdo)
++{
++	return ((rdo >> RDO_BATT_OP_PWR_SHIFT) & RDO_PWR_MASK) * 250;
++}
++
++static inline unsigned int rdo_max_power(u32 rdo)
++{
++	return ((rdo >> RDO_BATT_MAX_PWR_SHIFT) & RDO_PWR_MASK) * 250;
++}
++
++/* USB PD timers and counters */
++#define PD_T_NO_RESPONSE	5000	/* 4.5 - 5.5 seconds */
++#define PD_T_DB_DETECT		10000	/* 10 - 15 seconds */
++#define PD_T_SEND_SOURCE_CAP	150	/* 100 - 200 ms */
++#define PD_T_SENDER_RESPONSE	60	/* 24 - 30 ms, relaxed */
++#define PD_T_SOURCE_ACTIVITY	45
++#define PD_T_SINK_ACTIVITY	135
++#define PD_T_SINK_WAIT_CAP	240
++#define PD_T_PS_TRANSITION	500
++#define PD_T_SRC_TRANSITION	35
++#define PD_T_DRP_SNK		40
++#define PD_T_DRP_SRC		30
++#define PD_T_PS_SOURCE_OFF	920
++#define PD_T_PS_SOURCE_ON	480
++#define PD_T_PS_HARD_RESET	30
++#define PD_T_SRC_RECOVER	760
++#define PD_T_SRC_RECOVER_MAX	1000
++#define PD_T_SRC_TURN_ON	275
++#define PD_T_SAFE_0V		650
++#define PD_T_VCONN_SOURCE_ON	100
++#define PD_T_SINK_REQUEST	100	/* 100 ms minimum */
++#define PD_T_ERROR_RECOVERY	100	/* minimum 25 is insufficient */
++#define PD_T_SRCSWAPSTDBY      625     /* Maximum of 650ms */
++#define PD_T_NEWSRC            250     /* Maximum of 275ms */
++
++#define PD_T_DRP_TRY		100	/* 75 - 150 ms */
++#define PD_T_DRP_TRYWAIT	600	/* 400 - 800 ms */
++
++#define PD_T_CC_DEBOUNCE	200	/* 100 - 200 ms */
++#define PD_T_PD_DEBOUNCE	20	/* 10 - 20 ms */
++
++#define PD_N_CAPS_COUNT		(PD_T_NO_RESPONSE / PD_T_SEND_SOURCE_CAP)
++#define PD_N_HARD_RESET_COUNT	2
++
++#endif /* __LINUX_USB_PD_H */
+diff -Naur linux-4.14.15/include/linux/usb/pd_vdo.h linux-gpd-4.14.15/include/linux/usb/pd_vdo.h
+--- linux-4.14.15/include/linux/usb/pd_vdo.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/pd_vdo.h	2018-01-25 09:02:03.698215267 -0500
+@@ -0,0 +1,251 @@
++/*
++ * Copyright 2015-2017 Google, Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef __LINUX_USB_PD_VDO_H
++#define __LINUX_USB_PD_VDO_H
++
++#include "pd.h"
++
++/*
++ * VDO : Vendor Defined Message Object
++ * VDM object is minimum of VDM header + 6 additional data objects.
++ */
++
++#define VDO_MAX_OBJECTS		6
++#define VDO_MAX_SIZE		(VDO_MAX_OBJECTS + 1)
++
++/*
++ * VDM header
++ * ----------
++ * <31:16>  :: SVID
++ * <15>     :: VDM type ( 1b == structured, 0b == unstructured )
++ * <14:13>  :: Structured VDM version (can only be 00 == 1.0 currently)
++ * <12:11>  :: reserved
++ * <10:8>   :: object position (1-7 valid ... used for enter/exit mode only)
++ * <7:6>    :: command type (SVDM only?)
++ * <5>      :: reserved (SVDM), command type (UVDM)
++ * <4:0>    :: command
++ */
++#define VDO(vid, type, custom)				\
++	(((vid) << 16) |				\
++	 ((type) << 15) |				\
++	 ((custom) & 0x7FFF))
++
++#define VDO_SVDM_TYPE		(1 << 15)
++#define VDO_SVDM_VERS(x)	((x) << 13)
++#define VDO_OPOS(x)		((x) << 8)
++#define VDO_CMDT(x)		((x) << 6)
++#define VDO_OPOS_MASK		VDO_OPOS(0x7)
++#define VDO_CMDT_MASK		VDO_CMDT(0x3)
++
++#define CMDT_INIT		0
++#define CMDT_RSP_ACK		1
++#define CMDT_RSP_NAK		2
++#define CMDT_RSP_BUSY		3
++
++/* reserved for SVDM ... for Google UVDM */
++#define VDO_SRC_INITIATOR	(0 << 5)
++#define VDO_SRC_RESPONDER	(1 << 5)
++
++#define CMD_DISCOVER_IDENT	1
++#define CMD_DISCOVER_SVID	2
++#define CMD_DISCOVER_MODES	3
++#define CMD_ENTER_MODE		4
++#define CMD_EXIT_MODE		5
++#define CMD_ATTENTION		6
++
++#define VDO_CMD_VENDOR(x)    (((10 + (x)) & 0x1f))
++
++/* ChromeOS specific commands */
++#define VDO_CMD_VERSION		VDO_CMD_VENDOR(0)
++#define VDO_CMD_SEND_INFO	VDO_CMD_VENDOR(1)
++#define VDO_CMD_READ_INFO	VDO_CMD_VENDOR(2)
++#define VDO_CMD_REBOOT		VDO_CMD_VENDOR(5)
++#define VDO_CMD_FLASH_ERASE	VDO_CMD_VENDOR(6)
++#define VDO_CMD_FLASH_WRITE	VDO_CMD_VENDOR(7)
++#define VDO_CMD_ERASE_SIG	VDO_CMD_VENDOR(8)
++#define VDO_CMD_PING_ENABLE	VDO_CMD_VENDOR(10)
++#define VDO_CMD_CURRENT		VDO_CMD_VENDOR(11)
++#define VDO_CMD_FLIP		VDO_CMD_VENDOR(12)
++#define VDO_CMD_GET_LOG		VDO_CMD_VENDOR(13)
++#define VDO_CMD_CCD_EN		VDO_CMD_VENDOR(14)
++
++#define PD_VDO_VID(vdo)		((vdo) >> 16)
++#define PD_VDO_SVDM(vdo)	(((vdo) >> 15) & 1)
++#define PD_VDO_OPOS(vdo)	(((vdo) >> 8) & 0x7)
++#define PD_VDO_CMD(vdo)		((vdo) & 0x1f)
++#define PD_VDO_CMDT(vdo)	(((vdo) >> 6) & 0x3)
++
++/*
++ * SVDM Identity request -> response
++ *
++ * Request is simply properly formatted SVDM header
++ *
++ * Response is 4 data objects:
++ * [0] :: SVDM header
++ * [1] :: Identitiy header
++ * [2] :: Cert Stat VDO
++ * [3] :: (Product | Cable) VDO
++ * [4] :: AMA VDO
++ *
++ */
++#define VDO_INDEX_HDR		0
++#define VDO_INDEX_IDH		1
++#define VDO_INDEX_CSTAT		2
++#define VDO_INDEX_CABLE		3
++#define VDO_INDEX_PRODUCT	3
++#define VDO_INDEX_AMA		4
++
++/*
++ * SVDM Identity Header
++ * --------------------
++ * <31>     :: data capable as a USB host
++ * <30>     :: data capable as a USB device
++ * <29:27>  :: product type
++ * <26>     :: modal operation supported (1b == yes)
++ * <25:16>  :: Reserved, Shall be set to zero
++ * <15:0>   :: USB-IF assigned VID for this cable vendor
++ */
++#define IDH_PTYPE_UNDEF		0
++#define IDH_PTYPE_HUB		1
++#define IDH_PTYPE_PERIPH	2
++#define IDH_PTYPE_PCABLE	3
++#define IDH_PTYPE_ACABLE	4
++#define IDH_PTYPE_AMA		5
++
++#define VDO_IDH(usbh, usbd, ptype, is_modal, vid)		\
++	((usbh) << 31 | (usbd) << 30 | ((ptype) & 0x7) << 27	\
++	 | (is_modal) << 26 | ((vid) & 0xffff))
++
++#define PD_IDH_PTYPE(vdo)	(((vdo) >> 27) & 0x7)
++#define PD_IDH_VID(vdo)		((vdo) & 0xffff)
++#define PD_IDH_MODAL_SUPP(vdo)	((vdo) & (1 << 26))
++
++/*
++ * Cert Stat VDO
++ * -------------
++ * <31:0>  : USB-IF assigned XID for this cable
++ */
++#define PD_CSTAT_XID(vdo)	(vdo)
++
++/*
++ * Product VDO
++ * -----------
++ * <31:16> : USB Product ID
++ * <15:0>  : USB bcdDevice
++ */
++#define VDO_PRODUCT(pid, bcd)	(((pid) & 0xffff) << 16 | ((bcd) & 0xffff))
++#define PD_PRODUCT_PID(vdo)	(((vdo) >> 16) & 0xffff)
++
++/*
++ * Cable VDO
++ * ---------
++ * <31:28> :: Cable HW version
++ * <27:24> :: Cable FW version
++ * <23:20> :: Reserved, Shall be set to zero
++ * <19:18> :: type-C to Type-A/B/C (00b == A, 01 == B, 10 == C)
++ * <17>    :: Type-C to Plug/Receptacle (0b == plug, 1b == receptacle)
++ * <16:13> :: cable latency (0001 == <10ns(~1m length))
++ * <12:11> :: cable termination type (11b == both ends active VCONN req)
++ * <10>    :: SSTX1 Directionality support (0b == fixed, 1b == cfgable)
++ * <9>     :: SSTX2 Directionality support
++ * <8>     :: SSRX1 Directionality support
++ * <7>     :: SSRX2 Directionality support
++ * <6:5>   :: Vbus current handling capability
++ * <4>     :: Vbus through cable (0b == no, 1b == yes)
++ * <3>     :: SOP" controller present? (0b == no, 1b == yes)
++ * <2:0>   :: USB SS Signaling support
++ */
++#define CABLE_ATYPE		0
++#define CABLE_BTYPE		1
++#define CABLE_CTYPE		2
++#define CABLE_PLUG		0
++#define CABLE_RECEPTACLE	1
++#define CABLE_CURR_1A5		0
++#define CABLE_CURR_3A		1
++#define CABLE_CURR_5A		2
++#define CABLE_USBSS_U2_ONLY	0
++#define CABLE_USBSS_U31_GEN1	1
++#define CABLE_USBSS_U31_GEN2	2
++#define VDO_CABLE(hw, fw, cbl, gdr, lat, term, tx1d, tx2d, rx1d, rx2d, cur,\
++		  vps, sopp, usbss) \
++	(((hw) & 0x7) << 28 | ((fw) & 0x7) << 24 | ((cbl) & 0x3) << 18	\
++	 | (gdr) << 17 | ((lat) & 0x7) << 13 | ((term) & 0x3) << 11	\
++	 | (tx1d) << 10 | (tx2d) << 9 | (rx1d) << 8 | (rx2d) << 7	\
++	 | ((cur) & 0x3) << 5 | (vps) << 4 | (sopp) << 3		\
++	 | ((usbss) & 0x7))
++
++/*
++ * AMA VDO
++ * ---------
++ * <31:28> :: Cable HW version
++ * <27:24> :: Cable FW version
++ * <23:12> :: Reserved, Shall be set to zero
++ * <11>    :: SSTX1 Directionality support (0b == fixed, 1b == cfgable)
++ * <10>    :: SSTX2 Directionality support
++ * <9>     :: SSRX1 Directionality support
++ * <8>     :: SSRX2 Directionality support
++ * <7:5>   :: Vconn power
++ * <4>     :: Vconn power required
++ * <3>     :: Vbus power required
++ * <2:0>   :: USB SS Signaling support
++ */
++#define VDO_AMA(hw, fw, tx1d, tx2d, rx1d, rx2d, vcpwr, vcr, vbr, usbss) \
++	(((hw) & 0x7) << 28 | ((fw) & 0x7) << 24			\
++	 | (tx1d) << 11 | (tx2d) << 10 | (rx1d) << 9 | (rx2d) << 8	\
++	 | ((vcpwr) & 0x7) << 5 | (vcr) << 4 | (vbr) << 3		\
++	 | ((usbss) & 0x7))
++
++#define PD_VDO_AMA_VCONN_REQ(vdo)	(((vdo) >> 4) & 1)
++#define PD_VDO_AMA_VBUS_REQ(vdo)	(((vdo) >> 3) & 1)
++
++#define AMA_VCONN_PWR_1W	0
++#define AMA_VCONN_PWR_1W5	1
++#define AMA_VCONN_PWR_2W	2
++#define AMA_VCONN_PWR_3W	3
++#define AMA_VCONN_PWR_4W	4
++#define AMA_VCONN_PWR_5W	5
++#define AMA_VCONN_PWR_6W	6
++#define AMA_USBSS_U2_ONLY	0
++#define AMA_USBSS_U31_GEN1	1
++#define AMA_USBSS_U31_GEN2	2
++#define AMA_USBSS_BBONLY	3
++
++/*
++ * SVDM Discover SVIDs request -> response
++ *
++ * Request is properly formatted VDM Header with discover SVIDs command.
++ * Response is a set of SVIDs of all all supported SVIDs with all zero's to
++ * mark the end of SVIDs.  If more than 12 SVIDs are supported command SHOULD be
++ * repeated.
++ */
++#define VDO_SVID(svid0, svid1)	(((svid0) & 0xffff) << 16 | ((svid1) & 0xffff))
++#define PD_VDO_SVID_SVID0(vdo)	((vdo) >> 16)
++#define PD_VDO_SVID_SVID1(vdo)	((vdo) & 0xffff)
++
++/* USB-IF SIDs */
++#define USB_SID_PD		0xff00 /* power delivery */
++#define USB_SID_DISPLAYPORT	0xff01
++#define USB_SID_MHL		0xff02	/* Mobile High-Definition Link */
++
++/* VDM command timeouts (in ms) */
++
++#define PD_T_VDM_UNSTRUCTURED	500
++#define PD_T_VDM_BUSY		100
++#define PD_T_VDM_WAIT_MODE_E	100
++#define PD_T_VDM_SNDR_RSP	30
++#define PD_T_VDM_E_MODE		25
++#define PD_T_VDM_RCVR_RSP	15
++
++#endif /* __LINUX_USB_PD_VDO_H */
+diff -Naur linux-4.14.15/include/linux/usb/tcpm.h linux-gpd-4.14.15/include/linux/usb/tcpm.h
+--- linux-4.14.15/include/linux/usb/tcpm.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/usb/tcpm.h	2018-01-25 09:02:03.699215265 -0500
+@@ -0,0 +1,212 @@
++/*
++ * Copyright 2015-2017 Google, Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef __LINUX_USB_TCPM_H
++#define __LINUX_USB_TCPM_H
++
++#include <linux/bitops.h>
++#include <linux/usb/typec.h>
++#include "pd.h"
++
++enum typec_cc_status {
++	TYPEC_CC_OPEN,
++	TYPEC_CC_RA,
++	TYPEC_CC_RD,
++	TYPEC_CC_RP_DEF,
++	TYPEC_CC_RP_1_5,
++	TYPEC_CC_RP_3_0,
++};
++
++enum typec_cc_polarity {
++	TYPEC_POLARITY_CC1,
++	TYPEC_POLARITY_CC2,
++};
++
++/* Time to wait for TCPC to complete transmit */
++#define PD_T_TCPC_TX_TIMEOUT	100		/* in ms	*/
++#define PD_ROLE_SWAP_TIMEOUT	(MSEC_PER_SEC * 10)
++
++enum tcpm_transmit_status {
++	TCPC_TX_SUCCESS = 0,
++	TCPC_TX_DISCARDED = 1,
++	TCPC_TX_FAILED = 2,
++};
++
++enum tcpm_transmit_type {
++	TCPC_TX_SOP = 0,
++	TCPC_TX_SOP_PRIME = 1,
++	TCPC_TX_SOP_PRIME_PRIME = 2,
++	TCPC_TX_SOP_DEBUG_PRIME = 3,
++	TCPC_TX_SOP_DEBUG_PRIME_PRIME = 4,
++	TCPC_TX_HARD_RESET = 5,
++	TCPC_TX_CABLE_RESET = 6,
++	TCPC_TX_BIST_MODE_2 = 7
++};
++
++/**
++ * struct tcpc_config - Port configuration
++ * @src_pdo:	PDO parameters sent to port partner as response to
++ *		PD_CTRL_GET_SOURCE_CAP message
++ * @nr_src_pdo:	Number of entries in @src_pdo
++ * @snk_pdo:	PDO parameters sent to partner as response to
++ *		PD_CTRL_GET_SINK_CAP message
++ * @nr_snk_pdo:	Number of entries in @snk_pdo
++ * @max_snk_mv:	Maximum acceptable sink voltage in mV
++ * @max_snk_ma:	Maximum sink current in mA
++ * @max_snk_mw:	Maximum required sink power in mW
++ * @operating_snk_mw:
++ *		Required operating sink power in mW
++ * @type:	Port type (TYPEC_PORT_DFP, TYPEC_PORT_UFP, or
++ *		TYPEC_PORT_DRP)
++ * @default_role:
++ *		Default port role (TYPEC_SINK or TYPEC_SOURCE).
++ *		Set to TYPEC_NO_PREFERRED_ROLE if no default role.
++ * @try_role_hw:True if try.{Src,Snk} is implemented in hardware
++ * @alt_modes:	List of supported alternate modes
++ */
++struct tcpc_config {
++	const u32 *src_pdo;
++	unsigned int nr_src_pdo;
++
++	const u32 *snk_pdo;
++	unsigned int nr_snk_pdo;
++
++	const u32 *snk_vdo;
++	unsigned int nr_snk_vdo;
++
++	unsigned int max_snk_mv;
++	unsigned int max_snk_ma;
++	unsigned int max_snk_mw;
++	unsigned int operating_snk_mw;
++
++	enum typec_port_type type;
++	enum typec_role default_role;
++	bool try_role_hw;	/* try.{src,snk} implemented in hardware */
++
++	const struct typec_altmode_desc *alt_modes;
++};
++
++enum tcpc_usb_switch {
++	TCPC_USB_SWITCH_CONNECT,
++	TCPC_USB_SWITCH_DISCONNECT,
++};
++
++/* Mux state attributes */
++#define TCPC_MUX_USB_DEVICE_ENABLED		BIT(0)	/* USB device enabled */
++#define TCPC_MUX_USB_HOST_ENABLED		BIT(1)	/* USB host enabled */
++#define TCPC_MUX_DP_SRC_ENABLED			BIT(2)	/* DP enabled */
++#define TCPC_MUX_POLARITY_INVERTED		BIT(3)	/* Polarity inverted */
++
++/* Mux modes, decoded to attributes */
++enum tcpc_mux_mode {
++	/* Open switch */
++	TYPEC_MUX_NONE = 0,
++	/* USB device only */
++	TYPEC_MUX_USB_DEVICE = TCPC_MUX_USB_DEVICE_ENABLED,
++	/* USB host only */
++	TYPEC_MUX_USB_HOST = TCPC_MUX_USB_HOST_ENABLED,
++	/* DP source only */
++	TYPEC_MUX_DP = TCPC_MUX_DP_SRC_ENABLED,
++	/* Both USB host and DP source */
++	TYPEC_MUX_DOCK = TCPC_MUX_USB_HOST_ENABLED | TCPC_MUX_DP_SRC_ENABLED,
++};
++
++struct tcpc_mux_dev {
++	int (*set)(struct tcpc_mux_dev *dev, enum tcpc_mux_mode mux_mode,
++		   enum tcpc_usb_switch usb_config,
++		   enum typec_cc_polarity polarity);
++	bool dfp_only;
++	void *priv_data;
++};
++
++/**
++ * struct tcpc_dev - Port configuration and callback functions
++ * @config:	Pointer to port configuration
++ * @get_vbus:	Called to read current VBUS state
++ * @get_current_limit:
++ *		Optional; called by the tcpm core when configured as a snk
++ *		and cc=Rp-def. This allows the tcpm to provide a fallback
++ *		current-limit detection method for the cc=Rp-def case.
++ *		For example, some tcpcs may include BC1.2 charger detection
++ *		and use that in this case.
++ * @set_cc:	Called to set value of CC pins
++ * @get_cc:	Called to read current CC pin values
++ * @set_polarity:
++ *		Called to set polarity
++ * @set_vconn:	Called to enable or disable VCONN
++ * @set_vbus:	Called to enable or disable VBUS
++ * @set_current_limit:
++ *		Optional; called to set current limit as negotiated
++ *		with partner.
++ * @set_pd_rx:	Called to enable or disable reception of PD messages
++ * @set_roles:	Called to set power and data roles
++ * @start_drp_toggling:
++ *		Optional; if supported by hardware, called to start DRP
++ *		toggling. DRP toggling is stopped automatically if
++ *		a connection is established.
++ * @try_role:	Optional; called to set a preferred role
++ * @pd_transmit:Called to transmit PD message
++ * @mux:	Pointer to multiplexer data
++ */
++struct tcpc_dev {
++	const struct tcpc_config *config;
++
++	int (*init)(struct tcpc_dev *dev);
++	int (*get_vbus)(struct tcpc_dev *dev);
++	int (*get_current_limit)(struct tcpc_dev *dev);
++	int (*set_cc)(struct tcpc_dev *dev, enum typec_cc_status cc);
++	int (*get_cc)(struct tcpc_dev *dev, enum typec_cc_status *cc1,
++		      enum typec_cc_status *cc2);
++	int (*set_polarity)(struct tcpc_dev *dev,
++			    enum typec_cc_polarity polarity);
++	int (*set_vconn)(struct tcpc_dev *dev, bool on);
++	int (*set_vbus)(struct tcpc_dev *dev, bool on, bool charge);
++	int (*set_current_limit)(struct tcpc_dev *dev, u32 max_ma, u32 mv);
++	int (*set_pd_rx)(struct tcpc_dev *dev, bool on);
++	int (*set_roles)(struct tcpc_dev *dev, bool attached,
++			 enum typec_role role, enum typec_data_role data);
++	int (*start_drp_toggling)(struct tcpc_dev *dev,
++				  enum typec_cc_status cc);
++	int (*try_role)(struct tcpc_dev *dev, int role);
++	int (*pd_transmit)(struct tcpc_dev *dev, enum tcpm_transmit_type type,
++			   const struct pd_message *msg);
++	struct tcpc_mux_dev *mux;
++};
++
++struct tcpm_port;
++
++struct tcpm_port *tcpm_register_port(struct device *dev, struct tcpc_dev *tcpc);
++void tcpm_unregister_port(struct tcpm_port *port);
++
++void tcpm_update_source_capabilities(struct tcpm_port *port, const u32 *pdo,
++				     unsigned int nr_pdo);
++void tcpm_update_sink_capabilities(struct tcpm_port *port, const u32 *pdo,
++				   unsigned int nr_pdo,
++				   unsigned int max_snk_mv,
++				   unsigned int max_snk_ma,
++				   unsigned int max_snk_mw,
++				   unsigned int operating_snk_mw);
++
++void tcpm_vbus_change(struct tcpm_port *port);
++void tcpm_cc_change(struct tcpm_port *port);
++void tcpm_pd_receive(struct tcpm_port *port,
++		     const struct pd_message *msg);
++void tcpm_pd_transmit_complete(struct tcpm_port *port,
++			       enum tcpm_transmit_status status);
++void tcpm_pd_hard_reset(struct tcpm_port *port);
++void tcpm_tcpc_reset(struct tcpm_port *port);
++
++struct tcpc_mux_dev *devm_tcpc_gen_mux_create(struct device *dev);
++
++#endif /* __LINUX_USB_TCPM_H */
+diff -Naur linux-4.14.15/include/linux/vbox_utils.h linux-gpd-4.14.15/include/linux/vbox_utils.h
+--- linux-4.14.15/include/linux/vbox_utils.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/linux/vbox_utils.h	2018-01-25 09:02:03.700215263 -0500
+@@ -0,0 +1,92 @@
++/*
++ * Copyright (C) 2006-2016 Oracle Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * The contents of this file may alternatively be used under the terms
++ * of the Common Development and Distribution License Version 1.0
++ * (CDDL) only, in which case the provisions of the CDDL are applicable
++ * instead of those of the GPL.
++ *
++ * You may elect to license modified versions of this file under the
++ * terms and conditions of either the GPL or the CDDL or both.
++ */
++
++#ifndef __VBOX_UTILS_H__
++#define __VBOX_UTILS_H__
++
++#include <linux/printk.h>
++#include <linux/vbox_vmmdev_types.h>
++
++struct vbg_dev;
++
++/**
++ * vboxguest logging functions, these log both to the backdoor and call
++ * the equivalent kernel pr_foo function.
++ */
++__printf(1, 2) void vbg_info(const char *fmt, ...);
++__printf(1, 2) void vbg_warn(const char *fmt, ...);
++__printf(1, 2) void vbg_err(const char *fmt, ...);
++
++/* Only use backdoor logging for non-dynamic debug builds */
++#if defined(DEBUG) && !defined(CONFIG_DYNAMIC_DEBUG)
++__printf(1, 2) void vbg_debug(const char *fmt, ...);
++#else
++#define vbg_debug pr_debug
++#endif
++
++/**
++ * Allocate memory for generic request and initialize the request header.
++ *
++ * Return: the allocated memory
++ * @len:		Size of memory block required for the request.
++ * @req_type:		The generic request type.
++ */
++void *vbg_req_alloc(size_t len, enum vmmdev_request_type req_type);
++
++/**
++ * Perform a generic request.
++ *
++ * Return: VBox status code
++ * @gdev:		The Guest extension device.
++ * @req:		Pointer to the request structure.
++ */
++int vbg_req_perform(struct vbg_dev *gdev, void *req);
++
++int vbg_hgcm_connect(struct vbg_dev *gdev,
++		     struct vmmdev_hgcm_service_location *loc,
++		     u32 *client_id, int *vbox_status);
++
++int vbg_hgcm_disconnect(struct vbg_dev *gdev, u32 client_id, int *vbox_status);
++
++int vbg_hgcm_call(struct vbg_dev *gdev, u32 client_id, u32 function,
++		  u32 timeout_ms, struct vmmdev_hgcm_function_parameter *parms,
++		  u32 parm_count, int *vbox_status);
++
++int vbg_hgcm_call32(
++	struct vbg_dev *gdev, u32 client_id, u32 function, u32 timeout_ms,
++	struct vmmdev_hgcm_function_parameter32 *parm32, u32 parm_count,
++	int *vbox_status);
++
++/**
++ * Convert a VirtualBox status code to a standard Linux kernel return value.
++ * Return: 0 or negative errno value.
++ * @rc:			VirtualBox status code to convert.
++ */
++int vbg_status_code_to_errno(int rc);
++
++/**
++ * Helper for the vboxsf driver to get a reference to the guest device.
++ * Return: a pointer to the gdev; or a ERR_PTR value on error.
++ */
++struct vbg_dev *vbg_get_gdev(void);
++
++/**
++ * Helper for the vboxsf driver to put a guest device reference.
++ * @gdev:		Reference returned by vbg_get_gdev to put.
++ */
++void vbg_put_gdev(struct vbg_dev *gdev);
++
++#endif
+diff -Naur linux-4.14.15/include/uapi/drm/drm_mode.h linux-gpd-4.14.15/include/uapi/drm/drm_mode.h
+--- linux-4.14.15/include/uapi/drm/drm_mode.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/drm/drm_mode.h	2018-01-25 09:02:03.701215261 -0500
+@@ -127,6 +127,13 @@
+ #define DRM_MODE_LINK_STATUS_GOOD	0
+ #define DRM_MODE_LINK_STATUS_BAD	1
+ 
++/* Panel Orientation options */
++#define DRM_MODE_PANEL_ORIENTATION_UNKNOWN	-1
++#define DRM_MODE_PANEL_ORIENTATION_NORMAL	0
++#define DRM_MODE_PANEL_ORIENTATION_BOTTOM_UP	1
++#define DRM_MODE_PANEL_ORIENTATION_LEFT_UP	2
++#define DRM_MODE_PANEL_ORIENTATION_RIGHT_UP	3
++
+ /*
+  * DRM_MODE_ROTATE_<degrees>
+  *
+diff -Naur linux-4.14.15/include/uapi/linux/usb/ch9.h linux-gpd-4.14.15/include/uapi/linux/usb/ch9.h
+--- linux-4.14.15/include/uapi/linux/usb/ch9.h	2018-01-23 13:58:21.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/usb/ch9.h	2018-01-25 09:02:03.702215260 -0500
+@@ -321,6 +321,7 @@
+ #define USB_CLASS_CSCID			0x0b	/* chip+ smart card */
+ #define USB_CLASS_CONTENT_SEC		0x0d	/* content security */
+ #define USB_CLASS_VIDEO			0x0e
++#define USB_CLASS_DEBUG			0xdc
+ #define USB_CLASS_WIRELESS_CONTROLLER	0xe0
+ #define USB_CLASS_MISC			0xef
+ #define USB_CLASS_APP_SPEC		0xfe
+diff -Naur linux-4.14.15/include/uapi/linux/usb/f_accessory.h linux-gpd-4.14.15/include/uapi/linux/usb/f_accessory.h
+--- linux-4.14.15/include/uapi/linux/usb/f_accessory.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/usb/f_accessory.h	2018-01-25 09:02:03.703215258 -0500
+@@ -0,0 +1,146 @@
++/*
++ * Gadget Function Driver for Android USB accessories
++ *
++ * Copyright (C) 2011 Google, Inc.
++ * Author: Mike Lockwood <lockwood@android.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef _UAPI_LINUX_USB_F_ACCESSORY_H
++#define _UAPI_LINUX_USB_F_ACCESSORY_H
++
++/* Use Google Vendor ID when in accessory mode */
++#define USB_ACCESSORY_VENDOR_ID 0x18D1
++
++
++/* Product ID to use when in accessory mode */
++#define USB_ACCESSORY_PRODUCT_ID 0x2D00
++
++/* Product ID to use when in accessory mode and adb is enabled */
++#define USB_ACCESSORY_ADB_PRODUCT_ID 0x2D01
++
++/* Indexes for strings sent by the host via ACCESSORY_SEND_STRING */
++#define ACCESSORY_STRING_MANUFACTURER   0
++#define ACCESSORY_STRING_MODEL          1
++#define ACCESSORY_STRING_DESCRIPTION    2
++#define ACCESSORY_STRING_VERSION        3
++#define ACCESSORY_STRING_URI            4
++#define ACCESSORY_STRING_SERIAL         5
++
++/* Control request for retrieving device's protocol version
++ *
++ *	requestType:    USB_DIR_IN | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_GET_PROTOCOL
++ *	value:          0
++ *	index:          0
++ *	data            version number (16 bits little endian)
++ *                     1 for original accessory support
++ *                     2 adds HID and device to host audio support
++ */
++#define ACCESSORY_GET_PROTOCOL  51
++
++/* Control request for host to send a string to the device
++ *
++ *	requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_SEND_STRING
++ *	value:          0
++ *	index:          string ID
++ *	data            zero terminated UTF8 string
++ *
++ *  The device can later retrieve these strings via the
++ *  ACCESSORY_GET_STRING_* ioctls
++ */
++#define ACCESSORY_SEND_STRING   52
++
++/* Control request for starting device in accessory mode.
++ * The host sends this after setting all its strings to the device.
++ *
++ *	requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_START
++ *	value:          0
++ *	index:          0
++ *	data            none
++ */
++#define ACCESSORY_START         53
++
++/* Control request for registering a HID device.
++ * Upon registering, a unique ID is sent by the accessory in the
++ * value parameter. This ID will be used for future commands for
++ * the device
++ *
++ *	requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_REGISTER_HID_DEVICE
++ *	value:          Accessory assigned ID for the HID device
++ *	index:          total length of the HID report descriptor
++ *	data            none
++ */
++#define ACCESSORY_REGISTER_HID         54
++
++/* Control request for unregistering a HID device.
++ *
++ *	requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_REGISTER_HID
++ *	value:          Accessory assigned ID for the HID device
++ *	index:          0
++ *	data            none
++ */
++#define ACCESSORY_UNREGISTER_HID         55
++
++/* Control request for sending the HID report descriptor.
++ * If the HID descriptor is longer than the endpoint zero max packet size,
++ * the descriptor will be sent in multiple ACCESSORY_SET_HID_REPORT_DESC
++ * commands. The data for the descriptor must be sent sequentially
++ * if multiple packets are needed.
++ *
++ *	requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_SET_HID_REPORT_DESC
++ *	value:          Accessory assigned ID for the HID device
++ *	index:          offset of data in descriptor
++ *                      (needed when HID descriptor is too big for one packet)
++ *	data            the HID report descriptor
++ */
++#define ACCESSORY_SET_HID_REPORT_DESC         56
++
++/* Control request for sending HID events.
++ *
++ *	requestType:    USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_SEND_HID_EVENT
++ *	value:          Accessory assigned ID for the HID device
++ *	index:          0
++ *	data            the HID report for the event
++ */
++#define ACCESSORY_SEND_HID_EVENT         57
++
++/* Control request for setting the audio mode.
++ *
++ *	requestType:	USB_DIR_OUT | USB_TYPE_VENDOR
++ *	request:        ACCESSORY_SET_AUDIO_MODE
++ *	value:          0 - no audio
++ *                     1 - device to host, 44100 16-bit stereo PCM
++ *	index:          0
++ *	data            none
++ */
++#define ACCESSORY_SET_AUDIO_MODE         58
++
++/* ioctls for retrieving strings set by the host */
++#define ACCESSORY_GET_STRING_MANUFACTURER   _IOW('M', 1, char[256])
++#define ACCESSORY_GET_STRING_MODEL          _IOW('M', 2, char[256])
++#define ACCESSORY_GET_STRING_DESCRIPTION    _IOW('M', 3, char[256])
++#define ACCESSORY_GET_STRING_VERSION        _IOW('M', 4, char[256])
++#define ACCESSORY_GET_STRING_URI            _IOW('M', 5, char[256])
++#define ACCESSORY_GET_STRING_SERIAL         _IOW('M', 6, char[256])
++/* returns 1 if there is a start request pending */
++#define ACCESSORY_IS_START_REQUESTED        _IO('M', 7)
++/* returns audio mode (set via the ACCESSORY_SET_AUDIO_MODE control request) */
++#define ACCESSORY_GET_AUDIO_MODE            _IO('M', 8)
++
++#endif /* _UAPI_LINUX_USB_F_ACCESSORY_H */
+diff -Naur linux-4.14.15/include/uapi/linux/usb/f_mtp.h linux-gpd-4.14.15/include/uapi/linux/usb/f_mtp.h
+--- linux-4.14.15/include/uapi/linux/usb/f_mtp.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/usb/f_mtp.h	2018-01-25 09:02:03.703215258 -0500
+@@ -0,0 +1,61 @@
++/*
++ * Gadget Function Driver for MTP
++ *
++ * Copyright (C) 2010 Google, Inc.
++ * Author: Mike Lockwood <lockwood@android.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef _UAPI_LINUX_USB_F_MTP_H
++#define _UAPI_LINUX_USB_F_MTP_H
++
++#include <linux/ioctl.h>
++#include <linux/types.h>
++
++struct mtp_file_range {
++	/* file descriptor for file to transfer */
++	int			fd;
++	/* offset in file for start of transfer */
++	loff_t		offset;
++	/* number of bytes to transfer */
++	int64_t		length;
++	/* MTP command ID for data header,
++	 * used only for MTP_SEND_FILE_WITH_HEADER
++	 */
++	uint16_t	command;
++	/* MTP transaction ID for data header,
++	 * used only for MTP_SEND_FILE_WITH_HEADER
++	 */
++	uint32_t	transaction_id;
++};
++
++struct mtp_event {
++	/* size of the event */
++	size_t		length;
++	/* event data to send */
++	void		*data;
++};
++
++/* Sends the specified file range to the host */
++#define MTP_SEND_FILE              _IOW('M', 0, struct mtp_file_range)
++/* Receives data from the host and writes it to a file.
++ * The file is created if it does not exist.
++ */
++#define MTP_RECEIVE_FILE           _IOW('M', 1, struct mtp_file_range)
++/* Sends an event to the host via the interrupt endpoint */
++#define MTP_SEND_EVENT             _IOW('M', 3, struct mtp_event)
++/* Sends the specified file range to the host,
++ * with a 12 byte MTP data packet header at the beginning.
++ */
++#define MTP_SEND_FILE_WITH_HEADER  _IOW('M', 4, struct mtp_file_range)
++
++#endif /* _UAPI_LINUX_USB_F_MTP_H */
+diff -Naur linux-4.14.15/include/uapi/linux/vbox_err.h linux-gpd-4.14.15/include/uapi/linux/vbox_err.h
+--- linux-4.14.15/include/uapi/linux/vbox_err.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/vbox_err.h	2018-01-25 09:02:03.704215256 -0500
+@@ -0,0 +1,170 @@
++/*
++ * Copyright (C) 2017 Oracle Corporation
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
++ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
++ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ * OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++#ifndef __UAPI_VBOX_ERR_H__
++#define __UAPI_VBOX_ERR_H__
++
++#define VINF_SUCCESS                        0
++#define VERR_GENERAL_FAILURE                (-1)
++#define VERR_INVALID_PARAMETER              (-2)
++#define VERR_INVALID_MAGIC                  (-3)
++#define VERR_INVALID_HANDLE                 (-4)
++#define VERR_LOCK_FAILED                    (-5)
++#define VERR_INVALID_POINTER                (-6)
++#define VERR_IDT_FAILED                     (-7)
++#define VERR_NO_MEMORY                      (-8)
++#define VERR_ALREADY_LOADED                 (-9)
++#define VERR_PERMISSION_DENIED              (-10)
++#define VERR_VERSION_MISMATCH               (-11)
++#define VERR_NOT_IMPLEMENTED                (-12)
++#define VERR_INVALID_FLAGS                  (-13)
++
++#define VERR_NOT_EQUAL                      (-18)
++#define VERR_NOT_SYMLINK                    (-19)
++#define VERR_NO_TMP_MEMORY                  (-20)
++#define VERR_INVALID_FMODE                  (-21)
++#define VERR_WRONG_ORDER                    (-22)
++#define VERR_NO_TLS_FOR_SELF                (-23)
++#define VERR_FAILED_TO_SET_SELF_TLS         (-24)
++#define VERR_NO_CONT_MEMORY                 (-26)
++#define VERR_NO_PAGE_MEMORY                 (-27)
++#define VERR_THREAD_IS_DEAD                 (-29)
++#define VERR_THREAD_NOT_WAITABLE            (-30)
++#define VERR_PAGE_TABLE_NOT_PRESENT         (-31)
++#define VERR_INVALID_CONTEXT                (-32)
++#define VERR_TIMER_BUSY                     (-33)
++#define VERR_ADDRESS_CONFLICT               (-34)
++#define VERR_UNRESOLVED_ERROR               (-35)
++#define VERR_INVALID_FUNCTION               (-36)
++#define VERR_NOT_SUPPORTED                  (-37)
++#define VERR_ACCESS_DENIED                  (-38)
++#define VERR_INTERRUPTED                    (-39)
++#define VERR_TIMEOUT                        (-40)
++#define VERR_BUFFER_OVERFLOW                (-41)
++#define VERR_TOO_MUCH_DATA                  (-42)
++#define VERR_MAX_THRDS_REACHED              (-43)
++#define VERR_MAX_PROCS_REACHED              (-44)
++#define VERR_SIGNAL_REFUSED                 (-45)
++#define VERR_SIGNAL_PENDING                 (-46)
++#define VERR_SIGNAL_INVALID                 (-47)
++#define VERR_STATE_CHANGED                  (-48)
++#define VERR_INVALID_UUID_FORMAT            (-49)
++#define VERR_PROCESS_NOT_FOUND              (-50)
++#define VERR_PROCESS_RUNNING                (-51)
++#define VERR_TRY_AGAIN                      (-52)
++#define VERR_PARSE_ERROR                    (-53)
++#define VERR_OUT_OF_RANGE                   (-54)
++#define VERR_NUMBER_TOO_BIG                 (-55)
++#define VERR_NO_DIGITS                      (-56)
++#define VERR_NEGATIVE_UNSIGNED              (-57)
++#define VERR_NO_TRANSLATION                 (-58)
++
++#define VERR_NOT_FOUND                      (-78)
++#define VERR_INVALID_STATE                  (-79)
++#define VERR_OUT_OF_RESOURCES               (-80)
++
++#define VERR_FILE_NOT_FOUND                 (-102)
++#define VERR_PATH_NOT_FOUND                 (-103)
++#define VERR_INVALID_NAME                   (-104)
++#define VERR_ALREADY_EXISTS                 (-105)
++#define VERR_TOO_MANY_OPEN_FILES            (-106)
++#define VERR_SEEK                           (-107)
++#define VERR_NEGATIVE_SEEK                  (-108)
++#define VERR_SEEK_ON_DEVICE                 (-109)
++#define VERR_EOF                            (-110)
++#define VERR_READ_ERROR                     (-111)
++#define VERR_WRITE_ERROR                    (-112)
++#define VERR_WRITE_PROTECT                  (-113)
++#define VERR_SHARING_VIOLATION              (-114)
++#define VERR_FILE_LOCK_FAILED               (-115)
++#define VERR_FILE_LOCK_VIOLATION            (-116)
++#define VERR_CANT_CREATE                    (-117)
++#define VERR_CANT_DELETE_DIRECTORY          (-118)
++#define VERR_NOT_SAME_DEVICE                (-119)
++#define VERR_FILENAME_TOO_LONG              (-120)
++#define VERR_MEDIA_NOT_PRESENT              (-121)
++#define VERR_MEDIA_NOT_RECOGNIZED           (-122)
++#define VERR_FILE_NOT_LOCKED                (-123)
++#define VERR_FILE_LOCK_LOST                 (-124)
++#define VERR_DIR_NOT_EMPTY                  (-125)
++#define VERR_NOT_A_DIRECTORY                (-126)
++#define VERR_IS_A_DIRECTORY                 (-127)
++#define VERR_FILE_TOO_BIG                   (-128)
++
++#define VERR_NET_IO_ERROR                       (-400)
++#define VERR_NET_OUT_OF_RESOURCES               (-401)
++#define VERR_NET_HOST_NOT_FOUND                 (-402)
++#define VERR_NET_PATH_NOT_FOUND                 (-403)
++#define VERR_NET_PRINT_ERROR                    (-404)
++#define VERR_NET_NO_NETWORK                     (-405)
++#define VERR_NET_NOT_UNIQUE_NAME                (-406)
++
++#define VERR_NET_IN_PROGRESS                    (-436)
++#define VERR_NET_ALREADY_IN_PROGRESS            (-437)
++#define VERR_NET_NOT_SOCKET                     (-438)
++#define VERR_NET_DEST_ADDRESS_REQUIRED          (-439)
++#define VERR_NET_MSG_SIZE                       (-440)
++#define VERR_NET_PROTOCOL_TYPE                  (-441)
++#define VERR_NET_PROTOCOL_NOT_AVAILABLE         (-442)
++#define VERR_NET_PROTOCOL_NOT_SUPPORTED         (-443)
++#define VERR_NET_SOCKET_TYPE_NOT_SUPPORTED      (-444)
++#define VERR_NET_OPERATION_NOT_SUPPORTED        (-445)
++#define VERR_NET_PROTOCOL_FAMILY_NOT_SUPPORTED  (-446)
++#define VERR_NET_ADDRESS_FAMILY_NOT_SUPPORTED   (-447)
++#define VERR_NET_ADDRESS_IN_USE                 (-448)
++#define VERR_NET_ADDRESS_NOT_AVAILABLE          (-449)
++#define VERR_NET_DOWN                           (-450)
++#define VERR_NET_UNREACHABLE                    (-451)
++#define VERR_NET_CONNECTION_RESET               (-452)
++#define VERR_NET_CONNECTION_ABORTED             (-453)
++#define VERR_NET_CONNECTION_RESET_BY_PEER       (-454)
++#define VERR_NET_NO_BUFFER_SPACE                (-455)
++#define VERR_NET_ALREADY_CONNECTED              (-456)
++#define VERR_NET_NOT_CONNECTED                  (-457)
++#define VERR_NET_SHUTDOWN                       (-458)
++#define VERR_NET_TOO_MANY_REFERENCES            (-459)
++#define VERR_NET_CONNECTION_TIMED_OUT           (-460)
++#define VERR_NET_CONNECTION_REFUSED             (-461)
++#define VERR_NET_HOST_DOWN                      (-464)
++#define VERR_NET_HOST_UNREACHABLE               (-465)
++#define VERR_NET_PROTOCOL_ERROR                 (-466)
++#define VERR_NET_INCOMPLETE_TX_PACKET           (-467)
++
++/* misc. unsorted codes */
++#define VERR_RESOURCE_BUSY                      (-138)
++#define VERR_DISK_FULL                          (-152)
++#define VERR_TOO_MANY_SYMLINKS                  (-156)
++#define VERR_NO_MORE_FILES                      (-201)
++#define VERR_INTERNAL_ERROR                     (-225)
++#define VERR_INTERNAL_ERROR_2                   (-226)
++#define VERR_INTERNAL_ERROR_3                   (-227)
++#define VERR_INTERNAL_ERROR_4                   (-228)
++#define VERR_DEV_IO_ERROR                       (-250)
++#define VERR_IO_BAD_LENGTH                      (-255)
++#define VERR_BROKEN_PIPE                        (-301)
++#define VERR_NO_DATA                            (-304)
++#define VERR_SEM_DESTROYED                      (-363)
++#define VERR_DEADLOCK                           (-365)
++#define VERR_BAD_EXE_FORMAT                     (-608)
++#define VINF_HGCM_ASYNC_EXECUTE                 (2903)
++
++#endif
+diff -Naur linux-4.14.15/include/uapi/linux/vboxguest.h linux-gpd-4.14.15/include/uapi/linux/vboxguest.h
+--- linux-4.14.15/include/uapi/linux/vboxguest.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/vboxguest.h	2018-01-25 09:02:03.705215254 -0500
+@@ -0,0 +1,341 @@
++/*
++ * VBoxGuest - VirtualBox Guest Additions Driver Interface.
++ *
++ * Copyright (C) 2006-2016 Oracle Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * The contents of this file may alternatively be used under the terms
++ * of the Common Development and Distribution License Version 1.0
++ * (CDDL) only, in which case the provisions of the CDDL are applicable
++ * instead of those of the GPL.
++ *
++ * You may elect to license modified versions of this file under the
++ * terms and conditions of either the GPL or the CDDL or both.
++ */
++
++#ifndef __UAPI_VBOXGUEST_H__
++#define __UAPI_VBOXGUEST_H__
++
++#include <asm/bitsperlong.h>
++#include <linux/ioctl.h>
++#include <linux/vbox_err.h>
++#include <linux/vbox_vmmdev_types.h>
++
++/* Version of vbg_ioctl_hdr structure. */
++#define VBG_IOCTL_HDR_VERSION		0x10001
++/* Default request type.  Use this for non-VMMDev requests. */
++#define VBG_IOCTL_HDR_TYPE_DEFAULT		0
++
++/**
++ * Common ioctl header.
++ *
++ * This is a mirror of vmmdev_request_header to prevent duplicating data and
++ * needing to verify things multiple times.
++ */
++struct vbg_ioctl_hdr {
++	/** IN: The request input size, and output size if size_out is zero. */
++	__u32 size_in;
++	/** IN: Structure version (VBG_IOCTL_HDR_VERSION) */
++	__u32 version;
++	/** IN: The VMMDev request type or VBG_IOCTL_HDR_TYPE_DEFAULT. */
++	__u32 type;
++	/**
++	 * OUT: The VBox status code of the operation, out direction only.
++	 * This is a VINF_ or VERR_ value as defined in vbox_err.h.
++	 */
++	__s32 rc;
++	/** IN: Output size. Set to zero to use size_in as output size. */
++	__u32 size_out;
++	/** Reserved, MBZ. */
++	__u32 reserved;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_hdr, 24);
++
++
++/*
++ * The VBoxGuest I/O control version.
++ *
++ * As usual, the high word contains the major version and changes to it
++ * signifies incompatible changes.
++ *
++ * The lower word is the minor version number, it is increased when new
++ * functions are added or existing changed in a backwards compatible manner.
++ */
++#define VBG_IOC_VERSION		0x00010000u
++
++/**
++ * VBG_IOCTL_DRIVER_VERSION_INFO data structure
++ *
++ * Note VBG_IOCTL_DRIVER_VERSION_INFO may switch the session to a backwards
++ * compatible interface version if uClientVersion indicates older client code.
++ */
++struct vbg_ioctl_driver_version_info {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			/** Requested interface version (VBG_IOC_VERSION). */
++			__u32 req_version;
++			/**
++			 * Minimum interface version number (typically the
++			 * major version part of VBG_IOC_VERSION).
++			 */
++			__u32 min_version;
++			/** Reserved, MBZ. */
++			__u32 reserved1;
++			/** Reserved, MBZ. */
++			__u32 reserved2;
++		} in;
++		struct {
++			/** Version for this session (typ. VBG_IOC_VERSION). */
++			__u32 session_version;
++			/** Version of the IDC interface (VBG_IOC_VERSION). */
++			__u32 driver_version;
++			/** The SVN revision of the driver, or 0. */
++			__u32 driver_revision;
++			/** Reserved \#1 (zero until defined). */
++			__u32 reserved1;
++			/** Reserved \#2 (zero until defined). */
++			__u32 reserved2;
++		} out;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_driver_version_info, 24 + 20);
++
++#define VBG_IOCTL_DRIVER_VERSION_INFO \
++	_IOWR('V', 0, struct vbg_ioctl_driver_version_info)
++
++
++/* IOCTL to perform a VMM Device request less than 1KB in size. */
++#define VBG_IOCTL_VMMDEV_REQUEST(s)	_IOC(_IOC_READ | _IOC_WRITE, 'V', 2, s)
++
++
++/* IOCTL to perform a VMM Device request larger then 1KB. */
++#define VBG_IOCTL_VMMDEV_REQUEST_BIG	_IOC(_IOC_READ | _IOC_WRITE, 'V', 3, 0)
++
++
++/** VBG_IOCTL_HGCM_CONNECT data structure. */
++struct vbg_ioctl_hgcm_connect {
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			struct vmmdev_hgcm_service_location loc;
++		} in;
++		struct {
++			__u32 client_id;
++		} out;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_hgcm_connect, 24 + 132);
++
++#define VBG_IOCTL_HGCM_CONNECT \
++	_IOWR('V', 4, struct vbg_ioctl_hgcm_connect)
++
++
++/** VBG_IOCTL_HGCM_DISCONNECT data structure. */
++struct vbg_ioctl_hgcm_disconnect {
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			__u32 client_id;
++		} in;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_hgcm_disconnect, 24 + 4);
++
++#define VBG_IOCTL_HGCM_DISCONNECT \
++	_IOWR('V', 5, struct vbg_ioctl_hgcm_disconnect)
++
++
++/** VBG_IOCTL_HGCM_CALL data structure. */
++struct vbg_ioctl_hgcm_call {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	/** Input: The id of the caller. */
++	__u32 client_id;
++	/** Input: Function number. */
++	__u32 function;
++	/**
++	 * Input: How long to wait (milliseconds) for completion before
++	 * cancelling the call. Set to -1 to wait indefinitely.
++	 */
++	__u32 timeout_ms;
++	/** Interruptable flag, ignored for userspace calls. */
++	__u8 interruptible;
++	/** Explicit padding, MBZ. */
++	__u8 reserved;
++	/**
++	 * Input: How many parameters following this structure.
++	 *
++	 * The parameters are either HGCMFunctionParameter64 or 32,
++	 * depending on whether we're receiving a 64-bit or 32-bit request.
++	 *
++	 * The current maximum is 61 parameters (given a 1KB max request size,
++	 * and a 64-bit parameter size of 16 bytes).
++	 */
++	__u16 parm_count;
++	/*
++	 * Parameters follow in form:
++	 * struct hgcm_function_parameter<32|64> parms[parm_count]
++	 */
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_hgcm_call, 24 + 16);
++
++#define VBG_IOCTL_HGCM_CALL_32(s)	_IOC(_IOC_READ | _IOC_WRITE, 'V', 6, s)
++#define VBG_IOCTL_HGCM_CALL_64(s)	_IOC(_IOC_READ | _IOC_WRITE, 'V', 7, s)
++#if __BITS_PER_LONG == 64
++#define VBG_IOCTL_HGCM_CALL(s)		VBG_IOCTL_HGCM_CALL_64(s)
++#else
++#define VBG_IOCTL_HGCM_CALL(s)		VBG_IOCTL_HGCM_CALL_32(s)
++#endif
++
++
++/** VBG_IOCTL_LOG data structure. */
++struct vbg_ioctl_log {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			/**
++			 * The log message, this may be zero terminated. If it
++			 * is not zero terminated then the length is determined
++			 * from the input size.
++			 */
++			char msg[1];
++		} in;
++	} u;
++};
++
++#define VBG_IOCTL_LOG(s)		_IOC(_IOC_READ | _IOC_WRITE, 'V', 9, s)
++
++
++/** VBG_IOCTL_WAIT_FOR_EVENTS data structure. */
++struct vbg_ioctl_wait_for_events {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			/** Timeout in milliseconds. */
++			__u32 timeout_ms;
++			/** Events to wait for. */
++			__u32 events;
++		} in;
++		struct {
++			/** Events that occurred. */
++			__u32 events;
++		} out;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_wait_for_events, 24 + 8);
++
++#define VBG_IOCTL_WAIT_FOR_EVENTS \
++	_IOWR('V', 10, struct vbg_ioctl_wait_for_events)
++
++
++/*
++ * IOCTL to VBoxGuest to interrupt (cancel) any pending
++ * VBG_IOCTL_WAIT_FOR_EVENTS and return.
++ *
++ * Handled inside the vboxguest driver and not seen by the host at all.
++ * After calling this, VBG_IOCTL_WAIT_FOR_EVENTS should no longer be called in
++ * the same session. Any VBOXGUEST_IOCTL_WAITEVENT calls in the same session
++ * done after calling this will directly exit with -EINTR.
++ */
++#define VBG_IOCTL_INTERRUPT_ALL_WAIT_FOR_EVENTS \
++	_IOWR('V', 11, struct vbg_ioctl_hdr)
++
++
++/** VBG_IOCTL_CHANGE_FILTER_MASK data structure. */
++struct vbg_ioctl_change_filter {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			/** Flags to set. */
++			__u32 or_mask;
++			/** Flags to remove. */
++			__u32 not_mask;
++		} in;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_change_filter, 24 + 8);
++
++/* IOCTL to VBoxGuest to control the event filter mask. */
++#define VBG_IOCTL_CHANGE_FILTER_MASK \
++	_IOWR('V', 12, struct vbg_ioctl_change_filter)
++
++
++/** VBG_IOCTL_CHANGE_GUEST_CAPABILITIES data structure. */
++struct vbg_ioctl_set_guest_caps {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			/** Capabilities to set (VMMDEV_GUEST_SUPPORTS_XXX). */
++			__u32 or_mask;
++			/** Capabilities to drop (VMMDEV_GUEST_SUPPORTS_XXX). */
++			__u32 not_mask;
++		} in;
++		struct {
++			/** Capabilities held by the session after the call. */
++			__u32 session_caps;
++			/** Capabilities for all the sessions after the call. */
++			__u32 global_caps;
++		} out;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_set_guest_caps, 24 + 8);
++
++#define VBG_IOCTL_CHANGE_GUEST_CAPABILITIES \
++	_IOWR('V', 14, struct vbg_ioctl_set_guest_caps)
++
++
++/** VBG_IOCTL_CHECK_BALLOON data structure. */
++struct vbg_ioctl_check_balloon {
++	/** The header. */
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			/** The size of the balloon in chunks of 1MB. */
++			__u32 balloon_chunks;
++			/**
++			 * false = handled in R0, no further action required.
++			 *  true = allocate balloon memory in R3.
++			 */
++			__u8 handle_in_r3;
++			/** Explicit padding, MBZ. */
++			__u8 padding[3];
++		} out;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_check_balloon, 24 + 8);
++
++/*
++ * IOCTL to check memory ballooning.
++ *
++ * The guest kernel module will ask the host for the current size of the
++ * balloon and adjust the size. Or it will set handle_in_r3 = true and R3 is
++ * responsible for allocating memory and calling VBG_IOCTL_CHANGE_BALLOON.
++ */
++#define VBG_IOCTL_CHECK_BALLOON \
++	_IOWR('V', 17, struct vbg_ioctl_check_balloon)
++
++
++/** VBG_IOCTL_WRITE_CORE_DUMP data structure. */
++struct vbg_ioctl_write_coredump {
++	struct vbg_ioctl_hdr hdr;
++	union {
++		struct {
++			__u32 flags; /** Flags (reserved, MBZ). */
++		} in;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vbg_ioctl_write_coredump, 24 + 4);
++
++#define VBG_IOCTL_WRITE_CORE_DUMP \
++	_IOWR('V', 19, struct vbg_ioctl_write_coredump)
++
++#endif
+diff -Naur linux-4.14.15/include/uapi/linux/vbox_vmmdev_types.h linux-gpd-4.14.15/include/uapi/linux/vbox_vmmdev_types.h
+--- linux-4.14.15/include/uapi/linux/vbox_vmmdev_types.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/vbox_vmmdev_types.h	2018-01-25 09:02:03.705215254 -0500
+@@ -0,0 +1,237 @@
++/*
++ * Virtual Device for Guest <-> VMM/Host communication, type definitions
++ * which are also used for the vboxguest ioctl interface / by vboxsf
++ *
++ * Copyright (C) 2006-2016 Oracle Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * The contents of this file may alternatively be used under the terms
++ * of the Common Development and Distribution License Version 1.0
++ * (CDDL) only, in which case the provisions of the CDDL are applicable
++ * instead of those of the GPL.
++ *
++ * You may elect to license modified versions of this file under the
++ * terms and conditions of either the GPL or the CDDL or both.
++ */
++
++#ifndef __UAPI_VBOX_VMMDEV_TYPES_H__
++#define __UAPI_VBOX_VMMDEV_TYPES_H__
++
++#include <asm/bitsperlong.h>
++#include <linux/types.h>
++
++/*
++ * We cannot use linux' compiletime_assert here because it expects to be used
++ * inside a function only. Use a typedef to a char array with a negative size.
++ */
++#define VMMDEV_ASSERT_SIZE(type, size) \
++	typedef char type ## _asrt_size[1 - 2*!!(sizeof(struct type) != (size))]
++
++/** enum vmmdev_request_type - VMMDev request types. */
++enum vmmdev_request_type {
++	VMMDEVREQ_INVALID_REQUEST              =  0,
++	VMMDEVREQ_GET_MOUSE_STATUS             =  1,
++	VMMDEVREQ_SET_MOUSE_STATUS             =  2,
++	VMMDEVREQ_SET_POINTER_SHAPE            =  3,
++	VMMDEVREQ_GET_HOST_VERSION             =  4,
++	VMMDEVREQ_IDLE                         =  5,
++	VMMDEVREQ_GET_HOST_TIME                = 10,
++	VMMDEVREQ_GET_HYPERVISOR_INFO          = 20,
++	VMMDEVREQ_SET_HYPERVISOR_INFO          = 21,
++	VMMDEVREQ_REGISTER_PATCH_MEMORY        = 22, /* since version 3.0.6 */
++	VMMDEVREQ_DEREGISTER_PATCH_MEMORY      = 23, /* since version 3.0.6 */
++	VMMDEVREQ_SET_POWER_STATUS             = 30,
++	VMMDEVREQ_ACKNOWLEDGE_EVENTS           = 41,
++	VMMDEVREQ_CTL_GUEST_FILTER_MASK        = 42,
++	VMMDEVREQ_REPORT_GUEST_INFO            = 50,
++	VMMDEVREQ_REPORT_GUEST_INFO2           = 58, /* since version 3.2.0 */
++	VMMDEVREQ_REPORT_GUEST_STATUS          = 59, /* since version 3.2.8 */
++	VMMDEVREQ_REPORT_GUEST_USER_STATE      = 74, /* since version 4.3 */
++	/* Retrieve a display resize request sent by the host, deprecated. */
++	VMMDEVREQ_GET_DISPLAY_CHANGE_REQ       = 51,
++	VMMDEVREQ_VIDEMODE_SUPPORTED           = 52,
++	VMMDEVREQ_GET_HEIGHT_REDUCTION         = 53,
++	/**
++	 * @VMMDEVREQ_GET_DISPLAY_CHANGE_REQ2:
++	 * Retrieve a display resize request sent by the host.
++	 *
++	 * Queries a display resize request sent from the host.  If the
++	 * event_ack member is sent to true and there is an unqueried request
++	 * available for one of the virtual display then that request will
++	 * be returned.  If several displays have unqueried requests the lowest
++	 * numbered display will be chosen first.  Only the most recent unseen
++	 * request for each display is remembered.
++	 * If event_ack is set to false, the last host request queried with
++	 * event_ack set is resent, or failing that the most recent received
++	 * from the host.  If no host request was ever received then all zeros
++	 * are returned.
++	 */
++	VMMDEVREQ_GET_DISPLAY_CHANGE_REQ2      = 54,
++	VMMDEVREQ_REPORT_GUEST_CAPABILITIES    = 55,
++	VMMDEVREQ_SET_GUEST_CAPABILITIES       = 56,
++	VMMDEVREQ_VIDEMODE_SUPPORTED2          = 57, /* since version 3.2.0 */
++	VMMDEVREQ_GET_DISPLAY_CHANGE_REQEX     = 80, /* since version 4.2.4 */
++	VMMDEVREQ_HGCM_CONNECT                 = 60,
++	VMMDEVREQ_HGCM_DISCONNECT              = 61,
++	VMMDEVREQ_HGCM_CALL32                  = 62,
++	VMMDEVREQ_HGCM_CALL64                  = 63,
++	VMMDEVREQ_HGCM_CANCEL                  = 64,
++	VMMDEVREQ_HGCM_CANCEL2                 = 65,
++	VMMDEVREQ_VIDEO_ACCEL_ENABLE           = 70,
++	VMMDEVREQ_VIDEO_ACCEL_FLUSH            = 71,
++	VMMDEVREQ_VIDEO_SET_VISIBLE_REGION     = 72,
++	VMMDEVREQ_GET_SEAMLESS_CHANGE_REQ      = 73,
++	VMMDEVREQ_QUERY_CREDENTIALS            = 100,
++	VMMDEVREQ_REPORT_CREDENTIALS_JUDGEMENT = 101,
++	VMMDEVREQ_REPORT_GUEST_STATS           = 110,
++	VMMDEVREQ_GET_MEMBALLOON_CHANGE_REQ    = 111,
++	VMMDEVREQ_GET_STATISTICS_CHANGE_REQ    = 112,
++	VMMDEVREQ_CHANGE_MEMBALLOON            = 113,
++	VMMDEVREQ_GET_VRDPCHANGE_REQ           = 150,
++	VMMDEVREQ_LOG_STRING                   = 200,
++	VMMDEVREQ_GET_CPU_HOTPLUG_REQ          = 210,
++	VMMDEVREQ_SET_CPU_HOTPLUG_STATUS       = 211,
++	VMMDEVREQ_REGISTER_SHARED_MODULE       = 212,
++	VMMDEVREQ_UNREGISTER_SHARED_MODULE     = 213,
++	VMMDEVREQ_CHECK_SHARED_MODULES         = 214,
++	VMMDEVREQ_GET_PAGE_SHARING_STATUS      = 215,
++	VMMDEVREQ_DEBUG_IS_PAGE_SHARED         = 216,
++	VMMDEVREQ_GET_SESSION_ID               = 217, /* since version 3.2.8 */
++	VMMDEVREQ_WRITE_COREDUMP               = 218,
++	VMMDEVREQ_GUEST_HEARTBEAT              = 219,
++	VMMDEVREQ_HEARTBEAT_CONFIGURE          = 220,
++	/* Ensure the enum is a 32 bit data-type */
++	VMMDEVREQ_SIZEHACK                     = 0x7fffffff
++};
++
++#if __BITS_PER_LONG == 64
++#define VMMDEVREQ_HGCM_CALL VMMDEVREQ_HGCM_CALL64
++#else
++#define VMMDEVREQ_HGCM_CALL VMMDEVREQ_HGCM_CALL32
++#endif
++
++/** HGCM service location types. */
++enum vmmdev_hgcm_service_location_type {
++	VMMDEV_HGCM_LOC_INVALID    = 0,
++	VMMDEV_HGCM_LOC_LOCALHOST  = 1,
++	VMMDEV_HGCM_LOC_LOCALHOST_EXISTING = 2,
++	/* Ensure the enum is a 32 bit data-type */
++	VMMDEV_HGCM_LOC_SIZEHACK   = 0x7fffffff
++};
++
++/** HGCM host service location. */
++struct vmmdev_hgcm_service_location_localhost {
++	/** Service name */
++	char service_name[128];
++};
++VMMDEV_ASSERT_SIZE(vmmdev_hgcm_service_location_localhost, 128);
++
++/** HGCM service location. */
++struct vmmdev_hgcm_service_location {
++	/** Type of the location. */
++	enum vmmdev_hgcm_service_location_type type;
++
++	union {
++		struct vmmdev_hgcm_service_location_localhost localhost;
++	} u;
++};
++VMMDEV_ASSERT_SIZE(vmmdev_hgcm_service_location, 128 + 4);
++
++/** HGCM function parameter type. */
++enum vmmdev_hgcm_function_parameter_type {
++	VMMDEV_HGCM_PARM_TYPE_INVALID            = 0,
++	VMMDEV_HGCM_PARM_TYPE_32BIT              = 1,
++	VMMDEV_HGCM_PARM_TYPE_64BIT              = 2,
++	/** Deprecated Doesn't work, use PAGELIST. */
++	VMMDEV_HGCM_PARM_TYPE_PHYSADDR           = 3,
++	/** In and Out, user-memory */
++	VMMDEV_HGCM_PARM_TYPE_LINADDR            = 4,
++	/** In, user-memory  (read;  host<-guest) */
++	VMMDEV_HGCM_PARM_TYPE_LINADDR_IN         = 5,
++	/** Out, user-memory (write; host->guest) */
++	VMMDEV_HGCM_PARM_TYPE_LINADDR_OUT        = 6,
++	/** In and Out, kernel-memory */
++	VMMDEV_HGCM_PARM_TYPE_LINADDR_KERNEL     = 7,
++	/** In, kernel-memory  (read;  host<-guest) */
++	VMMDEV_HGCM_PARM_TYPE_LINADDR_KERNEL_IN  = 8,
++	/** Out, kernel-memory (write; host->guest) */
++	VMMDEV_HGCM_PARM_TYPE_LINADDR_KERNEL_OUT = 9,
++	/** Physical addresses of locked pages for a buffer. */
++	VMMDEV_HGCM_PARM_TYPE_PAGELIST           = 10,
++	/* Ensure the enum is a 32 bit data-type */
++	VMMDEV_HGCM_PARM_TYPE_SIZEHACK           = 0x7fffffff
++};
++
++/** HGCM function parameter, 32-bit client. */
++struct vmmdev_hgcm_function_parameter32 {
++	enum vmmdev_hgcm_function_parameter_type type;
++	union {
++		__u32 value32;
++		__u64 value64;
++		struct {
++			__u32 size;
++			union {
++				__u32 phys_addr;
++				__u32 linear_addr;
++			} u;
++		} pointer;
++		struct {
++			/** Size of the buffer described by the page list. */
++			__u32 size;
++			/** Relative to the request header. */
++			__u32 offset;
++		} page_list;
++	} u;
++} __packed;
++VMMDEV_ASSERT_SIZE(vmmdev_hgcm_function_parameter32, 4 + 8);
++
++/** HGCM function parameter, 64-bit client. */
++struct vmmdev_hgcm_function_parameter64 {
++	enum vmmdev_hgcm_function_parameter_type type;
++	union {
++		__u32 value32;
++		__u64 value64;
++		struct {
++			__u32 size;
++			union {
++				__u64 phys_addr;
++				__u64 linear_addr;
++			} u;
++		} __packed pointer;
++		struct {
++			/** Size of the buffer described by the page list. */
++			__u32 size;
++			/** Relative to the request header. */
++			__u32 offset;
++		} page_list;
++	} __packed u;
++} __packed;
++VMMDEV_ASSERT_SIZE(vmmdev_hgcm_function_parameter64, 4 + 12);
++
++#if __BITS_PER_LONG == 64
++#define vmmdev_hgcm_function_parameter vmmdev_hgcm_function_parameter64
++#else
++#define vmmdev_hgcm_function_parameter vmmdev_hgcm_function_parameter32
++#endif
++
++#define VMMDEV_HGCM_F_PARM_DIRECTION_NONE      0x00000000U
++#define VMMDEV_HGCM_F_PARM_DIRECTION_TO_HOST   0x00000001U
++#define VMMDEV_HGCM_F_PARM_DIRECTION_FROM_HOST 0x00000002U
++#define VMMDEV_HGCM_F_PARM_DIRECTION_BOTH      0x00000003U
++
++/**
++ * struct vmmdev_hgcm_pagelist - VMMDEV_HGCM_PARM_TYPE_PAGELIST parameters
++ * point to this structure to actually describe the buffer.
++ */
++struct vmmdev_hgcm_pagelist {
++	__u32 flags;             /** VMMDEV_HGCM_F_PARM_*. */
++	__u16 offset_first_page; /** Data offset in the first page. */
++	__u16 page_count;        /** Number of pages. */
++	__u64 pages[1];          /** Page addresses. */
++};
++VMMDEV_ASSERT_SIZE(vmmdev_hgcm_pagelist, 4 + 2 + 2 + 8);
++
++#endif
+diff -Naur linux-4.14.15/include/uapi/linux/vbsfmount.h linux-gpd-4.14.15/include/uapi/linux/vbsfmount.h
+--- linux-4.14.15/include/uapi/linux/vbsfmount.h	1969-12-31 19:00:00.000000000 -0500
++++ linux-gpd-4.14.15/include/uapi/linux/vbsfmount.h	2018-01-25 09:02:03.706215252 -0500
+@@ -0,0 +1,62 @@
++/*
++ * Copyright (C) 2006-2016 Oracle Corporation
++ *
++ * VirtualBox Guest Shared Folders: mount(2) parameter structure.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#ifndef VBFS_MOUNT_H
++#define VBFS_MOUNT_H
++
++/* Linux constraints the size of data mount argument to PAGE_SIZE - 1. */
++#define MAX_HOST_NAME  256
++#define MAX_NLS_NAME    32
++
++#define VBSF_MOUNT_SIGNATURE_BYTE_0 ('\377')
++#define VBSF_MOUNT_SIGNATURE_BYTE_1 ('\376')
++#define VBSF_MOUNT_SIGNATURE_BYTE_2 ('\375')
++
++struct vbsf_mount_info_new {
++	/*
++	 * The old version of the mount_info struct started with a
++	 * char name[MAX_HOST_NAME] field, where name cannot be '\0'.
++	 * So the new version of the mount_info struct starts with a
++	 * nullchar field which is always 0 so that we can detect and
++	 * reject the old structure being passed.
++	 */
++	char nullchar;
++	char signature[3];	/* signature */
++	int length;		/* length of the whole structure */
++	char name[MAX_HOST_NAME];	/* share name */
++	char nls_name[MAX_NLS_NAME];	/* name of an I/O charset */
++	int uid;		/* user ID for all entries, default 0=root */
++	int gid;		/* group ID for all entries, default 0=root */
++	int ttl;		/* time to live */
++	int dmode;		/* mode for directories if != 0xffffffff */
++	int fmode;		/* mode for regular files if != 0xffffffff */
++	int dmask;		/* umask applied to directories */
++	int fmask;		/* umask applied to regular files */
++};
++
++struct vbsf_mount_opts {
++	int uid;
++	int gid;
++	int ttl;
++	int dmode;
++	int fmode;
++	int dmask;
++	int fmask;
++	int ronly;
++	int sloppy;
++	int noexec;
++	int nodev;
++	int nosuid;
++	int remount;
++	char nls_name[MAX_NLS_NAME];
++	char *convertcp;
++};
++
++#endif /* vbsfmount.h */

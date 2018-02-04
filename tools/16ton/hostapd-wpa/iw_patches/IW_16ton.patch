@@ -1,0 +1,169 @@
+diff -Naur iw-3.17/debian/changelog iw-3.17-16ton/debian/changelog
+--- iw-3.17/debian/changelog	2014-10-14 14:43:15.000000000 -0400
++++ iw-3.17-16ton/debian/changelog	2017-10-10 14:06:07.563617899 -0400
+@@ -1,3 +1,10 @@
++iw (3.17-16ton) unstable; urgency=medium
++
++  * Allow negative channels
++  * Channel to frequency correction
++
++ -- Ben Maddocks <bm16ton@gmail.com>  Sat, 07 Oct 2017 20:42:02 +0200
++
+ iw (3.17-1) unstable; urgency=medium
+ 
+   * New upstream release.
+diff -Naur iw-3.17/DIALOG iw-3.17-16ton/DIALOG
+--- iw-3.17/DIALOG	1969-12-31 19:00:00.000000000 -0500
++++ iw-3.17-16ton/DIALOG	2017-10-09 09:52:09.098671622 -0400
+@@ -0,0 +1,70 @@
++<window title="16ton Network app" width-request="503" height-request="231"> <vbox>
++<hbox height-request="115">		
++	<vbox>
++	<hbox>		
++		<button>
++			<label>wifi link info (highlight card)</label>
++			<action>xterm -e /opt/hardware-apps/bin/stats-net-tools.sh &xterm -e /opt/hardware-apps/bin/stats2-net-tools.sh &</action>
++		</button>
++			<text>
++				<label>on dev </label>
++			</text>
++	</hbox>
++	<hbox>
++		<button>
++			<label>set txpower dbi to </label>
++			<action>pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY xterm +hold -e iwconfig $LIST txpower $COMBOBOX</action>
++		</button>
++			<combobox width-request="60">
++				<variable>COMBOBOX</variable>
++				<item>8</item>
++				<item>12</item>
++				<item>20</item>
++			</combobox>
++					<text>
++				<label>on dev </label>
++			</text>
++	</hbox>
++	<hbox>
++		<button>
++			<label>wireless signal (w/ wavemon)</label>
++			<action>xterm -e wavemon -i $LIST &</action>
++		</button>
++					<text>
++				<label>on dev </label>
++			</text>
++	</hbox>
++	</vbox>
++	<list> <width>30</width> <variable>LIST</variable>
++<item>wlp3s0</item>
++
++</list>
++</hbox>
++	<vbox>
++	<hbox homogeneous="true" space-expand="false" space-fill="false">
++		<button>
++			<label>Show info for wifi device PHY</label>
++			<action>xterm -hold -e iw phy$ENTRY info &</action>
++		</button>
++			<combobox width-request="60">
++				<variable>ENTRY</variable>
++				<item>0</item>
++			</combobox>
++	</hbox>
++	</vbox>
++<hseparator width-request="503"></hseparator>
++<hbox homogeneous="true" space-expand="false" space-fill="false">
++		<button>
++			<label>arp list without search  (no root)</label>
++			<action>xterm -hold -e arp -a &</action>
++		</button>
++		<button>
++			<label>"arp search  (requires root)"</label>
++			<action>pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY xterm -hold -e arp-scan --localnet</action>
++		</button>
++</hbox>
++		<button>
++			<label>Exit</label>
++		</button>
++
++</vbox> </window>
+diff -Naur iw-3.17/phy.c iw-3.17-16ton/phy.c
+--- iw-3.17/phy.c	2014-10-09 10:31:00.000000000 -0400
++++ iw-3.17-16ton/phy.c	2017-10-07 10:21:20.978836611 -0400
+@@ -101,6 +101,7 @@
+ 		{ .name = "HT40-", .val = NL80211_CHAN_HT40MINUS, },
+ 	};
+ 	unsigned int htval = NL80211_CHAN_NO_HT;
++	int val;
+ 	unsigned int freq;
+ 	int i;
+ 
+@@ -109,14 +110,19 @@
+ 
+ 	if (!*argv[0])
+ 		return 1;
+-	freq = strtoul(argv[0], &end, 10);
++	val = strtol(argv[0], &end, 10);
+ 	if (*end)
+ 		return 1;
+ 
++   // treat val as channel number
+ 	if (chan) {
+ 		enum nl80211_band band;
+-		band = freq <= 14 ? NL80211_BAND_2GHZ : NL80211_BAND_5GHZ;
+-		freq = ieee80211_channel_to_frequency(freq, band);
++		band = val <= 14 ? NL80211_BAND_2GHZ : NL80211_BAND_5GHZ;
++		freq = ieee80211_channel_to_frequency(val, band);
++	}
++	else // treat val as frequency and cut a possible sign 
++	{
++		freq = (unsigned long) val;
+ 	}
+ 
+ 	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_FREQ, freq);
+diff -Naur iw-3.17/PLAYLIST iw-3.17-16ton/PLAYLIST
+--- iw-3.17/PLAYLIST	1969-12-31 19:00:00.000000000 -0500
++++ iw-3.17-16ton/PLAYLIST	2017-10-09 09:52:09.097671622 -0400
+@@ -0,0 +1 @@
++wlp3s0
+diff -Naur iw-3.17/util.c iw-3.17-16ton/util.c
+--- iw-3.17/util.c	2014-10-09 10:31:00.000000000 -0400
++++ iw-3.17-16ton/util.c	2017-10-08 09:48:29.158067971 -0400
+@@ -268,14 +268,16 @@
+ {
+ 	/* see 802.11 17.3.8.3.2 and Annex J
+ 	 * there are overlapping channel numbers in 5GHz and 2GHz bands */
+-	if (chan <= 0)
+-		return 0; /* not supported */
++	//if (chan <= 0)
++	//	return 0; /* not supported */
+ 	switch (band) {
+ 	case NL80211_BAND_2GHZ:
+ 		if (chan == 14)
+ 			return 2484;
+ 		else if (chan < 14)
+ 			return 2407 + chan * 5;
++		else if (chan > 14 && chan <= 65)
++			return 2407 + chan * 5;
+ 		break;
+ 	case NL80211_BAND_5GHZ:
+ 		if (chan >= 182 && chan <= 196)
+@@ -300,6 +302,8 @@
+ 		return 14;
+ 	else if (freq < 2484)
+ 		return (freq - 2407) / 5;
++	else if (freq > 2484 && freq <= 2732)
++		return (freq - 2407) / 5;
+ 	else if (freq >= 4910 && freq <= 4980)
+ 		return (freq - 4000) / 5;
+ 	else if (freq <= 45000) /* DMG band lower limit */
+diff -Naur iw-3.17/version.sh iw-3.17-16ton/version.sh
+--- iw-3.17/version.sh	2014-10-09 10:31:00.000000000 -0400
++++ iw-3.17-16ton/version.sh	2017-10-07 11:05:06.172461939 -0400
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ 
+-VERSION="3.17"
++VERSION="3.17-16ton"
+ OUT="$1"
+ 
+ if [ -d .git ] && head=`git rev-parse --verify HEAD 2>/dev/null`; then
