@@ -1,0 +1,21 @@
+.TH xt_geoip_dl 1 "2010-12-17" "xtables-addons" "xtables-addons"
+.SH Name
+.PP
+xt_geoip_dl \(em download GeoIP database files
+.SH Syntax
+.PP
+\fI/usr/libexec/xt_geoip/\fP\fBxt_geoip_dl\fP
+.SH Description
+.PP
+Downloads and unpacks the MaxMind GeoIP Country Lite databases for IPv4 and
+IPv6 and unpacks them to the current directory.
+.PP
+Since the script is usually installed to the libexec directory of the
+xtables-addons package and this is outside $PATH (on purpose), invoking the
+script requires it to be called with a path.
+.SH Options
+.PP
+None.
+.SH See also
+.PP
+xt_geoip_build(1)

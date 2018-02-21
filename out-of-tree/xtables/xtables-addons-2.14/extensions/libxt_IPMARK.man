@@ -1,0 +1,57 @@
+.PP
+Allows you to mark a received packet basing on its IP address. This
+can replace many mangle/mark entries with only one, if you use
+firewall based classifier.
+.PP
+This target is to be used inside the \fBmangle\fP table.
+.TP
+\fB\-\-addr\fP {\fBsrc\fP|\fBdst\fP}
+Select source or destination IP address as a basis for the mark.
+.TP
+\fB\-\-and\-mask\fP \fImask\fP
+Perform bitwise AND on the IP address and this bitmask.
+.TP
+\fB\-\-or\-mask\fP \fImask\fP
+Perform bitwise OR on the IP address and this bitmask.
+.TP
+\fB\-\-shift\fP \fIvalue\fP
+Shift addresses to the right by the given number of bits before taking it
+as a mark. (This is done before ANDing or ORing it.) This option is needed
+to select part of an IPv6 address, because marks are only 32 bits in size.
+.PP
+The order of IP address bytes is reversed to meet "human order of bytes":
+192.168.0.1 is 0xc0a80001. At first the "AND" operation is performed, then
+"OR".
+.PP
+Examples:
+.PP
+We create a queue for each user, the queue number is adequate
+to the IP address of the user, e.g.: all packets going to/from 192.168.5.2
+are directed to 1:0502 queue, 192.168.5.12 -> 1:050c etc.
+.PP
+We have one classifier rule:
+.IP
+tc filter add dev eth3 parent 1:0 protocol ip fw
+.PP
+Earlier we had many rules just like below:
+.IP
+iptables \-t mangle \-A POSTROUTING \-o eth3 \-d 192.168.5.2 \-j MARK
+\-\-set\-mark 0x10502
+.IP
+iptables \-t mangle \-A POSTROUTING \-o eth3 \-d 192.168.5.3 \-j MARK
+\-\-set\-mark 0x10503
+.PP
+Using IPMARK target we can replace all the mangle/mark rules with only one:
+.IP
+iptables \-t mangle \-A POSTROUTING \-o eth3 \-j IPMARK \-\-addr dst
+\-\-and\-mask 0xffff \-\-or\-mask 0x10000
+.PP
+On the routers with hundreds of users there should be significant load
+decrease (e.g. twice).
+.PP
+(IPv6 example) If the source address is of the form
+2001:db8:45:1d:20d:93ff:fe9b:e443 and the resulting mark should be 0x93ff,
+then a right-shift of 16 is needed first:
+.IP
+\-t mangle \-A PREROUTING \-s 2001:db8::/32 \-j IPMARK \-\-addr src \-\-shift
+16 \-\-and\-mask 0xFFFF

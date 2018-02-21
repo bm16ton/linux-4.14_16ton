@@ -1,0 +1,3 @@
+# -*- Makefile -*-
+
+obj-${build_pknock}      += libxt_pknock.so

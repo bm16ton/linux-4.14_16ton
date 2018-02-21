@@ -1,0 +1,20 @@
+.PP
+This module matches the length of a packet against a specific value or range of
+values.
+.TP
+[\fB!\fR] \fB\-\-length\fR \fIlength\fR[\fB:\fR\fIlength\fR]
+Match exact length or length range.
+.TP
+\fB\-\-layer3\fR
+Match the layer3 frame size (e.g. IPv4/v6 header plus payload).
+.TP
+\fB\-\-layer4\fR
+Match the layer4 frame size (e.g. TCP/UDP header plus payload).
+.TP
+\fB\-\-layer5\fR
+Match the layer5 frame size (e.g. TCP/UDP payload, often called layer7).
+.PP
+If no \-\-layer* option is given, \-\-layer3 is assumed by default. Note that
+using \-\-layer5 may not match a packet if it is not one of the recognized
+types (currently TCP, UDP, UDPLite, ICMP, AH and ESP) or which has no 5th
+layer.

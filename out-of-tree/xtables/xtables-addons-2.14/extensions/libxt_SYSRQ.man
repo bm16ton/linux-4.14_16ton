@@ -1,0 +1,84 @@
+.PP
+The SYSRQ target allows to remotely trigger sysrq on the local machine over the
+network. This can be useful when vital parts of the machine hang, for example
+an oops in a filesystem causing locks to be not released and processes to get
+stuck as a result \(em if still possible, use /proc/sysrq-trigger. Even when
+processes are stuck, interrupts are likely to be still processed, and as such,
+sysrq can be triggered through incoming network packets.
+.PP
+The xt_SYSRQ implementation uses a salted hash and a sequence number to prevent
+network sniffers from either guessing the password or replaying earlier
+requests. The initial sequence number comes from the time of day so you will
+have a small window of vulnerability should time go backwards at a reboot.
+However, the file /sys/module/xt_SYSREQ/seqno can be used to both query and
+update the current sequence number. Also, you should limit as to who can issue
+commands using \fB\-s\fP and/or \fB\-m mac\fP, and also that the destination is
+correct using \fB\-d\fP (to protect against potential broadcast packets),
+noting that it is still short of MAC/IP spoofing:
+.IP
+\-A INPUT \-s 10.10.25.1 \-m mac \-\-mac\-source aa:bb:cc:dd:ee:ff \-d
+10.10.25.7 \-p udp \-\-dport 9 \-j SYSRQ
+.IP
+(with IPsec) \-A INPUT \-s 10.10.25.1 \-d 10.10.25.7 \-m policy \-\-dir in
+\-\-pol ipsec \-\-proto esp \-\-tunnel\-src 10.10.25.1 \-\-tunnel\-dst
+10.10.25.7 \-p udp \-\-dport 9 \-j SYSRQ
+.PP
+You should also limit the rate at which connections can be received to limit
+the CPU time taken by illegal requests, for example:
+.IP
+\-A INPUT \-s 10.10.25.1 \-m mac \-\-mac\-source aa:bb:cc:dd:ee:ff \-d
+10.10.25.7 \-p udp \-\-dport 9 \-m limit \-\-limit 5/minute \-j SYSRQ
+.PP
+This extension does not take any options. The \fB\-p udp\fP options are
+required.
+.PP
+The SYSRQ password can be changed through
+/sys/module/xt_SYSRQ/parameters/password, for example:
+.IP
+echo \-n "password" >/sys/module/xt_SYSRQ/parameters/password
+.PP
+The module will not respond to sysrq requests until a password has been set.
+.PP
+Alternatively, the password may be specified at modprobe time, but this is
+insecure as people can possible see it through ps(1). You can use an option
+line in e.g. /etc/modprobe.d/xt_sysrq if it is properly guarded, that is, only
+readable by root.
+.IP
+options xt_SYSRQ password=cookies
+.PP
+The hash algorithm can also be specified as a module option, for example, to
+use SHA-256 instead of the default SHA-1:
+.IP
+options xt_SYSRQ hash=sha256
+.PP
+The xt_SYSRQ module is normally silent unless a successful request is received,
+but the \fIdebug\fP module parameter can be used to find exactly why a
+seemingly correct request is not being processed.
+.PP
+To trigger SYSRQ from a remote host, just use socat:
+.PP
+.nf
+sysrq_key="s"  # the SysRq key(s)
+password="password"
+seqno="$(date +%s)"
+salt="$(dd bs=12 count=1 if=/dev/urandom 2>/dev/null |
+    openssl enc \-base64)"
+ipaddr="2001:0db8:0000:0000:0000:ff00:0042:8329"
+req="$sysrq_key,$seqno,$salt"
+req="$req,$(echo \-n "$req,$ipaddr,$password" | sha1sum | cut \-c1\-40)"
+
+echo "$req" | socat stdin udp\-sendto:$ipaddr:9
+.fi
+.PP
+See the Linux docs for possible sysrq keys. Important ones are: re(b)oot,
+power(o)ff, (s)ync filesystems, (u)mount and remount readonly. More than one
+sysrq key can be used at once, but bear in mind that, for example, a sync may
+not complete before a subsequent reboot or poweroff.
+.PP
+An IPv4 address should have no leading zeros, an IPv6 address should
+be in the full expanded form (as shown above). The debug option will cause
+output to be emitted in the same form.
+.PP
+The hashing scheme should be enough to prevent mis-use of SYSRQ in many
+environments, but it is not perfect: take reasonable precautions to
+protect your machines.

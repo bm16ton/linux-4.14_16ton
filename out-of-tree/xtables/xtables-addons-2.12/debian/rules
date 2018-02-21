@@ -1,0 +1,78 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+PKD  = $(abspath $(dir $(MAKEFILE_LIST)))
+# Package version
+pver := $(shell dpkg-parsechangelog -l$(PKD)/changelog | sed -ne 's,^Version: *\([0-9.]*\).*,\1,p')
+BUILD_DATE := $(shell dpkg-parsechangelog --show-field=Date)
+
+DCFG := debian/xtables-addons-dkms.dkms
+TMPSRC := debian/temp.src
+
+# '--with autotools_dev' may be used instead of '--with autoreconf' but not together
+%:
+	dh $@ --with dkms --with autoreconf
+
+
+override_dh_clean:
+	$(RM) -r $(TMPSRC)
+	dh_clean *.8 *.man .manpages.lst extensions/*/Makefile $(DCFG) config.log \
+          extensions/.*.oo.d extensions/ACCOUNT/.*.oo.d extensions/pknock/.*.oo.d
+
+override_dh_auto_configure:
+	[ -d /lib/modules/`uname -r`/build ] \
+	&& dh_auto_configure \
+	|| dh_auto_configure -- --without-kbuild
+
+override_dh_auto_build:
+	## prepare sources for DKMS and source packages
+	mkdir -p $(TMPSRC) \
+	&& cp -r build-aux extensions geoip m4 configure.ac *.in config.h aclocal.m4 mconfig Makefile Makefile.* $(TMPSRC) \
+	&& find $(TMPSRC) -name ".gitignore" -delete
+	## continue with build
+	dh_auto_build
+
+SRC_MOD := debian/xtables-addons-source/usr/src/modules
+SRC_DKMS := debian/xtables-addons-dkms/usr/src
+override_dh_auto_install: $(DCFG)
+	## prepare module sources
+	mkdir -p $(TMPSRC)/debian \
+	&& cp debian/changelog debian/copyright debian/compat \
+		debian/control.modules.in debian/control $(TMPSRC)/debian/ \
+	&& cp debian/rules.modules $(TMPSRC)/debian/rules
+	mkdir -p $(SRC_MOD) \
+	&& mv $(TMPSRC) $(SRC_MOD)/xtables-addons \
+	&& cd debian/xtables-addons-source/usr/src \
+	&& find modules -print0 | LC_ALL=C sort -z | tar cjf xtables-addons.tar.bz2 --mtime="$(BUILD_DATE)" --mode=go=rX,u+rw,a-s --no-recursion --null -T - \
+	&& $(RM) -r modules/xtables-addons/debian
+	## prepare DKMS sources
+	mkdir -p $(SRC_DKMS) \
+	&& mv $(SRC_MOD)/xtables-addons $(SRC_DKMS)/xtables-addons-$(pver) \
+	&& $(RM) -r $(SRC_MOD)
+	## continue with install
+	dh_auto_install
+
+
+DKMS_MODS=$(shell find . -name "*.ko" -print | LC_ALL=C sort | sed 's|.*/\([^/]*\)\.ko|\1|')
+
+$(DCFG):
+	sed -e 's/__VERSION__/$(pver)/g' $(DCFG).in > $(DCFG)
+	# use the list of generated modules (if not empty) to create a dkms config file.
+	[ -n "${DKMS_MODS}" ] \
+	&& sed -i -e '/####/,$$d' $(DCFG) \
+	&& ( value=0; for module_name in $(DKMS_MODS); \
+	do printf "BUILT_MODULE_LOCATION[$$value]=\"\" \
+			\nBUILT_MODULE_NAME[$$value]=\"$$module_name\" \
+			\nDEST_MODULE_LOCATION[$$value]=\"/updates\"\n"; \
+		value=$$((value+1)); \
+	done ) >> $(DCFG) || exit 0;
+
+#workaround for 'dpkg-shlibdeps: error: couldn't find library libipset.so.1'
+override_dh_shlibdeps:
+	LD_LIBRARY_PATH="debian/xtables-addons-common/usr/lib/xtables-addons:$(LD_LIBRARY_PATH)" dh_shlibdeps
+
+get-orig-source:
+	uscan --noconf --rename --check-dirname-level=0 --force-download --download-current-version --destdir=$(CURDIR) $(PKD)

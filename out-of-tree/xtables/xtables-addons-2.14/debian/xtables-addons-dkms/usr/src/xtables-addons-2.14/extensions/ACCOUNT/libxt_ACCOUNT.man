@@ -1,0 +1,60 @@
+The ACCOUNT target is a high performance accounting system for large
+local networks. It allows per-IP accounting in whole prefixes of IPv4
+addresses with size of up to /8 without the need to add individual
+accouting rule for each IP address.
+.PP
+The ACCOUNT is designed to be queried for data every second or at
+least every ten seconds. It is written as kernel module to handle high
+bandwidths without packet loss.
+.PP
+The largest possible subnet size is 24 bit, meaning for example 10.0.0.0/8
+network. ACCOUNT uses fixed internal data structures
+which speeds up the processing of each packet. Furthermore,
+accounting data for one complete 192.168.1.X/24 network takes 4 KB of
+memory. Memory for 16 or 24 bit networks is only allocated when
+needed.
+.PP
+To optimize the kernel<->userspace data transfer a bit more, the
+kernel module only transfers information about IPs, where the src/dst
+packet counter is not 0. This saves precious kernel time.
+.PP
+There is no /proc interface as it would be too slow for continuous access.
+The read-and-flush query operation is the fastest, as no internal data
+snapshot needs to be created&copied for all data. Use the "read"
+operation without flush only for debugging purposes!
+.PP
+Usage:
+.PP
+ACCOUNT takes two mandatory parameters:
+.TP
+\fB\-\-addr\fR \fInetwork\fP\fB/\fP\fInetmask\fR
+where \fInetwork\fP\fB/\fP\fInetmask\fP is the subnet to account for, in CIDR syntax
+.TP
+\fB\-\-tname\fP \fINAME\fP
+where \fINAME\fP is the name of the table where the accounting information
+should be stored
+.PP
+The subnet 0.0.0.0/0 is a special case: all data are then stored in the src_bytes
+and src_packets structure of slot "0". This is useful if you want
+to account the overall traffic to/from your internet provider.
+.PP
+The data can be queried using the userspace libxt_ACCOUNT_cl library,
+and by the reference implementation to show usage of this library,
+the \fBiptaccount\fP(8) tool.
+.PP
+Here is an example of use:
+.PP
+iptables \-A FORWARD \-j ACCOUNT \-\-addr 0.0.0.0/0 \-\-tname all_outgoing;
+iptables \-A FORWARD \-j ACCOUNT \-\-addr 192.168.1.0/24 \-\-tname sales;
+.PP
+This creates two tables called "all_outgoing" and "sales" which can be
+queried using the userspace library/iptaccount tool.
+.PP
+Note that this target is non-terminating \(em the packet destined to it
+will continue traversing the chain in which it has been used.
+.PP
+Also note that once a table has been defined for specific CIDR address/netmask
+block, it can be referenced multiple times using \-j ACCOUNT, provided
+that both the original table name and address/netmask block are specified.
+.PP
+For more information go to http://www.intra2net.com/en/developer/ipt_ACCOUNT/
