@@ -22,7 +22,7 @@ ADDITIONS:
     *		dump_eep_power  shows all tx power related info  
     *	    probably more i forgot  
 -	Atheros modparams added  
--		ath.ko  
+    -	ath.ko  
     *			16ton   (enables all bands and power if u forgot to compile with correct options  
 -		ath9k_hw.ko  
     *			txpower:Manual TX power setting  
