@@ -13,8 +13,8 @@ ADDITIONS:
 -	CFG80211 no longer changes regdomain based on associated AP  
 -	Atheros ath9k all 5ghz channels are open for AP etc  
 -	Atheros ath9k now has extra channels;  
-*		 0 thru -19 and random channels 16 thru 65 (got bored will addin the rest)  
-*		 requires this kernel and my hostapd/iw patches in tools/16ton  
+    *		 0 thru -19 and random channels 16 thru 65 (got bored will addin the rest)  
+    *		 requires this kernel and my hostapd/iw patches in tools/16ton  
 -	Atheros has CTL's removed, so cards reported maximum is now available. various other little things.  
 -	Atheros debugfs options added,  
 *		chanbw   echo 5 > chanbw  brings channel bandwidth to 5. echo 10 brings to 10 etc  
