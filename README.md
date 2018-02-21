@@ -1,4 +1,4 @@
-## Do to a fire I no longer own a GPD win :( I will continue to apply the patches but will not have a  way to test if they are still working.  
+## Do to a house fire I no longer own a GPD win :( I will continue to apply the patches but will not have a  way to test if they are still working.  
 ## Also do to health issues my updates will be seldom, and new patches rare over next few months  Ill be back on it as soon as i can and will try to update to newest 4.14 releases as fast as i can > Ben Maddocks 2/20/2018
 
 WARNING/DISCLAIMER I am not a kernel developer. I don't even know C. I use logical deduction, trial and error etc  
