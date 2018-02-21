@@ -1,4 +1,0 @@
-PSD (Portscan Detection) External extensions for Xtables-addons
-
-Example:
-iptables -A INPUT -m psd --psd-weight-threshold 21 --psd-delay-threshold 300 --psd-lo-ports-weight 1 --psd-hi-ports-weight 10 -j LOG --log-prefix "PSD: "

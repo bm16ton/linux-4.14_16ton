@@ -1,0 +1,24 @@
+diff -Naur linux-4.14.17/sound/soc/intel/boards/cht_bsw_rt5645.c linux-4.14.17-unknown/sound/soc/intel/boards/cht_bsw_rt5645.c
+--- linux-4.14.17/sound/soc/intel/boards/cht_bsw_rt5645.c	2018-02-03 11:39:25.000000000 -0500
++++ linux-4.14.17-unknown/sound/soc/intel/boards/cht_bsw_rt5645.c	2018-02-04 10:14:43.819119409 -0500
+@@ -682,14 +682,12 @@
+ 			cht_rt5645_cpu_dai_name;
+ 	}
+ 
+-	if (is_valleyview()) {
+-		drv->mclk = devm_clk_get(&pdev->dev, "pmc_plt_clk_3");
+-		if (IS_ERR(drv->mclk)) {
+-			dev_err(&pdev->dev,
+-				"Failed to get MCLK from pmc_plt_clk_3: %ld\n",
+-				PTR_ERR(drv->mclk));
+-			return PTR_ERR(drv->mclk);
+-		}
++	drv->mclk = devm_clk_get(&pdev->dev, "pmc_plt_clk_3");
++	if (IS_ERR(drv->mclk)) {
++		dev_err(&pdev->dev,
++			"Failed to get MCLK from pmc_plt_clk_3: %ld\n",
++			PTR_ERR(drv->mclk));
++		return PTR_ERR(drv->mclk);
+ 	}
+ 
+ 	snd_soc_card_set_drvdata(card, drv);
