@@ -6,7 +6,7 @@ to create my patches or to edit older patches to work on newer kernels. Ive been
 if you use my kernel, family and friends will most likely die randomly, your house will burn down and maybe on the  
 the far reaches of possibility your PC will work funny or not at all. You have been warned.  
 
-MOVED UPDATES TO changelog  
+MOVED UPDATES TO changelog-16ton  
 
 ADDITIONS:  
 -	CFG80211 no longer changes regdomain based on associated AP  
