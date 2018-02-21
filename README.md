@@ -45,8 +45,7 @@ ADDITIONS:
 -	automatic bringup on acpi connected uart broadcom bt adapters  
 -	more usb type C mux support  
 -	Added new cpu compile optimizations for alot of cpu's. The atom option is using the old non -march atom  
-    * standard prescott etc i believe is also for older atoms, Sometime ill manually add optimizations for the  
-    * x7-Z8750 found in the gpd win, where i dont believe theres -march -mtune for the newer atoms.  
+    * standard prescott etc i believe is also for older atoms, Sometime ill manually add optimizations for the x7-Z8750 found in the gpd win, where i dont believe theres -march -mtune for the newer atoms.  
 -	added kali-wifi-injection patches  
 -	removed watchdog from rt2800usb (ralink)  
 
