@@ -67,8 +67,7 @@ tools/16ton/iwleeprom
 -	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writing to certain intel and atheros cards. I patched it to enable all channels on all frequencies and increase txpower to 23db 2.4ghz and 22 on 5ghz on Intel cards and for Atheros cards it changes the eeprom reg domain to 0x6A tho Ive seen multiple sources say 65 unlocks 5ghz a quick look at Linux driver makes me think 6A will be less restrictive.If im wrong edit ath9kio.c search for 0x6A and replace it with 0x65, recompile. THO FOR ATHEROS CARDS THIS IS NOT REQUIRED AT ALL WHEN USING MY KERNEL. This might open things for windows people, i dunno i hate microsoft products.  
 
 tools/16ton/reghack  
--	The original and a newer version of reghack to remove ath9k restrictions from compiled driver. Most usefull  
--	on embedded devices.  
+-	The original and a newer version of reghack to remove ath9k restrictions from compiled driver. Most usefull on embedded devices.  
 
 tools/16ton/iw-3.17-16ton  
 -	patched iw tools needed for my kernel patches  
@@ -80,8 +79,7 @@ tools/16ton/dpf/st2205term*
 -	terminal emulator for hacked st2205 based tiny digital photo frames  
 
 tools/16ton/dpf/FRAMEBUFFER/*  
--	The userland application required for the tiny usb digital photo frame  
--	based off the ax206 chipsets. and the stand alone kernel module source (maybe older then in tree)  
+-	The userland application required for the tiny usb digital photo frame based off the ax206 chipsets. and the stand alone kernel module source (maybe older then in tree)  
 
 tools/16ton/beta-brite_alpha_led_displays  
 -	Sum basic scripts for controlling Alpha/Betabrite LED signs  
