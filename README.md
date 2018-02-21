@@ -24,15 +24,15 @@ ADDITIONS:
 -	Atheros modparams added  
     -	ath.ko  
         *			16ton   (enables all bands and power if u forgot to compile with correct options  
--		ath9k_hw.ko  
-    *			txpower:Manual TX power setting  
-    *			cwmin  
-    *			cwmax  
-    *			aifs  
-    *			cck_sifs  
-    *			ofdm_sifs  
-    *			slottime  
-    *			thresh62  
+    -	ath9k_hw.ko  
+        *			txpower:Manual TX power setting  
+        *			cwmin  
+        *			cwmax  
+        *			aifs  
+        *			cck_sifs  
+        *			ofdm_sifs  
+        *			slottime  
+        *			thresh62  
 -		Will add modparams for rx_intr_mitigation rxbuf and ani_interval  
 -	increased max txpower for the brcm wifi to 30db MUCH HIGHER THEN THE CARD CAN PROBABLY HANDLE SET MAX AT BOOT!  
 -	added pl-25A1 usb-2-usb network adapter  
