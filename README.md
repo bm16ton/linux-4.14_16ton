@@ -20,7 +20,7 @@ ADDITIONS:
     *		chanbw   echo 5 > chanbw  brings channel bandwidth to 5. echo 10 brings to 10 etc  
     *		diag	 enable/disable tx/rx etc  
     *		dump_eep_power  shows all tx power related info  
--	    probly more i forgot  
+    *	    probly more i forgot  
 -	Atheros modparams added  
 -		ath.ko  
     *			16ton   (enables all bands and power if u forgot to compile with correct options  
@@ -45,8 +45,8 @@ ADDITIONS:
 -	automatic bringup on acpi connected uart broadcom bt adapters  
 -	more usb type C mux support  
 -	Added new cpu compile optimizations for alot of cpu's. The atom option is using the old non -march atom  
--		standard prescott etc i believe is also for older atoms, Sometime ill manually add optimizations for the  
--		x7-Z8750 found in the gpd win, where i dont believe theres -march -mtune for the newer atoms.  
+    * standard prescott etc i believe is also for older atoms, Sometime ill manually add optimizations for the  
+    * x7-Z8750 found in the gpd win, where i dont believe theres -march -mtune for the newer atoms.  
 -	added kali-wifi-injection patches  
 -	removed watchdog from rt2800usb (ralink)  
 
