@@ -23,9 +23,9 @@ ADDITIONS:
     *	    probably more i forgot  
 -	Atheros modparams added  
     -	ath.ko  
-        *			16ton   (enables all bands and power if u forgot to compile with correct options  
+        *			16ton   (enables all bands and power if u forgot to compile with correct options)
     -	ath9k_hw.ko  
-        *			txpower:Manual TX power setting  
+        *			txpower:Manual TX power setting
         *			cwmin  
         *			cwmax  
         *			aifs  
