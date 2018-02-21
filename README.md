@@ -13,14 +13,14 @@ ADDITIONS:
 -	CFG80211 no longer changes regdomain based on associated AP  
 -	Atheros ath9k all 5ghz channels are open for AP etc  
 -	Atheros ath9k now has extra channels;  
-    *		 0 thru -19 and random channels 16 thru 65 (got bored will addin the rest)  
+    *		 0 thru -19 and random channels 16 thru 65 (got bored will add the rest)  
     *		 requires this kernel and my hostapd/iw patches in tools/16ton  
 -	Atheros has CTL's removed, so cards reported maximum is now available. various other little things.  
 -	Atheros debugfs options added,  
     *		chanbw   echo 5 > chanbw  brings channel bandwidth to 5. echo 10 brings to 10 etc  
     *		diag	 enable/disable tx/rx etc  
     *		dump_eep_power  shows all tx power related info  
-    *	    probly more i forgot  
+    *	    probably more i forgot  
 -	Atheros modparams added  
 -		ath.ko  
     *			16ton   (enables all bands and power if u forgot to compile with correct options  
@@ -41,7 +41,7 @@ ADDITIONS:
 -	added more vids/pids for uss720 and plusb  
 -	applied Krack patches to wpa/hostapd in tools/16ton, also 80/80 vht patch  
 -	in tree framebuffer kernel for ax206 hacked mini digital picture frames, userland utility in tools/16ton  
--	Newer/larger sdcard suppport on intel sdcard readers  
+-	Newer/larger sdcard support on intel sdcard readers  
 -	automatic bringup on acpi connected uart broadcom bt adapters  
 -	more usb type C mux support  
 -	Added new cpu compile optimizations for alot of cpu's. The atom option is using the old non -march atom  
@@ -61,7 +61,7 @@ wifi.scan-rand-mac-address=no
 in tools/16ton  
 
 tools/16ton/mtp_adb  
--	De-Android-ified mtp-server with setup scripts, my kernel allready has the required the modules ported  
+-	De-Android-ified mtp-server with setup scripts, my kernel allready has the required modules ported  
 
 tools/16ton/iwleeprom  
 -	forked from https://github.com/andyvand/AtherosROMKit iwleeprom allows reading/writing to certain intel and  
