@@ -139,6 +139,9 @@ enum i2c_alert_protocol {
  * struct i2c_driver - represent an I2C device driver
  * @class: What kind of i2c device we instantiate (for detect)
  * @attach_adapter: Callback for bus addition (deprecated)
+ * @match: Allows the driver to override the default i2c_bus match behavior
+ *         return < 0 to fail the match, > 0 to force a match, 0 to fallback
+ *         to default id matching
  * @probe: Callback for device binding - soon to be deprecated
  * @probe_new: New callback for device binding
  * @remove: Callback for device unbinding
@@ -179,6 +182,9 @@ struct i2c_driver {
 	 * using this, it will be removed in a near future.
 	 */
 	int (*attach_adapter)(struct i2c_adapter *) __deprecated;
+
+	/* Set this to override standard i2c_bus match behavior */
+	int (*match)(struct i2c_client *);
 
 	/* Standard driver model interfaces */
 	int (*probe)(struct i2c_client *, const struct i2c_device_id *);
@@ -304,6 +310,7 @@ static inline bool i2c_detect_slave_mode(struct device *dev) { return false; }
  * @type: chip type, to initialize i2c_client.name
  * @flags: to initialize i2c_client.flags
  * @addr: stored in i2c_client.addr
+ * @dev_name: Overrides the default <busnr>-<addr> dev_name if set
  * @platform_data: stored in i2c_client.dev.platform_data
  * @archdata: copied into i2c_client.dev.archdata
  * @of_node: pointer to OpenFirmware device node
@@ -328,6 +335,7 @@ struct i2c_board_info {
 	char		type[I2C_NAME_SIZE];
 	unsigned short	flags;
 	unsigned short	addr;
+	const char	*dev_name;
 	void		*platform_data;
 	struct dev_archdata	*archdata;
 	struct device_node *of_node;

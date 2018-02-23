@@ -16,6 +16,8 @@ struct device;
  * @debounce_interval:	debounce ticks interval in msecs
  * @can_disable:	%true indicates that userspace is allowed to
  *			disable button via sysfs
+ * @no_wakeup_events:	For wake-up source buttons only, if %true then no input
+ *			events will be generated if pressed while suspended
  * @value:		axis value for %EV_ABS
  * @irq:		Irq number in case of interrupt keys
  */
@@ -28,6 +30,7 @@ struct gpio_keys_button {
 	int wakeup;
 	int debounce_interval;
 	bool can_disable;
+	bool no_wakeup_events;
 	int value;
 	unsigned int irq;
 };

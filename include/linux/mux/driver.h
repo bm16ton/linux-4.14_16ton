@@ -36,6 +36,9 @@ struct mux_control_ops {
  * @states:		The number of mux controller states.
  * @idle_state:		The mux controller state to use when inactive, or one
  *			of MUX_IDLE_AS_IS and MUX_IDLE_DISCONNECT.
+ * @init_as_is:		Set to true to have the core leave the mux controller
+ *			state as-is until first selection. If @idle_state is
+ *			MUX_IDLE_AS_IS, @init_as_is is irrelevant.
  *
  * Mux drivers may only change @states and @idle_state, and may only do so
  * between allocation and registration of the mux controller. Specifically,
@@ -50,6 +53,7 @@ struct mux_control {
 
 	unsigned int states;
 	int idle_state;
+	bool init_as_is;
 };
 
 /**

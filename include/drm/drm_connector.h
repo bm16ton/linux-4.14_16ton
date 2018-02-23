@@ -223,6 +223,15 @@ struct drm_display_info {
 #define DRM_COLOR_FORMAT_YCRCB420	(1<<3)
 
 	/**
+	 * @panel_orientation: Read only connector property for built-in panels,
+	 * indicating the orientation of the panel vs the device's casing.
+	 * drm_connector_init() sets this to DRM_MODE_PANEL_ORIENTATION_UNKNOWN.
+	 * When not UNKNOWN this gets used by the drm_fb_helpers to rotate the
+	 * fb to compensate and gets exported as prop to userspace.
+	 */
+	int panel_orientation;
+
+	/**
 	 * @color_formats: HDMI Color formats, selects between RGB and YCrCb
 	 * modes. Used DRM_COLOR_FORMAT\_ defines, which are _not_ the same ones
 	 * as used to describe the pixel format in framebuffers, and also don't
@@ -1012,6 +1021,8 @@ int drm_mode_connector_update_edid_property(struct drm_connector *connector,
 					    const struct edid *edid);
 void drm_mode_connector_set_link_status_property(struct drm_connector *connector,
 						 uint64_t link_status);
+int drm_connector_init_panel_orientation_property(
+	struct drm_connector *connector, int width, int height);
 
 /**
  * struct drm_tile_group - Tile group metadata
