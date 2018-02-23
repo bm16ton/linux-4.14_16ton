@@ -119,7 +119,7 @@ Xbox360WirelessController::Xbox360WirelessController(libusb_device* dev, bool ch
     }
     m_uinput->add_key(KEY_LEFTSHIFT);
     m_uinput->add_key(KEY_LEFTCTRL);
-    m_uinput->add_key(KEY_LEFTMETA);
+    m_uinput->add_key(KEY_TAB);
     m_uinput->add_key(KEY_RIGHTALT);
     m_uinput->finish();
   }
@@ -315,9 +315,9 @@ Xbox360WirelessController::parse(uint8_t* data, int len, XboxGenericMsg* msg_out
             {
               m_uinput->send(EV_KEY, KEY_RIGHTALT, data[25]&CHATPAD_MOD_ORANGE);
             }
-            if (xor_modifier & CHATPAD_MOD_PEOPLE) // as KEY_LEFTMETA
+            if (xor_modifier & CHATPAD_MOD_PEOPLE) // as KEY_TAB
             {
-              m_uinput->send(EV_KEY, KEY_LEFTMETA, data[25]&CHATPAD_MOD_PEOPLE);
+              m_uinput->send(EV_KEY, KEY_TAB, data[25]&CHATPAD_MOD_PEOPLE);
             }
             if (m_chatpad_laststroke[1] && m_chatpad_laststroke[1] != data[26]
                 && m_chatpad_laststroke[1] != data[27]) // key released
@@ -397,7 +397,7 @@ Xbox360WirelessController::chatpad_release()
   }
   if (m_chatpad_laststroke[0] & CHATPAD_MOD_PEOPLE)
   {
-    m_uinput->send(EV_KEY, KEY_LEFTMETA, 0);
+    m_uinput->send(EV_KEY, KEY_TAB, 0);
   }
   m_chatpad_laststroke[0] = 0;
   if (m_chatpad_laststroke[1])

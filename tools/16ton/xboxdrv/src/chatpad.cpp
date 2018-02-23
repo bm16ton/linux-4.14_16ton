@@ -109,7 +109,7 @@ Chatpad::Chatpad(libusb_device_handle* handle, uint16_t bcdDevice,
   m_keymap[CHATPAD_MOD_SHIFT]  = KEY_LEFTSHIFT;
   m_keymap[CHATPAD_MOD_GREEN]  = KEY_LEFTALT;
   m_keymap[CHATPAD_MOD_ORANGE] = KEY_LEFTCTRL;
-  m_keymap[CHATPAD_MOD_PEOPLE] = KEY_LEFTMETA;
+  m_keymap[CHATPAD_MOD_PEOPLE] = KEY_TAB;
 
   init_uinput();
 

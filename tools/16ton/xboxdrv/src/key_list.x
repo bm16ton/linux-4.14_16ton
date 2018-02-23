@@ -500,8 +500,8 @@
   add(KEY_YEN, "KEY_YEN");
 #endif
 
-#ifdef KEY_LEFTMETA
-  add(KEY_LEFTMETA, "KEY_LEFTMETA");
+#ifdef KEY_TAB
+  add(KEY_TAB, "KEY_TAB");
 #endif
 
 #ifdef KEY_RIGHTMETA
