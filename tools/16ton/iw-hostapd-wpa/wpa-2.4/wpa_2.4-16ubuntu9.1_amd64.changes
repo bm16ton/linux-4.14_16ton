@@ -1,0 +1,35 @@
+Format: 1.8
+Date: Sat, 23 Dec 2017 07:41:21 -0400
+Source: wpa
+Binary: hostapd wpagui wpasupplicant wpasupplicant-udeb
+Architecture: amd64
+Version: 2.4-16ubuntu9.1
+Distribution: zesty-security
+Urgency: medium
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Changed-By: Ben Maddocks <bm16ton@gmail.com>
+Description:
+ hostapd    - IEEE 802.11 AP and IEEE 802.1X/WPA/WPA2/EAP Authenticator
+ wpagui     - graphical user interface for wpa_supplicant
+ wpasupplicant - client support for WPA and WPA2 (IEEE 802.11i)
+ wpasupplicant-udeb - Client support for WPA and WPA2 (IEEE 802.11i) (udeb)
+Changes:
+ wpa (2.4-16ubuntu9.1) zesty-security; urgency=medium
+ .
+   * No-scan extra channels patches etc
+Checksums-Sha1:
+ 20084e344441f4c7fe9fac6becfa88a1e3e2c359 562012 hostapd_2.4-16ubuntu9.1_amd64.deb
+ 1efe964d91a2724d20ede6c3092184e02cd9b1c1 352422 wpagui_2.4-16ubuntu9.1_amd64.deb
+ 16929e958bdc7aafa8f835822c7251921d9bf9bf 247366 wpasupplicant-udeb_2.4-16ubuntu9.1_amd64.udeb
+ 2dd2500161b2d8be5a797bade96fd9ee0ed874d4 973114 wpasupplicant_2.4-16ubuntu9.1_amd64.deb
+Checksums-Sha256:
+ 6f2676d8d55ef1cea1a57da8ded7c7878833fd7659aecb20bb8f049d38266e13 562012 hostapd_2.4-16ubuntu9.1_amd64.deb
+ afe74136c355516b9f7cb9d7422e474b4d2faf394bb69f41a93ef70deff19d99 352422 wpagui_2.4-16ubuntu9.1_amd64.deb
+ 9e53c3b021703dc4ce016fc4740817ab749f79a1015a70d0eb62b7dbaa25b7df 247366 wpasupplicant-udeb_2.4-16ubuntu9.1_amd64.udeb
+ 737d2c7967c57a17a161eca648e49529451a9311dd3c3f9d033d554ded29b444 973114 wpasupplicant_2.4-16ubuntu9.1_amd64.deb
+Files:
+ bb4d769060259afd4f9b3a09cf1edb9a 562012 net optional hostapd_2.4-16ubuntu9.1_amd64.deb
+ 5aaa43bc221044215637f37476a4d9df 352422 net optional wpagui_2.4-16ubuntu9.1_amd64.deb
+ 36a5cd972cd26a707df0789989b76cf7 247366 debian-installer standard wpasupplicant-udeb_2.4-16ubuntu9.1_amd64.udeb
+ 98f3a881da2a89b7cbd1df526b29ecd5 973114 net optional wpasupplicant_2.4-16ubuntu9.1_amd64.deb
+Original-Maintainer: Debian wpasupplicant Maintainers <pkg-wpa-devel@lists.alioth.debian.org>

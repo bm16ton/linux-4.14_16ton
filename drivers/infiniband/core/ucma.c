@@ -678,7 +678,7 @@ static ssize_t ucma_resolve_ip(struct ucma_file *file,
 	if (copy_from_user(&cmd, inbuf, sizeof(cmd)))
 		return -EFAULT;
 
-	if (!rdma_addr_size_in6(&cmd.src_addr) ||
+	if ((cmd.src_addr.sin6_family && !rdma_addr_size_in6(&cmd.src_addr)) ||
 	    !rdma_addr_size_in6(&cmd.dst_addr))
 		return -EINVAL;
 
@@ -914,13 +914,14 @@ static ssize_t ucma_query_path(struct ucma_context *ctx,
 
 		resp->path_data[i].flags = IB_PATH_GMP | IB_PATH_PRIMARY |
 					   IB_PATH_BIDIRECTIONAL;
-		if (rec->rec_type == SA_PATH_REC_TYPE_IB) {
-			ib_sa_pack_path(rec, &resp->path_data[i].path_rec);
-		} else {
+		if (rec->rec_type == SA_PATH_REC_TYPE_OPA) {
 			struct sa_path_rec ib;
 
 			sa_convert_path_opa_to_ib(&ib, rec);
 			ib_sa_pack_path(&ib, &resp->path_data[i].path_rec);
+
+		} else {
+			ib_sa_pack_path(rec, &resp->path_data[i].path_rec);
 		}
 	}
 
@@ -1238,6 +1239,9 @@ static int ucma_set_ib_path(struct ucma_context *ctx,
 	}
 
 	if (!optlen)
+		return -EINVAL;
+
+	if (!ctx->cm_id->device)
 		return -EINVAL;
 
 	memset(&sa_path, 0, sizeof(sa_path));

@@ -1,0 +1,29 @@
+Format: 1.8
+Date: Sat, 07 Oct 2017 20:42:02 +0200
+Source: iw
+Binary: iw
+Architecture: amd64
+Version: 3.17-16ton
+Distribution: unstable
+Urgency: medium
+Maintainer: Debian wpasupplicant Maintainers <pkg-wpa-devel@lists.alioth.debian.org>
+Changed-By: Ben Maddocks <bm16ton@gmail.com>
+Description:
+ iw         - tool for configuring Linux wireless devices
+Changes:
+ iw (3.17-16ton) unstable; urgency=medium
+ .
+   * Allow negative channels
+   * Channel to frequency correction
+Checksums-Sha1:
+ e79c2d107a4117f77a2d0cae4a39f09ae2103cf4 161520 iw-dbgsym_3.17-16ton_amd64.ddeb
+ 9d5e518d7808dbfbf143985a119bab9d64806585 5644 iw_3.17-16ton_amd64.buildinfo
+ 998fce5e4f6eee1c6bd4e40a151d51f39c4daf5e 63720 iw_3.17-16ton_amd64.deb
+Checksums-Sha256:
+ a4ac190b2be97a962ce3e39e9ba6b5b00c171235896f7cea1883e0da54c2f1b7 161520 iw-dbgsym_3.17-16ton_amd64.ddeb
+ 826aaea1a981a73ff93d5190bc8853388887d8ff4efda74e3440ff8fa595d1cf 5644 iw_3.17-16ton_amd64.buildinfo
+ 3dab2cab4cc3abf20fb374d7a4df35bdbc01742fe987c1b4a8caab30bb4205ef 63720 iw_3.17-16ton_amd64.deb
+Files:
+ f077deda04c110b517c7a56b2f7cbf3e 161520 debug optional iw-dbgsym_3.17-16ton_amd64.ddeb
+ 2b726f9754a800831d6153698335b0b2 5644 net optional iw_3.17-16ton_amd64.buildinfo
+ 8a5c267827b773549195e8f94e350981 63720 net optional iw_3.17-16ton_amd64.deb
