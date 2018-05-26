@@ -137,9 +137,9 @@ if not conf.env['CXX']:
     Exit(1)
 
 # X11 checks
-#if not conf.CheckLibWithHeader('X11', 'X11/Xlib.h', 'C++'):
-#    print 'libx11-dev must be installed!'
-#    Exit(1)
+if not conf.CheckLibWithHeader('X11', 'X11/Xlib.h', 'C++'):
+    print 'libx11-dev must be installed!'
+    Exit(1)
 
 env = conf.Finish()
 
