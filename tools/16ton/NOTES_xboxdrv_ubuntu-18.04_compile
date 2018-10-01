@@ -1,0 +1,5 @@
+xboxdrv failed to compile on Ubuntu 18.04 missing X11-dev headers, it was a problem
+with scons, I git cloned the repo upstream source, altho the versions where identical
+the git version had a fix, so I changed the version to like -16ton or someshit, so
+synaptic etc wouldnt replace it. the scons folder is the required working source
+
