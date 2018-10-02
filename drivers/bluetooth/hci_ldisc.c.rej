@@ -1,0 +1,18 @@
+--- drivers/bluetooth/hci_ldisc.c	2018-03-19 03:42:57.000000000 -0400
++++ drivers/bluetooth/hci_ldisc.c	2018-03-19 14:12:37.052497249 -0400
+@@ -523,13 +529,13 @@
+ 	if (hdev)
+ 		hci_uart_close(hdev);
+ 
++	cancel_work_sync(&hu->write_work);
++
+ 	if (test_bit(HCI_UART_PROTO_READY, &hu->flags)) {
+ 		write_lock_irqsave(&hu->proto_lock, flags);
+ 		clear_bit(HCI_UART_PROTO_READY, &hu->flags);
+ 		write_unlock_irqrestore(&hu->proto_lock, flags);
+ 
+-		cancel_work_sync(&hu->write_work);
+-
+ 		if (hdev) {
+ 			if (test_bit(HCI_UART_REGISTERED, &hu->flags))
+ 				hci_unregister_dev(hdev);
