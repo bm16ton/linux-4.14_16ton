@@ -435,8 +435,8 @@ ieee80211_tx_h_multicast_ps_buf(struct ieee80211_tx_data *tx)
 	if (ieee80211_hw_check(&tx->local->hw, QUEUE_CONTROL))
 		info->hw_queue = tx->sdata->vif.cab_queue;
 
-	/* no stations in PS mode */
-	if (!atomic_read(&ps->num_sta_ps))
+	/* no stations in PS mode and no buffered packets */
+	if (!atomic_read(&ps->num_sta_ps) && skb_queue_empty(&ps->bc_buf))
 		return TX_CONTINUE;
 
 	info->flags |= IEEE80211_TX_CTL_SEND_AFTER_DTIM;
@@ -803,16 +803,12 @@ ieee80211_tx_h_sequence(struct ieee80211_tx_data *tx)
 
 	/*
 	 * Packet injection may want to control the sequence
-	 * number, so if an injected packet is found, skip
-	 * renumbering it. Also make the packet NO_ACK to avoid
-	 * excessive retries (ACKing and retrying should be
-	 * handled by the injecting application).
-	 * FIXME This may break hostapd and some other injectors.
-	 * This should be done using a radiotap flag.
+	 * number, if we have no matching interface then we
+	 * neither assign one ourselves nor ask the driver to.
 	 */
 	if (unlikely(info->control.vif->type == NL80211_IFTYPE_MONITOR))
 		return TX_CONTINUE;
-	
+
 	if (unlikely(ieee80211_is_ctl(hdr->frame_control)))
 		return TX_CONTINUE;
 
@@ -1860,9 +1856,16 @@ static int ieee80211_skb_resize(struct ieee80211_sub_if_data *sdata,
 				int head_need, bool may_encrypt)
 {
 	struct ieee80211_local *local = sdata->local;
+	struct ieee80211_hdr *hdr;
+	bool enc_tailroom;
 	int tail_need = 0;
 
-	if (may_encrypt && sdata->crypto_tx_tailroom_needed_cnt) {
+	hdr = (struct ieee80211_hdr *) skb->data;
+	enc_tailroom = may_encrypt &&
+		       (sdata->crypto_tx_tailroom_needed_cnt ||
+			ieee80211_is_mgmt(hdr->frame_control));
+
+	if (enc_tailroom) {
 		tail_need = IEEE80211_ENCRYPT_TAILROOM;
 		tail_need -= skb_tailroom(skb);
 		tail_need = max_t(int, tail_need, 0);
@@ -1870,8 +1873,7 @@ static int ieee80211_skb_resize(struct ieee80211_sub_if_data *sdata,
 
 	if (skb_cloned(skb) &&
 	    (!ieee80211_hw_check(&local->hw, SUPPORTS_CLONED_SKBS) ||
-	     !skb_clone_writable(skb, ETH_HLEN) ||
-	     (may_encrypt && sdata->crypto_tx_tailroom_needed_cnt)))
+	     !skb_clone_writable(skb, ETH_HLEN) || enc_tailroom))
 		I802_DEBUG_INC(local->tx_expand_skb_head_cloned);
 	else if (head_need || tail_need)
 		I802_DEBUG_INC(local->tx_expand_skb_head);
@@ -1922,10 +1924,7 @@ void ieee80211_xmit(struct ieee80211_sub_if_data *sdata,
 		}
 	}
 
-        // Don't overwrite QoS header in monitor mode
-        if (likely(info->control.vif->type != NL80211_IFTYPE_MONITOR)) {
-            ieee80211_set_qos_hdr(sdata, skb);
-        }
+	ieee80211_set_qos_hdr(sdata, skb);
 	ieee80211_tx(sdata, sta, skb, false);
 }
 
