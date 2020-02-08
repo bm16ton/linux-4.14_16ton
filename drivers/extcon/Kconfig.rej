@@ -1,0 +1,12 @@
+--- drivers/extcon/Kconfig	2019-04-05 16:31:40.000000000 -0400
++++ drivers/extcon/Kconfig	2019-11-22 06:58:54.231351723 -0500
+@@ -44,7 +44,8 @@
+ 
+ config EXTCON_INTEL_INT3496
+ 	tristate "Intel INT3496 ACPI device extcon driver"
+-	depends on GPIOLIB && ACPI && (X86 || COMPILE_TEST)
++	depends on GPIOLIB && ACPI && X86
++	select MULTIPLEXER
+ 	help
+ 	  Say Y here to enable extcon support for USB OTG ports controlled by
+ 	  an Intel INT3496 ACPI device.

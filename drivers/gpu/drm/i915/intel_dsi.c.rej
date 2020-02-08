@@ -1,0 +1,78 @@
+--- drivers/gpu/drm/i915/intel_dsi.c	2019-04-05 16:31:40.000000000 -0400
++++ drivers/gpu/drm/i915/intel_dsi.c	2019-11-22 06:58:54.563396630 -0500
+@@ -1075,13 +1075,16 @@
+ 	struct drm_display_mode *adjusted_mode_sw;
+ 	struct intel_crtc *intel_crtc;
+ 	struct intel_dsi *intel_dsi = enc_to_intel_dsi(&encoder->base);
++	struct intel_panel *panel = &intel_dsi->attached_connector->panel;
+ 	unsigned int lane_count = intel_dsi->lane_count;
+ 	unsigned int bpp, fmt;
++	int orientation;
+ 	enum port port;
+ 	u16 hactive, hfp, hsync, hbp, vfp, vsync, vbp;
+ 	u16 hfp_sw, hsync_sw, hbp_sw;
+ 	u16 crtc_htotal_sw, crtc_hsync_start_sw, crtc_hsync_end_sw,
+ 				crtc_hblank_start_sw, crtc_hblank_end_sw;
++	u32 val;
+ 
+ 	/* FIXME: hw readout should not depend on SW state */
+ 	intel_crtc = to_intel_crtc(encoder->base.crtc);
+@@ -1221,6 +1224,49 @@
+ 	if (adjusted_mode->crtc_hblank_end == crtc_hblank_end_sw)
+ 		adjusted_mode->crtc_hblank_end =
+ 					adjusted_mode_sw->crtc_hblank_end;
++
++	if (!intel_dsi->got_panel_orientation) {
++		val = I915_READ(PLANE_CTL(intel_crtc->pipe, 0));
++		/* The rotation is used to correct for the panel orientation */
++		switch (val & PLANE_CTL_ROTATE_MASK) {
++		case PLANE_CTL_ROTATE_0:
++			orientation = DRM_MODE_PANEL_ORIENTATION_NORMAL;
++			break;
++		case PLANE_CTL_ROTATE_90:
++			orientation = DRM_MODE_PANEL_ORIENTATION_RIGHT_UP;
++			break;
++		case PLANE_CTL_ROTATE_180:
++			orientation = DRM_MODE_PANEL_ORIENTATION_BOTTOM_UP;
++			break;
++		case PLANE_CTL_ROTATE_270:
++			orientation = DRM_MODE_PANEL_ORIENTATION_LEFT_UP;
++			break;
++		}
++		intel_panel_set_orientation(panel, orientation);
++		intel_dsi->got_panel_orientation = true;
++	}
++}
++
++static void vlv_dsi_get_pipe_config(struct intel_encoder *encoder)
++{
++	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
++	struct intel_crtc *intel_crtc = to_intel_crtc(encoder->base.crtc);
++	struct intel_dsi *intel_dsi = enc_to_intel_dsi(&encoder->base);
++	struct intel_panel *panel = &intel_dsi->attached_connector->panel;
++	int orientation;
++	u32 val;
++
++	if (!intel_dsi->got_panel_orientation) {
++		val = I915_READ(DSPCNTR(intel_crtc->plane));
++
++		if (val & DISPPLANE_ROTATE_180)
++			orientation = DRM_MODE_PANEL_ORIENTATION_BOTTOM_UP;
++		else
++			orientation = DRM_MODE_PANEL_ORIENTATION_NORMAL;
++
++		intel_panel_set_orientation(panel, orientation);
++		intel_dsi->got_panel_orientation = true;
++	}
+ }
+ 
+ static void intel_dsi_get_config(struct intel_encoder *encoder,
+@@ -1232,6 +1278,8 @@
+ 
+ 	if (IS_GEN9_LP(dev_priv))
+ 		bxt_dsi_get_pipe_config(encoder, pipe_config);
++	else if (IS_VALLEYVIEW(dev_priv) || IS_CHERRYVIEW(dev_priv))
++		vlv_dsi_get_pipe_config(encoder);
+ 
+ 	pclk = intel_dsi_get_pclk(encoder, pipe_config->pipe_bpp,
+ 				  pipe_config);

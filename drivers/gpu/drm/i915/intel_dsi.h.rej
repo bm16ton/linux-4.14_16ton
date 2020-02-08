@@ -1,0 +1,11 @@
+--- drivers/gpu/drm/i915/intel_dsi.h	2019-04-05 16:31:40.000000000 -0400
++++ drivers/gpu/drm/i915/intel_dsi.h	2019-11-22 06:58:54.563396630 -0500
+@@ -52,6 +52,8 @@
+ 	/* if true, use HS mode, otherwise LP */
+ 	bool hs;
+ 
++	bool got_panel_orientation;
++
+ 	/* virtual channel */
+ 	int channel;
+ 
