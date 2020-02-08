@@ -1,0 +1,15 @@
+*.ko
+*.ko.unsigned
+*.ko.out
+*.ko.out.sig
+*.dwo
+.*.cmd
+.*.d
+*.mod
+
+/.cache.mk
+/.tmp_versions
+/Module.markers
+/Module.symvers
+
+!Makefile.in
