@@ -2070,31 +2070,6 @@ void buf_write(struct buffer *buf, const char *s, int len)
 	buf->pos += len;
 }
 
-static void check_for_gpl_usage(enum export exp, const char *m, const char *s)
-{
-	const char *e = is_vmlinux(m) ?"":".ko";
-
-	switch (exp) {
-	case export_gpl:
-		fatal("modpost: GPL-incompatible module %s%s "
-		      "uses GPL-only symbol '%s'\n", m, e, s);
-		break;
-	case export_unused_gpl:
-		fatal("modpost: GPL-incompatible module %s%s "
-		      "uses GPL-only symbol marked UNUSED '%s'\n", m, e, s);
-		break;
-	case export_gpl_future:
-		warn("modpost: GPL-incompatible module %s%s "
-		      "uses future GPL-only symbol '%s'\n", m, e, s);
-		break;
-	case export_plain:
-	case export_unused:
-	case export_unknown:
-		/* ignore */
-		break;
-	}
-}
-
 static void check_for_unused(enum export exp, const char *m, const char *s)
 {
 	const char *e = is_vmlinux(m) ?"":".ko";
@@ -2125,8 +2100,6 @@ static void check_exports(struct module *mod)
 			basename++;
 		else
 			basename = mod->name;
-		if (!mod->gpl_compatible)
-			check_for_gpl_usage(exp->export, basename, exp->name);
 		check_for_unused(exp->export, basename, exp->name);
 	}
 }
